@@ -82,7 +82,7 @@ class _CateraarMainLayoutState extends ConsumerState<CateraarMainLayout> {
         color: AppColors.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: AppColors.withAlphaFraction(Colors.black, 0.1),
             blurRadius: 8,
             offset: const Offset(0, -2),
           ),
@@ -107,14 +107,14 @@ class _CateraarMainLayoutState extends ConsumerState<CateraarMainLayout> {
   Widget _buildNavigationItem(int index) {
     final item = _navigationItems[index];
     final isSelected = _selectedIndex == index;
-    
+
     return GestureDetector(
       onTap: () => _onItemTapped(index),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected 
-              ? AppColors.primary.withOpacity(0.1)
+          color: isSelected
+              ? AppColors.withAlphaFraction(AppColors.primary, 0.1)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
@@ -130,9 +130,12 @@ class _CateraarMainLayoutState extends ConsumerState<CateraarMainLayout> {
             Text(
               item.label,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: isSelected ? AppColors.primary : AppColors.textSecondary,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-              ),
+                    color: isSelected
+                        ? AppColors.primary
+                        : AppColors.textSecondary,
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.normal,
+                  ),
             ),
           ],
         ),
@@ -247,7 +250,7 @@ class _QuickActionsBottomSheet extends StatelessWidget {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          
+
           Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
@@ -256,11 +259,10 @@ class _QuickActionsBottomSheet extends StatelessWidget {
                 Text(
                   'Snelle Acties',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: 24),
-                
                 GridView.count(
                   shrinkWrap: true,
                   crossAxisCount: 2,
@@ -346,16 +348,16 @@ class _QuickActionsBottomSheet extends StatelessWidget {
             Text(
               title,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+                    fontWeight: FontWeight.w600,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 4),
             Text(
               subtitle,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -387,7 +389,7 @@ class _MenuActionsBottomSheet extends StatelessWidget {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          
+
           Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
@@ -396,13 +398,13 @@ class _MenuActionsBottomSheet extends StatelessWidget {
                 Text(
                   'Menu Acties',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: 16),
-                
                 ListTile(
-                  leading: Icon(Icons.restaurant_menu, color: AppColors.primary),
+                  leading:
+                      Icon(Icons.restaurant_menu, color: AppColors.primary),
                   title: const Text('Menu Item Toevoegen'),
                   subtitle: const Text('Nieuw gerecht aan menu toevoegen'),
                   onTap: () {
@@ -410,7 +412,6 @@ class _MenuActionsBottomSheet extends StatelessWidget {
                     context.push('/cateraar/menu-items/add');
                   },
                 ),
-                
                 ListTile(
                   leading: Icon(Icons.category, color: AppColors.primary),
                   title: const Text('Categorie Toevoegen'),
@@ -420,7 +421,6 @@ class _MenuActionsBottomSheet extends StatelessWidget {
                     context.push('/cateraar/categories/add');
                   },
                 ),
-                
                 ListTile(
                   leading: Icon(Icons.receipt_long, color: AppColors.primary),
                   title: const Text('Recept Toevoegen'),
@@ -430,7 +430,6 @@ class _MenuActionsBottomSheet extends StatelessWidget {
                     context.push('/cateraar/recipes/add');
                   },
                 ),
-                
                 ListTile(
                   leading: Icon(Icons.qr_code_2, color: AppColors.primary),
                   title: const Text('QR Code Genereren'),
@@ -501,9 +500,7 @@ class _ExportAnalyticsDialogState extends State<_ExportAnalyticsDialog> {
               });
             },
           ),
-          
           const SizedBox(height: 16),
-          
           const Text('Selecteer formaat:'),
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
@@ -551,16 +548,17 @@ class _ExportAnalyticsDialogState extends State<_ExportAnalyticsDialog> {
 
   Future<void> _exportData() async {
     setState(() => _isExporting = true);
-    
+
     try {
       // Simulate export process
       await Future.delayed(const Duration(seconds: 2));
-      
+
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Analytics geëxporteerd als ${_formats[_selectedFormat]}'),
+            content:
+                Text('Analytics geëxporteerd als ${_formats[_selectedFormat]}'),
             backgroundColor: Colors.green,
           ),
         );
@@ -581,4 +579,3 @@ class _ExportAnalyticsDialogState extends State<_ExportAnalyticsDialog> {
     }
   }
 }
-
