@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../constants/app_constants.dart';
+import 'dart:typed_data';
 
 class ApiService {
   static final ApiService _instance = ApiService._internal();
@@ -160,7 +161,8 @@ class ApiService {
     return response.data;
   }
 
-  Future<Map<String, dynamic>> updateMenu(int id, Map<String, dynamic> menuData) async {
+  Future<Map<String, dynamic>> updateMenu(
+      int id, Map<String, dynamic> menuData) async {
     final response = await _dio.put('/menus/$id', data: menuData);
     return response.data;
   }
@@ -180,8 +182,10 @@ class ApiService {
     return response.data;
   }
 
-  Future<Map<String, dynamic>> updateHealthProfile(Map<String, dynamic> profileData) async {
-    final response = await _dio.put('/health/user-health-profile', data: profileData);
+  Future<Map<String, dynamic>> updateHealthProfile(
+      Map<String, dynamic> profileData) async {
+    final response =
+        await _dio.put('/health/user-health-profile', data: profileData);
     return response.data;
   }
 
@@ -191,7 +195,8 @@ class ApiService {
     return response.data;
   }
 
-  Future<Map<String, dynamic>> addNutritionLog(Map<String, dynamic> logData) async {
+  Future<Map<String, dynamic>> addNutritionLog(
+      Map<String, dynamic> logData) async {
     final response = await _dio.post('/health/nutrition-logs', data: logData);
     return response.data;
   }
@@ -206,12 +211,23 @@ class ApiService {
     return response.data;
   }
 
-  Future<Map<String, dynamic>> addFavorite(Map<String, dynamic> favoriteData) async {
-    final response = await _dio.post('/favorites', data: favoriteData);
+  Future<Map<String, dynamic>> addFavorite({
+    int? restaurantId,
+    int? menuItemId,
+    int? collectionId,
+    String? notes,
+  }) async {
+    final response = await _dio.post('/favorites', data: {
+      if (restaurantId != null) 'restaurant_id': restaurantId,
+      if (menuItemId != null) 'menu_item_id': menuItemId,
+      if (collectionId != null) 'collection_id': collectionId,
+      if (notes != null) 'notes': notes,
+    });
     return response.data;
   }
 
-  Future<Map<String, dynamic>> updateFavorite(int id, Map<String, dynamic> favoriteData) async {
+  Future<Map<String, dynamic>> updateFavorite(
+      int id, Map<String, dynamic> favoriteData) async {
     final response = await _dio.patch('/favorites/$id', data: favoriteData);
     return response.data;
   }
@@ -226,12 +242,14 @@ class ApiService {
     return response.data;
   }
 
-  Future<Map<String, dynamic>> createCollection(Map<String, dynamic> collectionData) async {
+  Future<Map<String, dynamic>> createCollection(
+      Map<String, dynamic> collectionData) async {
     final response = await _dio.post('/collections', data: collectionData);
     return response.data;
   }
 
-  Future<Map<String, dynamic>> updateCollection(int id, Map<String, dynamic> collectionData) async {
+  Future<Map<String, dynamic>> updateCollection(
+      int id, Map<String, dynamic> collectionData) async {
     final response = await _dio.put('/collections/$id', data: collectionData);
     return response.data;
   }
@@ -241,7 +259,7 @@ class ApiService {
   }
 
   // Activities endpoints
-  Future<Map<String, dynamic>> getActivities({
+  Future<Map<String, dynamic>> getUserActivity({
     String? activityType,
     int? restaurantId,
     int? menuItemId,
@@ -254,7 +272,10 @@ class ApiService {
     return response.data;
   }
 
-  Future<Map<String, dynamic>> logActivity(Map<String, dynamic> activityData) async {
+  Future<Map<String, dynamic>> logActivity(Map<String, dynamic> activityData,
+      {required String type,
+      required restaurantId,
+      required Map<String, String> metadata}) async {
     final response = await _dio.post('/activities', data: activityData);
     return response.data;
   }
@@ -281,19 +302,10 @@ class ApiService {
     return response.data;
   }
 
-  Future<Map<String, dynamic>> updateNotificationPreferences(Map<String, dynamic> preferences) async {
-    final response = await _dio.put('/notifications/preferences', data: preferences);
-    return response.data;
-  }
-
-  // Eaten endpoints
-  Future<Map<String, dynamic>> addEaten(Map<String, dynamic> eatenData) async {
-    final response = await _dio.post('/eaten', data: eatenData);
-    return response.data;
-  }
-
-  Future<Map<String, dynamic>> getEatenHistory() async {
-    final response = await _dio.get('/eaten');
+  Future<Map<String, dynamic>> updateNotificationPreferences(
+      Map<String, dynamic> preferences) async {
+    final response =
+        await _dio.put('/notifications/preferences', data: preferences);
     return response.data;
   }
 
@@ -311,12 +323,14 @@ class ApiService {
     return response.data;
   }
 
-  Future<Map<String, dynamic>> createRestaurant(Map<String, dynamic> restaurantData) async {
+  Future<Map<String, dynamic>> createRestaurant(
+      Map<String, dynamic> restaurantData) async {
     final response = await _dio.post('/restaurants/', data: restaurantData);
     return response.data;
   }
 
-  Future<Map<String, dynamic>> updateRestaurant(int id, Map<String, dynamic> restaurantData) async {
+  Future<Map<String, dynamic>> updateRestaurant(
+      int id, Map<String, dynamic> restaurantData) async {
     final response = await _dio.put('/restaurants/$id', data: restaurantData);
     return response.data;
   }
@@ -346,12 +360,14 @@ class ApiService {
     return response.data;
   }
 
-  Future<Map<String, dynamic>> createRecipe(Map<String, dynamic> recipeData) async {
+  Future<Map<String, dynamic>> createRecipe(
+      Map<String, dynamic> recipeData) async {
     final response = await _dio.post('/recipes/', data: recipeData);
     return response.data;
   }
 
-  Future<Map<String, dynamic>> updateRecipe(int id, Map<String, dynamic> recipeData) async {
+  Future<Map<String, dynamic>> updateRecipe(
+      int id, Map<String, dynamic> recipeData) async {
     final response = await _dio.put('/recipes/$id', data: recipeData);
     return response.data;
   }
@@ -360,7 +376,8 @@ class ApiService {
     await _dio.delete('/recipes/$id');
   }
 
-  Future<Map<String, dynamic>> getRecipeNutrition(int id, {double portionFactor = 1.0}) async {
+  Future<Map<String, dynamic>> getRecipeNutrition(int id,
+      {double portionFactor = 1.0}) async {
     final response = await _dio.get('/recipes/$id/nutrition', queryParameters: {
       'portion_factor': portionFactor,
     });
@@ -393,7 +410,8 @@ class ApiService {
     return response.data;
   }
 
-  Future<Map<String, dynamic>> getIngredientSuggestions(String query, {int limit = 10, bool verifiedOnly = false}) async {
+  Future<Map<String, dynamic>> getIngredientSuggestions(String query,
+      {int limit = 10, bool verifiedOnly = false}) async {
     final response = await _dio.get('/ingredients/suggest', queryParameters: {
       'q': query,
       'limit': limit,
@@ -402,7 +420,8 @@ class ApiService {
     return response.data;
   }
 
-  Future<Map<String, dynamic>> searchIngredients(String query, {int limit = 20, bool external = false}) async {
+  Future<Map<String, dynamic>> searchIngredients(String query,
+      {int limit = 20, bool external = false}) async {
     final response = await _dio.get('/ingredients/search', queryParameters: {
       'q': query,
       'limit': limit,
@@ -421,12 +440,14 @@ class ApiService {
     return response.data;
   }
 
-  Future<Map<String, dynamic>> createIngredient(Map<String, dynamic> ingredientData) async {
+  Future<Map<String, dynamic>> createIngredient(
+      Map<String, dynamic> ingredientData) async {
     final response = await _dio.post('/ingredients/', data: ingredientData);
     return response.data;
   }
 
-  Future<Map<String, dynamic>> updateIngredient(int id, Map<String, dynamic> ingredientData) async {
+  Future<Map<String, dynamic>> updateIngredient(
+      int id, Map<String, dynamic> ingredientData) async {
     final response = await _dio.put('/ingredients/$id', data: ingredientData);
     return response.data;
   }
@@ -445,21 +466,47 @@ class ApiService {
     return response.data;
   }
 
-  Future<Map<String, dynamic>> calculateNutrition(int ingredientId, double amountG) async {
-    final response = await _dio.post('/ingredients/nutrition/$ingredientId', data: {
+  Future<Map<String, dynamic>> calculateNutrition(
+      int ingredientId, double amountG) async {
+    final response =
+        await _dio.post('/ingredients/nutrition/$ingredientId', data: {
       'amount_g': amountG,
     });
     return response.data;
   }
 
+  Future<Map<String, dynamic>> lookupIngredientByBarcode(String barcode) async {
+    // GET /ingredients/lookup?barcode=...
+    final response = await _dio.get(
+      '/ingredients/lookup',
+      queryParameters: {'barcode': barcode},
+    );
+    return response.data;
+  }
+
+  Future<void> duplicateIngredient(int id) async {
+    // POST /ingredients/{id}/duplicate
+    await _dio.post('/ingredients/$id/duplicate', data: {});
+  }
+
+  Future<void> verifyIngredient(int id) async {
+    // POST /ingredients/{id}/verify
+    await _dio.post('/ingredients/$id/verify', data: {});
+  }
+
+  Future<void> syncIngredients() async {
+    // POST /ingredients/sync
+    await _dio.post('/ingredients/sync', data: {});
+  }
+
   // Analytics endpoints
-  Future<Map<String, dynamic>> getAnalytics({
-    required String metric,
+  Future<List<dynamic>> getAnalytics({
+    String? metric,
     String period = 'week',
     int? restaurantId,
   }) async {
     final response = await _dio.get('/analytics', queryParameters: {
-      'metric': metric,
+      if (metric != null) 'metric': metric,
       'period': period,
       if (restaurantId != null) 'restaurant_id': restaurantId,
     });
@@ -479,6 +526,21 @@ class ApiService {
     return response.data;
   }
 
+  Future<Uint8List> exportAnalyticsPDF({
+    int? restaurantId,
+    String period = 'week',
+  }) async {
+    final response = await _dio.get(
+      '/analytics/export/pdf',
+      queryParameters: {
+        if (restaurantId != null) 'restaurant_id': restaurantId,
+        'period': period,
+      },
+      options: Options(responseType: ResponseType.bytes), // PDF als bytes
+    );
+    return Uint8List.fromList(response.data);
+  }
+
   // Categories endpoints
   Future<Map<String, dynamic>> getCategories({int? menuId}) async {
     final response = await _dio.get('/categories', queryParameters: {
@@ -492,12 +554,14 @@ class ApiService {
     return response.data;
   }
 
-  Future<Map<String, dynamic>> createCategory(Map<String, dynamic> categoryData) async {
+  Future<Map<String, dynamic>> createCategory(
+      Map<String, dynamic> categoryData) async {
     final response = await _dio.post('/categories', data: categoryData);
     return response.data;
   }
 
-  Future<Map<String, dynamic>> updateCategory(int id, Map<String, dynamic> categoryData) async {
+  Future<Map<String, dynamic>> updateCategory(
+      int id, Map<String, dynamic> categoryData) async {
     final response = await _dio.put('/categories/$id', data: categoryData);
     return response.data;
   }
@@ -512,12 +576,14 @@ class ApiService {
     return response.data;
   }
 
-  Future<Map<String, dynamic>> createMenuItem(Map<String, dynamic> menuItemData) async {
+  Future<Map<String, dynamic>> createMenuItem(
+      Map<String, dynamic> menuItemData) async {
     final response = await _dio.post('/menu-items', data: menuItemData);
     return response.data;
   }
 
-  Future<Map<String, dynamic>> updateMenuItem(int id, Map<String, dynamic> menuItemData) async {
+  Future<Map<String, dynamic>> updateMenuItem(
+      int id, Map<String, dynamic> menuItemData) async {
     final response = await _dio.put('/menu-items/$id', data: menuItemData);
     return response.data;
   }
@@ -526,7 +592,8 @@ class ApiService {
     await _dio.delete('/menu-items/$id');
   }
 
-  Future<Map<String, dynamic>> addMenuItemToMenu(int menuId, Map<String, dynamic> itemData) async {
+  Future<Map<String, dynamic>> addMenuItemToMenu(
+      int menuId, Map<String, dynamic> itemData) async {
     final response = await _dio.post('/menus/$menuId/items', data: itemData);
     return response.data;
   }
@@ -537,8 +604,10 @@ class ApiService {
     return response.data;
   }
 
-  Future<Map<String, dynamic>> updateRestaurantTeam(int restaurantId, Map<String, dynamic> teamData) async {
-    final response = await _dio.put('/restaurants/$restaurantId/team', data: teamData);
+  Future<Map<String, dynamic>> updateRestaurantTeam(
+      int restaurantId, Map<String, dynamic> teamData) async {
+    final response =
+        await _dio.put('/restaurants/$restaurantId/team', data: teamData);
     return response.data;
   }
 
@@ -547,13 +616,18 @@ class ApiService {
     return response.data;
   }
 
-  Future<Map<String, dynamic>> addTeamMember(int restaurantId, Map<String, dynamic> memberData) async {
-    final response = await _dio.post('/restaurants/$restaurantId/teams', data: memberData);
+  Future<Map<String, dynamic>> addTeamMember(
+      int restaurantId, Map<String, dynamic> memberData) async {
+    final response =
+        await _dio.post('/restaurants/$restaurantId/teams', data: memberData);
     return response.data;
   }
 
-  Future<Map<String, dynamic>> updateTeamMember(int restaurantId, int membershipId, Map<String, dynamic> memberData) async {
-    final response = await _dio.put('/restaurants/$restaurantId/teams/$membershipId', data: memberData);
+  Future<Map<String, dynamic>> updateTeamMember(int restaurantId,
+      int membershipId, Map<String, dynamic> memberData) async {
+    final response = await _dio.put(
+        '/restaurants/$restaurantId/teams/$membershipId',
+        data: memberData);
     return response.data;
   }
 
@@ -577,12 +651,14 @@ class ApiService {
     return response.data;
   }
 
-  Future<Map<String, dynamic>> createReview(Map<String, dynamic> reviewData) async {
+  Future<Map<String, dynamic>> createReview(
+      Map<String, dynamic> reviewData) async {
     final response = await _dio.post('/reviews', data: reviewData);
     return response.data;
   }
 
-  Future<Map<String, dynamic>> updateReview(int id, Map<String, dynamic> reviewData) async {
+  Future<Map<String, dynamic>> updateReview(
+      int id, Map<String, dynamic> reviewData) async {
     final response = await _dio.put('/reviews/$id', data: reviewData);
     return response.data;
   }
@@ -591,28 +667,25 @@ class ApiService {
     await _dio.delete('/reviews/$id');
   }
 
-  Future<Map<String, dynamic>> replyToReview(int reviewId, String message) async {
+  Future<Map<String, dynamic>> replyToReview(
+      int reviewId, String message) async {
     final response = await _dio.post('/reviews/$reviewId/reply', data: {
       'message': message,
     });
     return response.data;
   }
 
-  Future<Map<String, dynamic>> voteReviewHelpful(int reviewId, bool isHelpful) async {
+  Future<Map<String, dynamic>> voteReviewHelpful(
+      int reviewId, bool isHelpful) async {
     final response = await _dio.post('/reviews/$reviewId/helpful', data: {
       'is_helpful': isHelpful,
     });
     return response.data;
   }
 
-  // Share endpoints
-  Future<Map<String, dynamic>> createShareLink(String targetType, int targetId) async {
-    final response = await _dio.post('/share/$targetType/$targetId');
-    return response.data;
-  }
-
   // User management endpoints
-  Future<Map<String, dynamic>> updateProfile(Map<String, dynamic> profileData) async {
+  Future<Map<String, dynamic>> updateProfile(
+      Map<String, dynamic> profileData) async {
     final response = await _dio.put('/auth/profile', data: profileData);
     return response.data;
   }
@@ -657,59 +730,6 @@ class ApiService {
     return response.data;
   }
 
-  // Favorites endpoints
-  Future<List<dynamic>> getFavorites() async {
-    final response = await _dio.get('/favorites');
-    return response.data;
-  }
-
-  Future<Map<String, dynamic>> addFavorite({
-    int? restaurantId,
-    int? menuItemId,
-    int? collectionId,
-    String? notes,
-  }) async {
-    final response = await _dio.post('/favorites', data: {
-      if (restaurantId != null) 'restaurant_id': restaurantId,
-      if (menuItemId != null) 'menu_item_id': menuItemId,
-      if (collectionId != null) 'collection_id': collectionId,
-      if (notes != null) 'notes': notes,
-    });
-    return response.data;
-  }
-
-  Future<void> removeFavorite(int favoriteId) async {
-    await _dio.delete('/favorites/$favoriteId');
-  }
-
-  // Health profile endpoints
-  Future<Map<String, dynamic>?> getHealthProfile() async {
-    final response = await _dio.get('/user-health-profile');
-    return response.data['health_profile'];
-  }
-
-  Future<Map<String, dynamic>> updateHealthProfile(
-      Map<String, dynamic> data) async {
-    final response = await _dio.put('/user-health-profile', data: data);
-    return response.data;
-  }
-
-  // Nutrition log endpoints
-  Future<List<dynamic>> getNutritionLogs() async {
-    final response = await _dio.get('/nutrition-logs');
-    return response.data['logs'];
-  }
-
-  Future<Map<String, dynamic>> addNutritionLog(
-      Map<String, dynamic> data) async {
-    final response = await _dio.post('/nutrition-logs', data: data);
-    return response.data;
-  }
-
-  Future<void> deleteNutritionLog(int logId) async {
-    await _dio.delete('/nutrition-logs/$logId');
-  }
-
   // Eaten endpoints
   Future<Map<String, dynamic>> addEaten({
     required int menuItemId,
@@ -725,32 +745,6 @@ class ApiService {
   Future<List<dynamic>> getEatenHistory() async {
     final response = await _dio.get('/eaten');
     return response.data;
-  }
-
-  // Analytics endpoints (for cateraars)
-  Future<List<dynamic>> getAnalytics({
-    required String metric,
-    String period = 'week',
-    int? restaurantId,
-  }) async {
-    final response = await _dio.get('/analytics', queryParameters: {
-      'metric': metric,
-      'period': period,
-      if (restaurantId != null) 'restaurant_id': restaurantId,
-    });
-    return response.data;
-  }
-
-  // Notifications endpoints
-  Future<List<dynamic>> getNotifications({bool unreadOnly = false}) async {
-    final response = await _dio.get('/notifications', queryParameters: {
-      if (unreadOnly) 'unread': true,
-    });
-    return response.data;
-  }
-
-  Future<void> markNotificationRead(int notificationId) async {
-    await _dio.put('/notifications/$notificationId/read');
   }
 
   // Share endpoints
@@ -781,6 +775,8 @@ class ApiService {
   Future<Response> delete(String path) {
     return _dio.delete(path);
   }
+
+  Future getSettings() async {}
 }
 
 // Auth interceptor to add JWT token to requests
