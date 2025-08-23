@@ -13,11 +13,15 @@ class DashboardPage extends ConsumerStatefulWidget {
 
 class _DashboardPageState extends ConsumerState<DashboardPage> {
   final ApiService _apiService = ApiService();
-  
+
   bool _isLoading = true;
   Map<String, dynamic>? _dashboardData;
   List<Map<String, dynamic>> _recentActivities = [];
   List<Map<String, dynamic>> _restaurants = [];
+
+  // ✅ Filters
+  String _selectedPeriod = 'week'; // mogelijke waarden: 'day', 'week', 'month'
+  Map<String, dynamic>? _selectedRestaurant; // gekozen restaurant
 
   @override
   void initState() {
@@ -27,18 +31,33 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
   Future<void> _loadDashboardData() async {
     setState(() => _isLoading = true);
-    
+
     try {
-      final futures = await Future.wait([
-        _apiService.getAnalytics(),
+      final results = await Future.wait<dynamic>([
+        _apiService.getAnalytics(
+          metric: 'overview', // of 'orders', 'revenue', afhankelijk van backend
+          period: _selectedPeriod,
+          restaurantId: _selectedRestaurant?['id'],
+        ),
         _apiService.getRestaurants(),
-        _apiService.getActivities(),
+        _apiService.getUserActivity(), // correcte naam
       ]);
-      
+
+      // Type‑zeker uitpakken en casten
+      final analytics = results[0];
+      final restaurantsResp = results[1] as Map<String, dynamic>;
+      final activityResp = results[2] as Map<String, dynamic>;
+
       setState(() {
-        _dashboardData = futures[0];
-        _restaurants = List<Map<String, dynamic>>.from(futures[1]['restaurants'] ?? []);
-        _recentActivities = List<Map<String, dynamic>>.from(futures[2]['activities'] ?? []);
+        // Als jouw /analytics een Map teruggeeft met 'quick_stats', casten we naar Map
+        _dashboardData = analytics is Map<String, dynamic> ? analytics : null;
+
+        _restaurants = List<Map<String, dynamic>>.from(
+          restaurantsResp['restaurants'] ?? const [],
+        );
+        _recentActivities = List<Map<String, dynamic>>.from(
+          activityResp['activities'] ?? const [],
+        );
         _isLoading = false;
       });
     } catch (e) {
@@ -49,6 +68,21 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         );
       }
     }
+  }
+
+  // 👉 voorbeeld om filters later te updaten
+  void _onPeriodChanged(String period) {
+    setState(() {
+      _selectedPeriod = period;
+    });
+    _loadDashboardData();
+  }
+
+  void _onRestaurantChanged(Map<String, dynamic>? restaurant) {
+    setState(() {
+      _selectedRestaurant = restaurant;
+    });
+    _loadDashboardData();
   }
 
   @override
@@ -76,30 +110,87 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           : RefreshIndicator(
               onRefresh: _loadDashboardData,
               child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Filters (optioneel voorbeeld – vervang later door echte dropdowns)
+                    Row(
+                      children: [
+                        Text('Periode: $_selectedPeriod'),
+                        const SizedBox(width: 12),
+                        Text(
+                            'Restaurant: ${_selectedRestaurant?['name'] ?? 'Alle'}'),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    Row(
+                      children: [
+                        // Periode dropdown
+                        DropdownButton<String>(
+                          value: _selectedPeriod,
+                          items: const [
+                            DropdownMenuItem(
+                                value: 'day', child: Text('Vandaag')),
+                            DropdownMenuItem(
+                                value: 'week', child: Text('Deze week')),
+                            DropdownMenuItem(
+                                value: 'month', child: Text('Deze maand')),
+                          ],
+                          onChanged: (val) {
+                            if (val != null) _onPeriodChanged(val);
+                          },
+                        ),
+                        const SizedBox(width: 16),
+
+                        // Restaurant dropdown
+                        Expanded(
+                          child: DropdownButton<Map<String, dynamic>?>(
+                            isExpanded: true,
+                            value: _selectedRestaurant,
+                            hint: const Text('Alle restaurants'),
+                            items: [
+                              const DropdownMenuItem<Map<String, dynamic>?>(
+                                value: null,
+                                child: Text('Alle restaurants'),
+                              ),
+                              ..._restaurants.map((r) =>
+                                  DropdownMenuItem<Map<String, dynamic>?>(
+                                    value: r,
+                                    child: Text(r['name'] ?? 'Onbekend'),
+                                  )),
+                            ],
+                            onChanged: (val) {
+                              _onRestaurantChanged(val);
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
                     // Welcome section
                     _buildWelcomeSection(),
                     const SizedBox(height: 24),
-                    
+
                     // Quick stats
                     _buildQuickStats(),
                     const SizedBox(height: 24),
-                    
+
                     // Performance overview
                     _buildPerformanceOverview(),
                     const SizedBox(height: 24),
-                    
+
                     // Recent activities
                     _buildRecentActivities(),
                     const SizedBox(height: 24),
-                    
+
                     // Restaurant overview
                     _buildRestaurantOverview(),
                     const SizedBox(height: 24),
-                    
+
                     // Quick actions
                     _buildQuickActions(),
                   ],
@@ -113,7 +204,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final now = DateTime.now();
     final hour = now.hour;
     String greeting;
-    
+
     if (hour < 12) {
       greeting = 'Goedemorgen';
     } else if (hour < 17) {
@@ -127,7 +218,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppColors.primary, AppColors.primary.withOpacity(0.8)],
+          colors: [
+            AppColors.primary,
+            AppColors.withAlphaFraction(AppColors.primary, 0.8),
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -139,16 +233,16 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           Text(
             '$greeting!',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: AppColors.onPrimary,
-              fontWeight: FontWeight.bold,
-            ),
+                  color: AppColors.onPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 8),
           Text(
             'Welkom terug bij je Menutri dashboard',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: AppColors.onPrimary.withOpacity(0.9),
-            ),
+                  color: AppColors.withAlphaFraction(AppColors.onPrimary, 0.9),
+                ),
           ),
           const SizedBox(height: 16),
           Row(
@@ -162,8 +256,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               Text(
                 'Je restaurants presteren goed vandaag!',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.onPrimary.withOpacity(0.8),
-                ),
+                      color:
+                          AppColors.withAlphaFraction(AppColors.onPrimary, 0.8),
+                    ),
               ),
             ],
           ),
@@ -174,18 +269,17 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
   Widget _buildQuickStats() {
     final stats = _dashboardData?['quick_stats'] ?? {};
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Overzicht Vandaag',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 16),
-        
         GridView.count(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -252,15 +346,15 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.1),
+                  color: AppColors.withAlphaFraction(Colors.green, 0.1),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
                   trend,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: Colors.green,
-                    fontWeight: FontWeight.w600,
-                  ),
+                        color: Colors.green,
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
               ),
             ],
@@ -269,15 +363,15 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           Text(
             value,
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 4),
           Text(
             title,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSecondary,
-            ),
+                  color: AppColors.textSecondary,
+                ),
           ),
         ],
       ),
@@ -294,8 +388,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             Text(
               'Prestaties Deze Week',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             TextButton(
               onPressed: () => context.push('/cateraar/analytics'),
@@ -304,7 +398,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           ],
         ),
         const SizedBox(height: 16),
-        
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
@@ -323,15 +416,16 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       Text(
                         'Totale Omzet',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
+                              color: AppColors.textSecondary,
+                            ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         '€2,847',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                     ],
                   ),
@@ -341,19 +435,23 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       Text(
                         'Gem. Rating',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
+                              color: AppColors.textSecondary,
+                            ),
                       ),
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          const Icon(Icons.star, color: Colors.orange, size: 20),
+                          const Icon(Icons.star,
+                              color: Colors.orange, size: 20),
                           const SizedBox(width: 4),
                           Text(
                             '4.6',
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                         ],
                       ),
@@ -361,14 +459,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 20),
-              
+
               // Simple chart placeholder
               Container(
                 height: 100,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
+                  color: AppColors.withAlphaFraction(AppColors.primary, 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Center(
@@ -376,8 +474,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     'Prestatie Grafiek\n(Wordt binnenkort geïmplementeerd)',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                          color: AppColors.textSecondary,
+                        ),
                   ),
                 ),
               ),
@@ -398,8 +496,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             Text(
               'Recente Activiteiten',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             TextButton(
               onPressed: () => context.push('/cateraar/activities'),
@@ -408,7 +506,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           ],
         ),
         const SizedBox(height: 16),
-        
         Container(
           decoration: BoxDecoration(
             color: AppColors.surface,
@@ -429,9 +526,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         const SizedBox(height: 16),
                         Text(
                           'Geen recente activiteiten',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
                         ),
                       ],
                     ),
@@ -440,14 +538,16 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               : ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemCount: _recentActivities.take(5).length,
-                  separatorBuilder: (context, index) => const Divider(height: 1),
+                  itemCount: _recentActivities.length.clamp(0, 5),
+                  separatorBuilder: (context, index) =>
+                      const Divider(height: 1),
                   itemBuilder: (context, index) {
                     final activity = _recentActivities[index];
                     return ListTile(
-                      leading: _getActivityIcon(activity['type']),
-                      title: Text(activity['description'] ?? ''),
-                      subtitle: Text(_formatDateTime(activity['created_at'])),
+                      leading: _getActivityIcon(activity['type'] as String?),
+                      title: Text((activity['description'] ?? '') as String),
+                      subtitle: Text(
+                          _formatDateTime(activity['created_at'] as String?)),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () {
                         // Navigate to activity detail
@@ -470,8 +570,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             Text(
               'Mijn Restaurants',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             TextButton(
               onPressed: () => context.push('/cateraar/restaurants'),
@@ -480,7 +580,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           ],
         ),
         const SizedBox(height: 16),
-        
         if (_restaurants.isEmpty)
           Container(
             width: double.infinity,
@@ -501,15 +600,15 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 Text(
                   'Geen restaurants gevonden',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+                        color: AppColors.textSecondary,
+                      ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Voeg je eerste restaurant toe om te beginnen',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+                        color: AppColors.textSecondary,
+                      ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
@@ -535,7 +634,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 final restaurant = _restaurants[index];
                 return Container(
                   width: 280,
-                  margin: EdgeInsets.only(right: index < _restaurants.length - 1 ? 16 : 0),
+                  margin: EdgeInsets.only(
+                    right: index < _restaurants.length - 1 ? 16 : 0,
+                  ),
                   child: _buildRestaurantCard(restaurant),
                 );
               },
@@ -562,7 +663,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
+                  color: AppColors.withAlphaFraction(AppColors.primary, 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -576,10 +677,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      restaurant['name'] ?? '',
+                      (restaurant['name'] ?? '') as String,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                            fontWeight: FontWeight.w600,
+                          ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -599,9 +700,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               ),
             ],
           ),
-          
           const Spacer(),
-          
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -611,14 +710,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   Text(
                     'Menu Items',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                          color: AppColors.textSecondary,
+                        ),
                   ),
                   Text(
                     '${restaurant['menu_items_count'] ?? 0}',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                 ],
               ),
@@ -628,14 +727,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   Text(
                     'QR Scans',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                          color: AppColors.textSecondary,
+                        ),
                   ),
                   Text(
                     '${restaurant['qr_scans'] ?? 0}',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                 ],
               ),
@@ -653,11 +752,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         Text(
           'Snelle Acties',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 16),
-        
         GridView.count(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -719,8 +817,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             Text(
               title,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+                    fontWeight: FontWeight.w600,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -746,12 +844,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
   String _formatDateTime(String? dateTime) {
     if (dateTime == null) return '';
-    
+
     try {
       final date = DateTime.parse(dateTime);
       final now = DateTime.now();
       final difference = now.difference(date);
-      
+
       if (difference.inDays > 0) {
         return '${difference.inDays} dagen geleden';
       } else if (difference.inHours > 0) {
@@ -766,4 +864,3 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     }
   }
 }
-
