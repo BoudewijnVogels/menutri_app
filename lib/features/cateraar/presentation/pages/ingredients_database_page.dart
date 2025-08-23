@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/services/api_service.dart';
 
@@ -16,9 +16,9 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
     with TickerProviderStateMixin {
   final ApiService _apiService = ApiService();
   final TextEditingController _searchController = TextEditingController();
-  
+
   late TabController _tabController;
-  
+
   bool _isLoading = true;
   bool _isScanning = false;
   List<Map<String, dynamic>> _ingredients = [];
@@ -62,24 +62,18 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
 
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final ingredientsResponse = await _apiService.getIngredients();
-      final categoriesResponse = await _apiService.getIngredientCategories();
-      
+
       final ingredients = List<Map<String, dynamic>>.from(
-        ingredientsResponse['ingredients'] ?? []
-      );
-      final categories = List<Map<String, dynamic>>.from(
-        categoriesResponse['categories'] ?? []
-      );
-      
+          ingredientsResponse['ingredients'] ?? []);
+
       setState(() {
         _ingredients = ingredients;
-        _categories = categories;
         _isLoading = false;
       });
-      
+
       _filterIngredients();
     } catch (e) {
       setState(() => _isLoading = false);
@@ -93,7 +87,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
 
   void _filterIngredients() {
     List<Map<String, dynamic>> filtered = List.from(_ingredients);
-    
+
     // Apply search filter
     if (_searchQuery.isNotEmpty) {
       filtered = filtered.where((ingredient) {
@@ -101,17 +95,19 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
         final brand = (ingredient['brand'] ?? '').toLowerCase();
         final ean = (ingredient['ean_code'] ?? '').toLowerCase();
         final query = _searchQuery.toLowerCase();
-        return name.contains(query) || brand.contains(query) || ean.contains(query);
+        return name.contains(query) ||
+            brand.contains(query) ||
+            ean.contains(query);
       }).toList();
     }
-    
+
     // Apply category filter
     if (_selectedCategory != null) {
       filtered = filtered.where((ingredient) {
         return ingredient['category_id'] == _selectedCategory;
       }).toList();
     }
-    
+
     // Apply verification filter
     if (_filterBy != 'all') {
       filtered = filtered.where((ingredient) {
@@ -127,12 +123,12 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
         }
       }).toList();
     }
-    
+
     // Apply sorting
     filtered.sort((a, b) {
       dynamic aValue = a[_sortBy];
       dynamic bValue = b[_sortBy];
-      
+
       if (['calories', 'protein', 'carbs', 'fat'].contains(_sortBy)) {
         aValue = (aValue ?? 0).toDouble();
         bValue = (bValue ?? 0).toDouble();
@@ -143,11 +139,11 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
         aValue = (aValue ?? '').toString().toLowerCase();
         bValue = (bValue ?? '').toString().toLowerCase();
       }
-      
+
       int comparison = Comparable.compare(aValue, bValue);
       return _sortAscending ? comparison : -comparison;
     });
-    
+
     setState(() {
       _filteredIngredients = filtered;
     });
@@ -257,7 +253,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
       children: [
         // Search and filter bar
         _buildSearchAndFilter(),
-        
+
         // Ingredients list
         Expanded(
           child: _filteredIngredients.isEmpty
@@ -320,7 +316,8 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
                 ],
               ),
               border: const OutlineInputBorder(),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
             onChanged: (value) {
               setState(() {
@@ -329,9 +326,9 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
               _filterIngredients();
             },
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           // Filter chips
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -357,9 +354,9 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
                     ),
                   );
                 }).toList(),
-                
+
                 const SizedBox(width: 8),
-                
+
                 // Category filters
                 ..._categories.map((category) {
                   final isSelected = _selectedCategory == category['id'];
@@ -395,7 +392,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
     final protein = ingredient['protein_per_100g'] ?? 0;
     final carbs = ingredient['carbs_per_100g'] ?? 0;
     final fat = ingredient['fat_per_100g'] ?? 0;
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
@@ -419,17 +416,21 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
                       children: [
                         Text(
                           ingredient['name'] ?? '',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                         if (ingredient['brand'] != null) ...[
                           const SizedBox(height: 4),
                           Text(
                             ingredient['brand'],
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
                           ),
                         ],
                       ],
@@ -440,7 +441,8 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
                     children: [
                       if (isVerified)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
                             color: Colors.green.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
@@ -448,14 +450,18 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.verified, size: 14, color: Colors.green),
+                              Icon(Icons.verified,
+                                  size: 14, color: Colors.green),
                               const SizedBox(width: 4),
                               Text(
                                 'Geverifieerd',
-                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                  color: Colors.green,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(
+                                      color: Colors.green,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                               ),
                             ],
                           ),
@@ -463,24 +469,29 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
                       if (isCustom) ...[
                         const SizedBox(height: 4),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
                             color: Colors.blue.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             'Aangepast',
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: Colors.blue,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.w600,
+                                ),
                           ),
                         ),
                       ],
                     ],
                   ),
                   PopupMenuButton<String>(
-                    onSelected: (value) => _handleIngredientAction(value, ingredient),
+                    onSelected: (value) =>
+                        _handleIngredientAction(value, ingredient),
                     itemBuilder: (context) => [
                       const PopupMenuItem(
                         value: 'edit',
@@ -511,7 +522,8 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
                         value: 'delete',
                         child: ListTile(
                           leading: Icon(Icons.delete, color: Colors.red),
-                          title: Text('Verwijderen', style: TextStyle(color: Colors.red)),
+                          title: Text('Verwijderen',
+                              style: TextStyle(color: Colors.red)),
                           contentPadding: EdgeInsets.zero,
                         ),
                       ),
@@ -519,27 +531,28 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // EAN code if available
               if (ingredient['ean_code'] != null) ...[
                 Row(
                   children: [
-                    Icon(Icons.qr_code, size: 16, color: AppColors.textSecondary),
+                    Icon(Icons.qr_code,
+                        size: 16, color: AppColors.textSecondary),
                     const SizedBox(width: 8),
                     Text(
                       'EAN: ${ingredient['ean_code']}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                        fontFamily: 'monospace',
-                      ),
+                            color: AppColors.textSecondary,
+                            fontFamily: 'monospace',
+                          ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
               ],
-              
+
               // Nutritional information
               Row(
                 children: [
@@ -580,16 +593,19 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
                   ),
                 ],
               ),
-              
+
               // Additional info
-              if (ingredient['allergens'] != null && ingredient['allergens'].isNotEmpty) ...[
+              if (ingredient['allergens'] != null &&
+                  ingredient['allergens'].isNotEmpty) ...[
                 const SizedBox(height: 12),
                 Wrap(
                   spacing: 4,
                   runSpacing: 4,
-                  children: (ingredient['allergens'] as List).map<Widget>((allergen) {
+                  children:
+                      (ingredient['allergens'] as List).map<Widget>((allergen) {
                     return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color: Colors.red.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
@@ -598,9 +614,9 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
                       child: Text(
                         allergen,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Colors.red.shade700,
-                          fontWeight: FontWeight.w500,
-                        ),
+                              color: Colors.red.shade700,
+                              fontWeight: FontWeight.w500,
+                            ),
                       ),
                     );
                   }).toList(),
@@ -630,15 +646,15 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
           Text(
             '$value$unit',
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: color,
-              fontWeight: FontWeight.bold,
-            ),
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           Text(
             label,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: color,
-            ),
+                  color: color,
+                ),
           ),
         ],
       ),
@@ -665,14 +681,14 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
                 child: Text(
                   'Scan een barcode om ingrediënt informatie op te halen uit de database',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.primary,
-                  ),
+                        color: AppColors.primary,
+                      ),
                 ),
               ),
             ],
           ),
         ),
-        
+
         // Scanner button
         Expanded(
           child: Center(
@@ -696,15 +712,15 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
                 Text(
                   'Barcode Scanner',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Scan een product barcode om ingrediënt informatie op te halen',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+                        color: AppColors.textSecondary,
+                      ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
@@ -721,7 +737,8 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: AppColors.onPrimary,
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 16),
                   ),
                 ),
               ],
@@ -748,15 +765,15 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
             Text(
               'Nutritional Data Analytics',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               'Gedetailleerde voedingswaarde analytics worden binnenkort toegevoegd',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -781,15 +798,15 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
             Text(
               'Ingrediënt Categorieën',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               'Categorie beheer wordt binnenkort toegevoegd',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -812,24 +829,30 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
             ),
             const SizedBox(height: 16),
             Text(
-              _searchQuery.isNotEmpty || _selectedCategory != null || _filterBy != 'all'
+              _searchQuery.isNotEmpty ||
+                      _selectedCategory != null ||
+                      _filterBy != 'all'
                   ? 'Geen ingrediënten gevonden'
                   : 'Nog geen ingrediënten',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
-              _searchQuery.isNotEmpty || _selectedCategory != null || _filterBy != 'all'
+              _searchQuery.isNotEmpty ||
+                      _selectedCategory != null ||
+                      _filterBy != 'all'
                   ? 'Probeer een andere zoekopdracht of filter'
                   : 'Voeg je eerste ingrediënt toe of scan een barcode',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
-            if (_searchQuery.isEmpty && _selectedCategory == null && _filterBy == 'all') ...[
+            if (_searchQuery.isEmpty &&
+                _selectedCategory == null &&
+                _filterBy == 'all') ...[
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -887,7 +910,8 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
             const Divider(),
             SwitchListTile(
               title: const Text('Oplopend'),
-              subtitle: Text(_sortAscending ? 'A-Z, Laag-Hoog' : 'Z-A, Hoog-Laag'),
+              subtitle:
+                  Text(_sortAscending ? 'A-Z, Laag-Hoog' : 'Z-A, Hoog-Laag'),
               value: _sortAscending,
               onChanged: (value) {
                 setState(() {
@@ -911,7 +935,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
 
   void _startBarcodeScanning() {
     setState(() => _isScanning = true);
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -929,7 +953,8 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: AppColors.surface,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(20)),
               ),
               child: Row(
                 children: [
@@ -952,7 +977,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
                 ],
               ),
             ),
-            
+
             // Scanner
             Expanded(
               child: MobileScanner(
@@ -980,7 +1005,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
   Future<void> _handleBarcodeScanned(String barcode) async {
     try {
       final response = await _apiService.lookupIngredientByBarcode(barcode);
-      
+
       if (response['ingredient'] != null) {
         // Ingredient found in database
         _showIngredientDetails(response['ingredient']);
@@ -1049,7 +1074,8 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Ingrediënt Niet Gevonden'),
-        content: Text('Barcode $barcode is niet gevonden in de database. Wil je dit ingrediënt handmatig toevoegen?'),
+        content: Text(
+            'Barcode $barcode is niet gevonden in de database. Wil je dit ingrediënt handmatig toevoegen?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -1072,7 +1098,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Nieuw Ingrediënt'),
-        content: Text(eanCode != null 
+        content: Text(eanCode != null
             ? 'Ingrediënt toevoegen met EAN code: $eanCode'
             : 'Ingrediënt toevoegen functionaliteit wordt binnenkort toegevoegd'),
         actions: [
@@ -1107,7 +1133,8 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Ingrediënt Bewerken'),
-        content: Text('Bewerken van "${ingredient['name']}" wordt binnenkort toegevoegd'),
+        content: Text(
+            'Bewerken van "${ingredient['name']}" wordt binnenkort toegevoegd'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -1122,7 +1149,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
     try {
       await _apiService.duplicateIngredient(ingredient['id']);
       await _loadData();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1147,7 +1174,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
     try {
       await _apiService.verifyIngredient(ingredient['id']);
       await _loadData();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1173,7 +1200,8 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Ingrediënt Verwijderen'),
-        content: Text('Weet je zeker dat je "${ingredient['name']}" wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.'),
+        content: Text(
+            'Weet je zeker dat je "${ingredient['name']}" wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -1185,11 +1213,12 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
               try {
                 await _apiService.deleteIngredient(ingredient['id']);
                 await _loadData();
-                
+
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Ingrediënt "${ingredient['name']}" verwijderd'),
+                      content:
+                          Text('Ingrediënt "${ingredient['name']}" verwijderd'),
                       backgroundColor: Colors.green,
                     ),
                   );
@@ -1218,7 +1247,8 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Ingrediënten Importeren'),
-        content: const Text('Import functionaliteit wordt binnenkort toegevoegd'),
+        content:
+            const Text('Import functionaliteit wordt binnenkort toegevoegd'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -1241,7 +1271,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
     try {
       await _apiService.syncIngredients();
       await _loadData();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -1262,4 +1292,3 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
     }
   }
 }
-
