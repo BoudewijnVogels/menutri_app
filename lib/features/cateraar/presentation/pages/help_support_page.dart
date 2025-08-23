@@ -8,19 +8,22 @@ class CateraarHelpSupportPage extends ConsumerStatefulWidget {
   const CateraarHelpSupportPage({super.key});
 
   @override
-  ConsumerState<CateraarHelpSupportPage> createState() => _CateraarHelpSupportPageState();
+  ConsumerState<CateraarHelpSupportPage> createState() =>
+      _CateraarHelpSupportPageState();
 }
 
-class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPage>
+class _CateraarHelpSupportPageState
+    extends ConsumerState<CateraarHelpSupportPage>
     with TickerProviderStateMixin {
   final ApiService _apiService = ApiService();
-  
+
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _feedbackController = TextEditingController();
   final TextEditingController _ticketTitleController = TextEditingController();
-  final TextEditingController _ticketDescriptionController = TextEditingController();
-  
+  final TextEditingController _ticketDescriptionController =
+      TextEditingController();
+
   bool _isLoading = true;
   bool _isSubmittingFeedback = false;
   bool _isSubmittingTicket = false;
@@ -54,7 +57,7 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
     },
     {
       'title': 'Email Support',
-      'subtitle': 'support@menutri.com',
+      'subtitle': 'support@menutri.nl',
       'icon': Icons.email,
       'color': Colors.blue,
       'action': 'email',
@@ -72,7 +75,7 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
       'title': 'WhatsApp',
       'subtitle': 'Chat via WhatsApp',
       'icon': Icons.message,
-      'color': Colors.green[700]!,
+      'color': Colors.green,
       'action': 'whatsapp',
       'available': true,
     },
@@ -181,9 +184,12 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
   @override
   void initState() {
     super.initState();
+    // Tabs initialiseren
     _tabController = TabController(length: 5, vsync: this);
-    _loadHelpData();
-    _searchController.addListener(_filterFaqItems);
+    // FAQ lokaal laden (fallback zonder backend)
+    _faqItems = _getDefaultFaqItems();
+    _filteredFaqItems = List<Map<String, dynamic>>.from(_faqItems);
+    _isLoading = false;
   }
 
   @override
@@ -196,34 +202,14 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
     super.dispose();
   }
 
-  Future<void> _loadHelpData() async {
-    setState(() => _isLoading = true);
-    
-    try {
-      final response = await _apiService.getHelpData();
-      
-      setState(() {
-        _faqItems = List<Map<String, dynamic>>.from(response['faq'] ?? _getDefaultFaqItems());
-        _supportTickets = List<Map<String, dynamic>>.from(response['tickets'] ?? []);
-        _filteredFaqItems = _faqItems;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _faqItems = _getDefaultFaqItems();
-        _filteredFaqItems = _faqItems;
-        _isLoading = false;
-      });
-    }
-  }
-
   List<Map<String, dynamic>> _getDefaultFaqItems() {
     return [
       {
         'id': '1',
         'category': 'getting_started',
         'question': 'Hoe begin ik met Menutri?',
-        'answer': 'Start door je restaurant profiel in te stellen, upload je menu items, en genereer QR codes voor je tafels. Bekijk onze getting started tutorial voor een complete gids.',
+        'answer':
+            'Start door je restaurant profiel in te stellen, upload je menu items, en genereer QR codes voor je tafels. Bekijk onze getting started tutorial voor een complete gids.',
         'helpful': 0,
         'not_helpful': 0,
       },
@@ -231,7 +217,8 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
         'id': '2',
         'category': 'restaurants',
         'question': 'Kan ik meerdere restaurants beheren?',
-        'answer': 'Ja, je kunt meerdere restaurants toevoegen en beheren vanuit één account. Elk restaurant heeft zijn eigen menu\'s, analytics en instellingen.',
+        'answer':
+            'Ja, je kunt meerdere restaurants toevoegen en beheren vanuit één account. Elk restaurant heeft zijn eigen menu\'s, analytics en instellingen.',
         'helpful': 0,
         'not_helpful': 0,
       },
@@ -239,7 +226,8 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
         'id': '3',
         'category': 'menus',
         'question': 'Hoe upload ik mijn menu items?',
-        'answer': 'Ga naar Menu Beheer, klik op "Item Toevoegen", vul de details in inclusief naam, beschrijving, prijs en voedingswaarden. Je kunt ook foto\'s toevoegen.',
+        'answer':
+            'Ga naar Menu Beheer, klik op "Item Toevoegen", vul de details in inclusief naam, beschrijving, prijs en voedingswaarden. Je kunt ook foto\'s toevoegen.',
         'helpful': 0,
         'not_helpful': 0,
       },
@@ -247,7 +235,8 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
         'id': '4',
         'category': 'analytics',
         'question': 'Welke analytics zijn beschikbaar?',
-        'answer': 'Je krijgt inzicht in QR code scans, populaire menu items, piekuren, klanttevredenheid en veel meer. Data kan geëxporteerd worden naar CSV.',
+        'answer':
+            'Je krijgt inzicht in QR code scans, populaire menu items, piekuren, klanttevredenheid en veel meer. Data kan geëxporteerd worden naar CSV.',
         'helpful': 0,
         'not_helpful': 0,
       },
@@ -255,7 +244,8 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
         'id': '5',
         'category': 'team',
         'question': 'Hoe nodig ik teamleden uit?',
-        'answer': 'Ga naar Team Beheer, klik op "Uitnodigen", vul het email adres in en selecteer de juiste rol. De uitnodiging wordt automatisch verstuurd.',
+        'answer':
+            'Ga naar Team Beheer, klik op "Uitnodigen", vul het email adres in en selecteer de juiste rol. De uitnodiging wordt automatisch verstuurd.',
         'helpful': 0,
         'not_helpful': 0,
       },
@@ -263,7 +253,8 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
         'id': '6',
         'category': 'billing',
         'question': 'Wat kosten de verschillende abonnementen?',
-        'answer': 'We hebben verschillende abonnementen vanaf €29/maand. Bekijk onze prijspagina voor alle opties en features per abonnement.',
+        'answer':
+            'We hebben verschillende abonnementen vanaf €29/maand. Bekijk onze prijspagina voor alle opties en features per abonnement.',
         'helpful': 0,
         'not_helpful': 0,
       },
@@ -271,7 +262,8 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
         'id': '7',
         'category': 'technical',
         'question': 'Mijn QR codes werken niet, wat nu?',
-        'answer': 'Controleer of je QR codes correct gegenereerd zijn en of je restaurant actief is. Probeer de QR code opnieuw te genereren of neem contact op met support.',
+        'answer':
+            'Controleer of je QR codes correct gegenereerd zijn en of je restaurant actief is. Probeer de QR code opnieuw te genereren of neem contact op met support.',
         'helpful': 0,
         'not_helpful': 0,
       },
@@ -279,7 +271,8 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
         'id': '8',
         'category': 'account',
         'question': 'Hoe wijzig ik mijn account gegevens?',
-        'answer': 'Ga naar Profiel Beheer waar je je persoonlijke gegevens, bedrijfsinformatie en voorkeuren kunt wijzigen.',
+        'answer':
+            'Ga naar Profiel Beheer waar je je persoonlijke gegevens, bedrijfsinformatie en voorkeuren kunt wijzigen.',
         'helpful': 0,
         'not_helpful': 0,
       },
@@ -287,7 +280,8 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
         'id': '9',
         'category': 'getting_started',
         'question': 'Wat is het verschil tussen Gast en Cateraar?',
-        'answer': 'Gasten kunnen restaurants zoeken en menu\'s bekijken. Cateraars beheren restaurants, menu\'s en krijgen toegang tot analytics en team functies.',
+        'answer':
+            'Gasten kunnen restaurants zoeken en menu\'s bekijken. Cateraars beheren restaurants, menu\'s en krijgen toegang tot analytics en team functies.',
         'helpful': 0,
         'not_helpful': 0,
       },
@@ -295,7 +289,8 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
         'id': '10',
         'category': 'menus',
         'question': 'Kan ik menu items bulksgewijs uploaden?',
-        'answer': 'Ja, je kunt een CSV bestand uploaden met al je menu items. Download eerst onze template om de juiste format te gebruiken.',
+        'answer':
+            'Ja, je kunt een CSV bestand uploaden met al je menu items. Download eerst onze template om de juiste format te gebruiken.',
         'helpful': 0,
         'not_helpful': 0,
       },
@@ -307,10 +302,10 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
     setState(() {
       _filteredFaqItems = _faqItems.where((item) {
         final matchesSearch = query.isEmpty ||
-            item['question'].toLowerCase().contains(query) ||
-            item['answer'].toLowerCase().contains(query);
-        final matchesCategory = _selectedCategory == 'all' ||
-            item['category'] == _selectedCategory;
+            (item['question'] as String).toLowerCase().contains(query) ||
+            (item['answer'] as String).toLowerCase().contains(query);
+        final matchesCategory =
+            _selectedCategory == 'all' || item['category'] == _selectedCategory;
         return matchesSearch && matchesCategory;
       }).toList();
     });
@@ -349,8 +344,8 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
                   break;
               }
             },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
+            itemBuilder: (context) => const [
+              PopupMenuItem(
                 value: 'contact_sales',
                 child: ListTile(
                   leading: Icon(Icons.business),
@@ -358,7 +353,7 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'feature_request',
                 child: ListTile(
                   leading: Icon(Icons.lightbulb),
@@ -366,7 +361,7 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'report_bug',
                 child: ListTile(
                   leading: Icon(Icons.bug_report),
@@ -374,7 +369,7 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'download_guides',
                 child: ListTile(
                   leading: Icon(Icons.download),
@@ -391,7 +386,8 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
             controller: _tabController,
             indicatorColor: AppColors.onPrimary,
             labelColor: AppColors.onPrimary,
-            unselectedLabelColor: AppColors.onPrimary.withOpacity(0.7),
+            unselectedLabelColor:
+                AppColors.withAlphaFraction(AppColors.onPrimary, 0.7),
             isScrollable: true,
             tabs: const [
               Tab(text: 'FAQ'),
@@ -455,7 +451,7 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
                   itemBuilder: (context, index) {
                     final category = _helpCategories[index];
                     final isSelected = _selectedCategory == category['id'];
-                    
+
                     return Padding(
                       padding: const EdgeInsets.only(right: 8),
                       child: FilterChip(
@@ -463,7 +459,9 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
                         avatar: Icon(
                           category['icon'],
                           size: 16,
-                          color: isSelected ? AppColors.onPrimary : AppColors.primary,
+                          color: isSelected
+                              ? AppColors.onPrimary
+                              : AppColors.primary,
                         ),
                         selected: isSelected,
                         onSelected: (selected) {
@@ -474,7 +472,9 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
                         },
                         selectedColor: AppColors.primary,
                         labelStyle: TextStyle(
-                          color: isSelected ? AppColors.onPrimary : AppColors.primary,
+                          color: isSelected
+                              ? AppColors.onPrimary
+                              : AppColors.primary,
                         ),
                       ),
                     );
@@ -484,7 +484,7 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
             ],
           ),
         ),
-        
+
         // FAQ Items
         Expanded(
           child: _filteredFaqItems.isEmpty
@@ -500,16 +500,17 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
                       const SizedBox(height: 16),
                       Text(
                         'Geen FAQ items gevonden',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'Probeer een andere zoekterm of categorie',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
+                              color: AppColors.textSecondary,
+                            ),
                       ),
                       const SizedBox(height: 24),
                       ElevatedButton(
@@ -598,11 +599,11 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
           Text(
             'Snelle Acties',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 16),
-          
+
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -658,22 +659,22 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
               );
             },
           ),
-          
+
           const SizedBox(height: 32),
-          
+
           // Contact Options
           Text(
             'Contact Opties',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 16),
-          
+
           ...(_contactOptions.map((option) => _buildContactOption(option))),
-          
+
           const SizedBox(height: 32),
-          
+
           // Business Hours
           Card(
             child: Padding(
@@ -690,9 +691,10 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
                       const SizedBox(width: 12),
                       Text(
                         'Support Tijden',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                     ],
                   ),
@@ -704,7 +706,7 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
+                      color: AppColors.withAlphaFraction(Colors.blue, 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -743,7 +745,7 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: option['color'].withOpacity(0.1),
+            color: AppColors.withAlphaFraction(option['color'], 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
@@ -763,7 +765,7 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.1),
+                  color: AppColors.withAlphaFraction(Colors.orange, 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -779,7 +781,9 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
             const Icon(Icons.arrow_forward_ios),
           ],
         ),
-        onTap: option['available'] ? () => _performContactAction(option['action']) : null,
+        onTap: option['available']
+            ? () => _performContactAction(option['action'])
+            : null,
         enabled: option['available'],
       ),
     );
@@ -828,8 +832,8 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
                     Text(
                       'Video Tutorials',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     Text(
                       'Leer Menutri kennen met onze stap-voor-stap tutorials',
@@ -842,9 +846,9 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
               ),
             ],
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Tutorial Grid
           GridView.builder(
             shrinkWrap: true,
@@ -860,9 +864,9 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
               return _buildTutorialCard(tutorial);
             },
           ),
-          
+
           const SizedBox(height: 32),
-          
+
           // Additional Resources
           Card(
             child: Padding(
@@ -879,14 +883,14 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
                       const SizedBox(width: 12),
                       Text(
                         'Aanvullende Bronnen',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  
                   ListTile(
                     leading: const Icon(Icons.description),
                     title: const Text('Gebruikershandleiding'),
@@ -894,9 +898,7 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
                     trailing: const Icon(Icons.download),
                     onTap: () => _downloadUserGuide(),
                   ),
-                  
                   const Divider(),
-                  
                   ListTile(
                     leading: const Icon(Icons.api),
                     title: const Text('API Documentatie'),
@@ -904,9 +906,7 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
                     trailing: const Icon(Icons.open_in_new),
                     onTap: () => _openApiDocs(),
                   ),
-                  
                   const Divider(),
-                  
                   ListTile(
                     leading: const Icon(Icons.school),
                     title: const Text('Menutri Academy'),
@@ -914,9 +914,7 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
                     trailing: const Icon(Icons.open_in_new),
                     onTap: () => _openAcademy(),
                   ),
-                  
                   const Divider(),
-                  
                   ListTile(
                     leading: const Icon(Icons.forum),
                     title: const Text('Community Forum'),
@@ -945,7 +943,7 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
               width: 120,
               height: double.infinity,
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
+                color: AppColors.withAlphaFraction(AppColors.primary, 0.1),
               ),
               child: Stack(
                 alignment: Alignment.center,
@@ -959,9 +957,10 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
                     bottom: 8,
                     right: 8,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.7),
+                        color: AppColors.withAlphaFraction(Colors.black, 0.7),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -977,7 +976,7 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
                 ],
               ),
             ),
-            
+
             // Content
             Expanded(
               child: Padding(
@@ -1018,14 +1017,15 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
   Widget _buildTicketsTab() {
     return Column(
       children: [
-        // Create Ticket Button
+        // In plaats van ticket aanmaken: mail support
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(16),
           child: ElevatedButton.icon(
-            onPressed: () => _showCreateTicketDialog(),
-            icon: const Icon(Icons.add),
-            label: const Text('Nieuw Support Ticket'),
+            onPressed: () => _launchUrl(
+                'mailto:support@menutri.nl?subject=Support%20ticket'),
+            icon: const Icon(Icons.email),
+            label: const Text('Mail Support (support@menutri.nl)'),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: AppColors.onPrimary,
@@ -1033,8 +1033,8 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
             ),
           ),
         ),
-        
-        // Tickets List
+
+        // Tickets List (optioneel leeg, tot backend bestaat)
         Expanded(
           child: _supportTickets.isEmpty
               ? Center(
@@ -1048,17 +1048,18 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Geen Support Tickets',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
+                        'Nog geen tickets in het systeem',
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Je hebt nog geen support tickets aangemaakt',
+                        'Neem contact op via e‑mail: support@menutri.nl',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
+                              color: AppColors.textSecondary,
+                            ),
                       ),
                     ],
                   ),
@@ -1079,10 +1080,10 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
   Widget _buildTicketCard(Map<String, dynamic> ticket) {
     final status = ticket['status'] ?? 'open';
     final priority = ticket['priority'] ?? 'medium';
-    
+
     Color statusColor;
     IconData statusIcon;
-    
+
     switch (status) {
       case 'open':
         statusColor = Colors.blue;
@@ -1104,7 +1105,7 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
         statusColor = Colors.blue;
         statusIcon = Icons.help_outline;
     }
-    
+
     Color priorityColor;
     switch (priority) {
       case 'low':
@@ -1119,7 +1120,7 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
       default:
         priorityColor = Colors.orange;
     }
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
@@ -1143,9 +1144,10 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
+                    color: AppColors.withAlphaFraction(statusColor, 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -1159,9 +1161,10 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: priorityColor.withOpacity(0.1),
+                    color: AppColors.withAlphaFraction(priorityColor, 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -1211,8 +1214,8 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
                     Text(
                       'Feedback & Suggesties',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     Text(
                       'Help ons Menutri te verbeteren met jouw feedback',
@@ -1225,9 +1228,9 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
               ),
             ],
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Feedback Form
           Card(
             child: Padding(
@@ -1238,35 +1241,37 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
                   Text(
                     'Deel je feedback',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                   const SizedBox(height: 16),
-                  
                   TextField(
                     controller: _feedbackController,
                     maxLines: 6,
                     decoration: const InputDecoration(
-                      hintText: 'Vertel ons wat je denkt van Menutri, wat we kunnen verbeteren, of welke features je graag zou willen zien...',
+                      hintText:
+                          'Vertel ons wat je denkt van Menutri, wat we kunnen verbeteren, of welke features je graag zou willen zien...',
                       border: OutlineInputBorder(),
                     ),
                   ),
-                  
                   const SizedBox(height: 16),
-                  
                   Row(
                     children: [
                       Expanded(
                         child: ElevatedButton.icon(
-                          onPressed: _isSubmittingFeedback ? null : _submitFeedback,
+                          onPressed:
+                              _isSubmittingFeedback ? null : _submitFeedback,
                           icon: _isSubmittingFeedback
                               ? const SizedBox(
                                   width: 16,
                                   height: 16,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 2),
                                 )
                               : const Icon(Icons.send),
-                          label: Text(_isSubmittingFeedback ? 'Versturen...' : 'Feedback Versturen'),
+                          label: Text(_isSubmittingFeedback
+                              ? 'Versturen...'
+                              : 'Feedback Versturen'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
                             foregroundColor: AppColors.onPrimary,
@@ -1279,18 +1284,18 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
               ),
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Quick Feedback Options
           Text(
             'Snelle Feedback',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 16),
-          
+
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -1303,9 +1308,9 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
               _buildQuickFeedbackChip('📚 Documentatie', 'docs'),
             ],
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // App Rating
           Card(
             child: Padding(
@@ -1316,8 +1321,8 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
                   Text(
                     'Beoordeel Menutri',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -1327,13 +1332,12 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(5, (index) {
                       return IconButton(
                         onPressed: () => _rateApp(index + 1),
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.star,
                           color: Colors.amber,
                           size: 32,
@@ -1341,9 +1345,7 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
                       );
                     }),
                   ),
-                  
                   const SizedBox(height: 16),
-                  
                   Row(
                     children: [
                       Expanded(
@@ -1359,9 +1361,9 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
               ),
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Contact for Feedback
           Card(
             child: ListTile(
@@ -1384,7 +1386,7 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
     return ActionChip(
       label: Text(label),
       onPressed: () => _sendQuickFeedback(type),
-      backgroundColor: AppColors.primary.withOpacity(0.1),
+      backgroundColor: AppColors.withAlphaFraction(AppColors.primary, 0.1),
       labelStyle: TextStyle(color: AppColors.primary),
     );
   }
@@ -1422,7 +1424,8 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
     // Update FAQ helpfulness
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(helpful ? 'Bedankt voor je feedback!' : 'Feedback ontvangen'),
+        content:
+            Text(helpful ? 'Bedankt voor je feedback!' : 'Feedback ontvangen'),
         backgroundColor: helpful ? Colors.green : Colors.orange,
       ),
     );
@@ -1432,32 +1435,39 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
     switch (action) {
       case 'activate_account':
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Account activatie wordt binnenkort toegevoegd')),
+          const SnackBar(
+              content: Text('Account activatie wordt binnenkort toegevoegd')),
         );
         break;
       case 'add_restaurant':
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Restaurant toevoegen wordt binnenkort toegevoegd')),
+          const SnackBar(
+              content:
+                  Text('Restaurant toevoegen wordt binnenkort toegevoegd')),
         );
         break;
       case 'upload_menu':
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Menu upload wordt binnenkort toegevoegd')),
+          const SnackBar(
+              content: Text('Menu upload wordt binnenkort toegevoegd')),
         );
         break;
       case 'generate_qr':
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('QR code generatie wordt binnenkort toegevoegd')),
+          const SnackBar(
+              content: Text('QR code generatie wordt binnenkort toegevoegd')),
         );
         break;
       case 'invite_team':
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Team uitnodigen wordt binnenkort toegevoegd')),
+          const SnackBar(
+              content: Text('Team uitnodigen wordt binnenkort toegevoegd')),
         );
         break;
       case 'view_analytics':
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Analytics bekijken wordt binnenkort toegevoegd')),
+          const SnackBar(
+              content: Text('Analytics bekijken wordt binnenkort toegevoegd')),
         );
         break;
     }
@@ -1467,11 +1477,12 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
     switch (action) {
       case 'chat':
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Live chat wordt binnenkort toegevoegd')),
+          const SnackBar(
+              content: Text('Live chat wordt binnenkort toegevoegd')),
         );
         break;
       case 'email':
-        _launchUrl('mailto:support@menutri.com');
+        _launchUrl('mailto:support@menutri.nl');
         break;
       case 'phone':
         _launchUrl('tel:+31201234567');
@@ -1481,12 +1492,14 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
         break;
       case 'video':
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Video call wordt binnenkort toegevoegd')),
+          const SnackBar(
+              content: Text('Video call wordt binnenkort toegevoegd')),
         );
         break;
       case 'remote':
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Remote support wordt binnenkort toegevoegd')),
+          const SnackBar(
+              content: Text('Remote support wordt binnenkort toegevoegd')),
         );
         break;
     }
@@ -1498,7 +1511,9 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
 
   void _downloadUserGuide() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Gebruikershandleiding download wordt binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text(
+              'Gebruikershandleiding download wordt binnenkort toegevoegd')),
     );
   }
 
@@ -1514,133 +1529,8 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
     _launchUrl('https://community.menutri.com');
   }
 
-  void _showCreateTicketDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Nieuw Support Ticket'),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _ticketTitleController,
-                decoration: const InputDecoration(
-                  labelText: 'Onderwerp',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: _selectedTicketCategory,
-                decoration: const InputDecoration(
-                  labelText: 'Categorie',
-                  border: OutlineInputBorder(),
-                ),
-                items: const [
-                  DropdownMenuItem(value: 'general', child: Text('Algemeen')),
-                  DropdownMenuItem(value: 'technical', child: Text('Technisch')),
-                  DropdownMenuItem(value: 'billing', child: Text('Facturering')),
-                  DropdownMenuItem(value: 'feature', child: Text('Feature Verzoek')),
-                ],
-                onChanged: (value) => setState(() => _selectedTicketCategory = value!),
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: _selectedTicketPriority,
-                decoration: const InputDecoration(
-                  labelText: 'Prioriteit',
-                  border: OutlineInputBorder(),
-                ),
-                items: const [
-                  DropdownMenuItem(value: 'low', child: Text('Laag')),
-                  DropdownMenuItem(value: 'medium', child: Text('Gemiddeld')),
-                  DropdownMenuItem(value: 'high', child: Text('Hoog')),
-                ],
-                onChanged: (value) => setState(() => _selectedTicketPriority = value!),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _ticketDescriptionController,
-                maxLines: 4,
-                decoration: const InputDecoration(
-                  labelText: 'Beschrijving',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Annuleren'),
-          ),
-          ElevatedButton(
-            onPressed: _isSubmittingTicket ? null : () {
-              Navigator.pop(context);
-              _createSupportTicket();
-            },
-            child: _isSubmittingTicket
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text('Aanmaken'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _createSupportTicket() async {
-    if (_ticketTitleController.text.isEmpty || _ticketDescriptionController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Vul alle velden in'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    setState(() => _isSubmittingTicket = true);
-
-    try {
-      final ticketData = {
-        'title': _ticketTitleController.text,
-        'description': _ticketDescriptionController.text,
-        'category': _selectedTicketCategory,
-        'priority': _selectedTicketPriority,
-      };
-
-      await _apiService.createSupportTicket(ticketData);
-
-      _ticketTitleController.clear();
-      _ticketDescriptionController.clear();
-      
-      setState(() => _isSubmittingTicket = false);
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Support ticket aangemaakt'),
-          backgroundColor: Colors.green,
-        ),
-      );
-      
-      _loadHelpData(); // Refresh tickets
-    } catch (e) {
-      setState(() => _isSubmittingTicket = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Fout bij aanmaken ticket: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
+  // _showCreateTicketDialog en _createSupportTicket zijn verwijderd i.v.m. geen backend API.
+  // Tickets-tab verwijst nu naar e-mail (support@menutri.nl).
 
   void _viewTicketDetails(Map<String, dynamic> ticket) {
     showDialog(
@@ -1685,12 +1575,12 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
       await _apiService.submitFeedback({
         'feedback': _feedbackController.text,
         'type': 'general',
-      });
+      } as String);
 
       _feedbackController.clear();
-      
+
       setState(() => _isSubmittingFeedback = false);
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Bedankt voor je feedback!'),
@@ -1728,7 +1618,8 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
 
   void _rateInAppStore() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('App Store beoordeling wordt binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('App Store beoordeling wordt binnenkort toegevoegd')),
     );
   }
 
@@ -1742,19 +1633,22 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
 
   void _submitFeatureRequest() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Feature verzoek wordt binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('Feature verzoek wordt binnenkort toegevoegd')),
     );
   }
 
   void _reportBug() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Bug rapportage wordt binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('Bug rapportage wordt binnenkort toegevoegd')),
     );
   }
 
   void _downloadGuides() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Handleidingen download wordt binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('Handleidingen download wordt binnenkort toegevoegd')),
     );
   }
 
@@ -1776,4 +1670,3 @@ class _CateraarHelpSupportPageState extends ConsumerState<CateraarHelpSupportPag
     }
   }
 }
-
