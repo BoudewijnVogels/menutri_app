@@ -1,0 +1,67 @@
+name: menutri_app
+description: "Menutri - Discover healthy food and restaurants"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.3
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # UI & Navigation
+  cupertino_icons: ^1.0.8
+  go_router: ^16.2.0
+  
+  # State Management
+  riverpod: ^2.5.1
+  flutter_riverpod: ^2.5.1
+  
+  # HTTP & API
+  http: ^1.2.2
+  dio: ^5.7.0
+  
+  # Storage
+  flutter_secure_storage: ^9.2.2
+  shared_preferences: ^2.3.2
+  
+  # Camera & Scanning
+  mobile_scanner: ^7.0.1
+  camera: ^0.11.0+2
+  
+  # Location & Maps
+  geolocator: ^14.0.2
+  google_maps_flutter: ^2.9.0
+  
+  # Sharing & External
+  share_plus: ^11.1.0
+  url_launcher: ^6.3.0
+  
+  # Data & CSV
+  csv: ^6.0.0
+  
+  # Internationalization
+  intl: ^0.20.2
+  
+  # Image handling
+  image_picker: ^1.1.2
+  cached_network_image: ^3.4.1
+  
+  # UI Components
+  flutter_svg: ^2.0.10+1
+  google_fonts: ^6.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
+    - assets/icons/
+
