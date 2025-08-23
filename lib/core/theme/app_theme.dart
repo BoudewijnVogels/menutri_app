@@ -7,16 +7,18 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.mediumBrown,
+        seedColor: AppColors.primary,
         brightness: Brightness.light,
-        primary: AppColors.mediumBrown,
-        secondary: AppColors.lightBrown,
-        surface: AppColors.white,
-        background: AppColors.white,
-        onPrimary: AppColors.white,
-        onSecondary: AppColors.darkBrown,
-        onSurface: AppColors.darkBrown,
-        onBackground: AppColors.darkBrown,
+        primary: AppColors.primary,
+        secondary: AppColors.secondary,
+        surface: AppColors.surface,
+        background: AppColors.background,
+        onPrimary: AppColors.onPrimary,
+        onSecondary: AppColors.onSecondary,
+        onSurface: AppColors.onSurface,
+        onBackground: AppColors.onBackground,
+        error: AppColors.error,
+        onError: AppColors.white,
       ),
 
       // Typography using Google Fonts (Inter)
