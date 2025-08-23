@@ -1,3 +1,4 @@
+import 'dart:math' as math; // ✅ voor min()
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -14,11 +15,15 @@ class AnalyticsPage extends ConsumerStatefulWidget {
 class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
     with TickerProviderStateMixin {
   final ApiService _apiService = ApiService();
-  
+
   late TabController _tabController;
-  
+
   bool _isLoading = true;
-  Map<String, dynamic>? _analyticsData;
+
+  // Kan Map of List zijn, afhankelijk van de backend-respons
+  Map<String, dynamic>? _analyticsMap;
+  List<dynamic> _analyticsList = [];
+
   List<Map<String, dynamic>> _restaurants = [];
   Map<String, dynamic>? _selectedRestaurant;
   String _selectedPeriod = '7d';
@@ -46,20 +51,22 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
 
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final restaurantsResponse = await _apiService.getRestaurants();
       final restaurants = List<Map<String, dynamic>>.from(
-        restaurantsResponse['restaurants'] ?? []
+        restaurantsResponse['restaurants'] ?? [],
       );
-      
+
       setState(() {
         _restaurants = restaurants;
         if (restaurants.isNotEmpty) {
           _selectedRestaurant = restaurants.first;
+        } else {
+          _selectedRestaurant = null;
         }
       });
-      
+
       await _loadAnalytics();
     } catch (e) {
       setState(() => _isLoading = false);
@@ -72,16 +79,30 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
   }
 
   Future<void> _loadAnalytics() async {
-    if (_selectedRestaurant == null) return;
-    
+    // Als je alle restaurants wilt tonen, laat restaurantId null
+    final restaurantId = _selectedRestaurant?['id'];
+
     try {
-      final response = await _apiService.getAnalytics(
-        restaurantId: _selectedRestaurant!['id'],
+      // ✅ maak response expliciet dynamic om List/Map flexibel af te vangen
+      final dynamic response = await _apiService.getAnalytics(
+        restaurantId: restaurantId,
         period: _selectedPeriod,
+        metric:
+            'overview', // pas aan indien jouw backend andere metric verwacht
       );
-      
+
       setState(() {
-        _analyticsData = response;
+        if (response is Map<String, dynamic>) {
+          _analyticsMap = response;
+          _analyticsList = [];
+        } else if (response is List) {
+          _analyticsList = response;
+          _analyticsMap = null;
+        } else {
+          // Onbekende vorm -> leeg maken zodat UI niet crasht
+          _analyticsMap = null;
+          _analyticsList = [];
+        }
         _isLoading = false;
       });
     } catch (e) {
@@ -94,10 +115,28 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
     }
   }
 
+  // Haal een "overview"-map op, ongeacht of de bron een Map of List is
+  Map<String, dynamic> _getOverview() {
+    // Backend geeft een object terug met een 'overview' veld
+    if (_analyticsMap != null) {
+      final obj = _analyticsMap!;
+      final over = obj['overview'];
+      if (over is Map<String, dynamic>) return over;
+      return {};
+    }
+
+    // Backend geeft een lijst terug – simpele fallback: neem eerste item als Map
+    if (_analyticsList.isNotEmpty && _analyticsList.first is Map) {
+      return Map<String, dynamic>.from(_analyticsList.first as Map);
+    }
+
+    return {};
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
         title: const Text('Analytics'),
         backgroundColor: AppColors.primary,
@@ -116,7 +155,8 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
                   controller: _tabController,
                   indicatorColor: AppColors.onPrimary,
                   labelColor: AppColors.onPrimary,
-                  unselectedLabelColor: AppColors.onPrimary.withOpacity(0.7),
+                  unselectedLabelColor:
+                      AppColors.withAlphaFraction(AppColors.onPrimary, 0.7),
                   isScrollable: true,
                   tabs: const [
                     Tab(text: 'Overzicht'),
@@ -134,9 +174,9 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
               ? _buildNoRestaurantsState()
               : Column(
                   children: [
-                    // Controls
+                    // Filters
                     _buildControls(),
-                    
+
                     // Tab content
                     Expanded(
                       child: TabBarView(
@@ -170,15 +210,15 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
             Text(
               'Geen Analytics Data',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               'Voeg eerst een restaurant toe om analytics te bekijken',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -204,7 +244,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
         color: AppColors.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: AppColors.withAlphaFraction(Colors.black, 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -212,26 +252,27 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
       ),
       child: Column(
         children: [
-          // Restaurant selector
+          // Restaurant selector (nullable!)
           Row(
             children: [
               Icon(Icons.restaurant, color: AppColors.primary),
               const SizedBox(width: 12),
               Expanded(
-                child: DropdownButtonFormField<Map<String, dynamic>>(
+                child: DropdownButtonFormField<Map<String, dynamic>?>(
                   value: _selectedRestaurant,
                   decoration: const InputDecoration(
                     labelText: 'Restaurant',
                     border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   ),
                   items: [
-                    DropdownMenuItem(
+                    const DropdownMenuItem<Map<String, dynamic>?>(
                       value: null,
-                      child: const Text('Alle Restaurants'),
+                      child: Text('Alle Restaurants'),
                     ),
                     ..._restaurants.map((restaurant) {
-                      return DropdownMenuItem(
+                      return DropdownMenuItem<Map<String, dynamic>?>(
                         value: restaurant,
                         child: Text(restaurant['name'] ?? ''),
                       );
@@ -247,9 +288,9 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
               ),
             ],
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Period selector
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -268,11 +309,15 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
                       _loadAnalytics();
                     },
                     backgroundColor: AppColors.background,
-                    selectedColor: AppColors.primary.withOpacity(0.2),
+                    selectedColor:
+                        AppColors.withAlphaFraction(AppColors.primary, 0.2),
                     checkmarkColor: AppColors.primary,
                     labelStyle: TextStyle(
-                      color: isSelected ? AppColors.primary : AppColors.textSecondary,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                      color: isSelected
+                          ? AppColors.primary
+                          : AppColors.textSecondary,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.normal,
                     ),
                   ),
                 );
@@ -285,34 +330,94 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
   }
 
   Widget _buildOverviewTab() {
-    final overview = _analyticsData?['overview'] ?? {};
-    
+    final overview = _getOverview();
+
     return RefreshIndicator(
       onRefresh: _loadAnalytics,
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
+        physics: const AlwaysScrollableScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Key metrics
             _buildKeyMetrics(overview),
-            
+
             const SizedBox(height: 24),
-            
+
             // Performance chart
             _buildPerformanceChart(overview),
-            
+
             const SizedBox(height: 24),
-            
+
             // Top performing items
             _buildTopPerformingItems(overview),
-            
+
             const SizedBox(height: 24),
-            
+
             // Recent activity
             _buildRecentActivity(overview),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildMetricCard({
+    required String title,
+    required String value,
+    required String change,
+    required IconData icon,
+    required Color color,
+  }) {
+    final isPositive = !change.startsWith('-');
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.outline),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Icon(icon, color: color, size: 24),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: AppColors.withAlphaFraction(
+                      isPositive ? Colors.green : Colors.red, 0.1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  change,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: isPositive ? Colors.green : Colors.red,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ),
+            ],
+          ),
+          const Spacer(),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+          ),
+        ],
       ),
     );
   }
@@ -324,11 +429,10 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
         Text(
           'Belangrijkste Statistieken',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 16),
-        
         GridView.count(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -371,64 +475,6 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
     );
   }
 
-  Widget _buildMetricCard({
-    required String title,
-    required String value,
-    required String change,
-    required IconData icon,
-    required Color color,
-  }) {
-    final isPositive = !change.startsWith('-');
-    
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.outline),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Icon(icon, color: color, size: 24),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: (isPositive ? Colors.green : Colors.red).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  change,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: isPositive ? Colors.green : Colors.red,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const Spacer(),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            title,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildPerformanceChart(Map<String, dynamic> overview) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -436,11 +482,10 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
         Text(
           'Prestatie Trend',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 16),
-        
         Container(
           height: 200,
           padding: const EdgeInsets.all(20),
@@ -462,15 +507,15 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
                 Text(
                   'Interactieve Grafiek',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Gedetailleerde grafieken worden binnenkort toegevoegd',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+                        color: AppColors.textSecondary,
+                      ),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -482,21 +527,19 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
   }
 
   Widget _buildTopPerformingItems(Map<String, dynamic> overview) {
-    final topItems = List<Map<String, dynamic>>.from(
-      overview['top_items'] ?? []
-    );
-    
+    final topItems =
+        List<Map<String, dynamic>>.from(overview['top_items'] ?? []);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Best Presterende Items',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 16),
-        
         Container(
           decoration: BoxDecoration(
             color: AppColors.surface,
@@ -517,9 +560,10 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
                         const SizedBox(height: 16),
                         Text(
                           'Geen data beschikbaar',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
                         ),
                       ],
                     ),
@@ -529,12 +573,14 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: topItems.length,
-                  separatorBuilder: (context, index) => const Divider(height: 1),
+                  separatorBuilder: (context, index) =>
+                      const Divider(height: 1),
                   itemBuilder: (context, index) {
                     final item = topItems[index];
                     return ListTile(
                       leading: CircleAvatar(
-                        backgroundColor: AppColors.primary.withOpacity(0.1),
+                        backgroundColor:
+                            AppColors.withAlphaFraction(AppColors.primary, 0.1),
                         child: Text(
                           '${index + 1}',
                           style: TextStyle(
@@ -547,7 +593,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
                       subtitle: Text('${item['views'] ?? 0} views'),
                       trailing: Text(
                         '${item['favorites'] ?? 0} ♥',
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.red,
                           fontWeight: FontWeight.w600,
                         ),
@@ -561,21 +607,19 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
   }
 
   Widget _buildRecentActivity(Map<String, dynamic> overview) {
-    final activities = List<Map<String, dynamic>>.from(
-      overview['recent_activities'] ?? []
-    );
-    
+    final activities =
+        List<Map<String, dynamic>>.from(overview['recent_activities'] ?? []);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Recente Activiteit',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 16),
-        
         Container(
           decoration: BoxDecoration(
             color: AppColors.surface,
@@ -596,9 +640,10 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
                         const SizedBox(height: 16),
                         Text(
                           'Geen recente activiteit',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
                         ),
                       ],
                     ),
@@ -607,14 +652,17 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
               : ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemCount: activities.take(5).length,
-                  separatorBuilder: (context, index) => const Divider(height: 1),
+                  // ✅ clamp → int: gebruik min()
+                  itemCount: math.min(activities.length, 5),
+                  separatorBuilder: (context, index) =>
+                      const Divider(height: 1),
                   itemBuilder: (context, index) {
                     final activity = activities[index];
                     return ListTile(
-                      leading: _getActivityIcon(activity['type']),
-                      title: Text(activity['description'] ?? ''),
-                      subtitle: Text(_formatDateTime(activity['created_at'])),
+                      leading: _getActivityIcon(activity['type'] as String?),
+                      title: Text((activity['description'] ?? '') as String),
+                      subtitle: Text(
+                          _formatDateTime(activity['created_at'] as String?)),
                       trailing: const Icon(Icons.chevron_right),
                     );
                   },
@@ -640,15 +688,15 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
             Text(
               'QR Scan Analytics',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               'Gedetailleerde QR scan analytics worden binnenkort toegevoegd',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -673,15 +721,15 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
             Text(
               'Menu Item Analytics',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               'Gedetailleerde menu item analytics worden binnenkort toegevoegd',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -706,15 +754,15 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
             Text(
               'Review Analytics',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               'Gedetailleerde review analytics worden binnenkort toegevoegd',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -733,17 +781,16 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
           children: [
             const Text('Selecteer het formaat voor export:'),
             const SizedBox(height: 16),
-            
             ListTile(
               leading: const Icon(Icons.table_chart),
               title: const Text('CSV Export'),
-              subtitle: const Text('Geschikt voor Excel en andere spreadsheet programma\'s'),
+              subtitle: const Text(
+                  'Geschikt voor Excel en andere spreadsheet programma\'s'),
               onTap: () {
                 Navigator.pop(context);
                 _exportCSV();
               },
             ),
-            
             ListTile(
               leading: const Icon(Icons.picture_as_pdf),
               title: const Text('PDF Rapport'),
@@ -770,12 +817,14 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
       await _apiService.exportAnalyticsCSV(
         restaurantId: _selectedRestaurant?['id'],
         period: _selectedPeriod,
+        metric: 'overview',
       );
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('CSV export gestart - je ontvangt een email met de download link'),
+            content: Text(
+                'CSV export gestart - je ontvangt een email met de download link'),
             backgroundColor: Colors.green,
           ),
         );
@@ -798,11 +847,12 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
         restaurantId: _selectedRestaurant?['id'],
         period: _selectedPeriod,
       );
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('PDF rapport wordt gegenereerd - je ontvangt een email met de download link'),
+            content: Text(
+                'PDF rapport wordt gegenereerd - je ontvangt een email met de download link'),
             backgroundColor: Colors.green,
           ),
         );
@@ -836,12 +886,12 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
 
   String _formatDateTime(String? dateTime) {
     if (dateTime == null) return '';
-    
+
     try {
       final date = DateTime.parse(dateTime);
       final now = DateTime.now();
       final difference = now.difference(date);
-      
+
       if (difference.inDays > 0) {
         return '${difference.inDays} dagen geleden';
       } else if (difference.inHours > 0) {
@@ -856,4 +906,3 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
     }
   }
 }
-
