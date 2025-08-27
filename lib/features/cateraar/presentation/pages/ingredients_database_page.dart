@@ -216,7 +216,8 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
             controller: _tabController,
             indicatorColor: AppColors.onPrimary,
             labelColor: AppColors.onPrimary,
-            unselectedLabelColor: AppColors.onPrimary.withOpacity(0.7),
+            unselectedLabelColor:
+                AppColors.withAlphaFraction(AppColors.onPrimary, 0.7),
             isScrollable: true,
             tabs: const [
               Tab(text: 'Alle Ingrediënten'),
@@ -281,7 +282,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
         color: AppColors.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: AppColors.withAlphaFraction(AppColors.black, 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -349,7 +350,8 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
                         _filterIngredients();
                       },
                       backgroundColor: AppColors.background,
-                      selectedColor: AppColors.primary.withOpacity(0.2),
+                      selectedColor:
+                          AppColors.withAlphaFraction(AppColors.primary, 0.2),
                       checkmarkColor: AppColors.primary,
                     ),
                   );
@@ -372,7 +374,8 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
                         _filterIngredients();
                       },
                       backgroundColor: AppColors.background,
-                      selectedColor: AppColors.primary.withOpacity(0.2),
+                      selectedColor:
+                          AppColors.withAlphaFraction(AppColors.primary, 0.2),
                       checkmarkColor: AppColors.primary,
                     ),
                   );
@@ -444,7 +447,8 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: Colors.green.withOpacity(0.1),
+                            color:
+                                AppColors.withAlphaFraction(Colors.green, 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Row(
@@ -472,7 +476,8 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: Colors.blue.withOpacity(0.1),
+                            color:
+                                AppColors.withAlphaFraction(Colors.blue, 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -607,9 +612,12 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
                       padding: const EdgeInsets.symmetric(
                           horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.1),
+                        color: AppColors.withAlphaFraction(
+                            AppColors.calorieMarginVeryHigh, 0.1),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.red.withOpacity(0.3)),
+                        border: Border.all(
+                            color: AppColors.withAlphaFraction(
+                                AppColors.calorieMarginVeryHigh, 0.3)),
                       ),
                       child: Text(
                         allergen,
@@ -638,7 +646,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: AppColors.withAlphaFraction(color, 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -669,9 +677,10 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
           padding: const EdgeInsets.all(16),
           margin: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: AppColors.primary.withOpacity(0.1),
+            color: AppColors.withAlphaFraction(AppColors.primary, 0.1),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+            border: Border.all(
+                color: AppColors.withAlphaFraction(AppColors.primary, 0.3)),
           ),
           child: Row(
             children: [
@@ -699,7 +708,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
                   width: 120,
                   height: 120,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: AppColors.withAlphaFraction(AppColors.primary, 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
