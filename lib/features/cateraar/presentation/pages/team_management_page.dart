@@ -18,9 +18,9 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
   final ApiService _apiService = ApiService();
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  
+
   late TabController _tabController;
-  
+
   bool _isLoading = true;
   List<Map<String, dynamic>> _teamMembers = [];
   List<Map<String, dynamic>> _filteredMembers = [];
@@ -110,29 +110,26 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
 
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final teamResponse = await _apiService.getTeamMembers();
       final invitationsResponse = await _apiService.getPendingInvitations();
       final restaurantsResponse = await _apiService.getRestaurants();
-      
-      final members = List<Map<String, dynamic>>.from(
-        teamResponse['members'] ?? []
-      );
+
+      final members =
+          List<Map<String, dynamic>>.from(teamResponse['members'] ?? []);
       final invitations = List<Map<String, dynamic>>.from(
-        invitationsResponse['invitations'] ?? []
-      );
+          invitationsResponse['invitations'] ?? []);
       final restaurants = List<Map<String, dynamic>>.from(
-        restaurantsResponse['restaurants'] ?? []
-      );
-      
+          restaurantsResponse['restaurants'] ?? []);
+
       setState(() {
         _teamMembers = members;
         _pendingInvitations = invitations;
         _restaurants = restaurants;
         _isLoading = false;
       });
-      
+
       _filterMembers();
     } catch (e) {
       setState(() => _isLoading = false);
@@ -146,7 +143,7 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
 
   void _filterMembers() {
     List<Map<String, dynamic>> filtered = List.from(_teamMembers);
-    
+
     // Apply search filter
     if (_searchQuery.isNotEmpty) {
       filtered = filtered.where((member) {
@@ -156,21 +153,21 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
         return name.contains(query) || email.contains(query);
       }).toList();
     }
-    
+
     // Apply role filter
     if (_filterRole != 'all') {
       filtered = filtered.where((member) {
         return member['role'] == _filterRole;
       }).toList();
     }
-    
+
     // Apply status filter
     if (_filterStatus != 'all') {
       filtered = filtered.where((member) {
         return member['status'] == _filterStatus;
       }).toList();
     }
-    
+
     setState(() {
       _filteredMembers = filtered;
     });
@@ -239,7 +236,8 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
             controller: _tabController,
             indicatorColor: AppColors.onPrimary,
             labelColor: AppColors.onPrimary,
-            unselectedLabelColor: AppColors.onPrimary.withOpacity(0.7),
+            unselectedLabelColor:
+                AppColors.withAlphaFraction(AppColors.onPrimary, 0.7),
             tabs: [
               Tab(text: 'Team (${_teamMembers.length})'),
               Tab(text: 'Uitnodigingen (${_pendingInvitations.length})'),
@@ -273,7 +271,7 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
       children: [
         // Search and filter bar
         _buildSearchAndFilter(),
-        
+
         // Team members list
         Expanded(
           child: _filteredMembers.isEmpty
@@ -301,7 +299,7 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
         color: AppColors.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.AppColors.withAlphaFraction(AppColors.black, 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -328,7 +326,8 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
                     )
                   : null,
               border: const OutlineInputBorder(),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
             onChanged: (value) {
               setState(() {
@@ -337,9 +336,9 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
               _filterMembers();
             },
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           // Filter chips
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -356,11 +355,12 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
                     _filterMembers();
                   },
                   backgroundColor: AppColors.background,
-                  selectedColor: AppColors.primary.withOpacity(0.2),
+                  selectedColor:
+                      AppColors.withAlphaFraction(AppColors.primary, 0.2),
                   checkmarkColor: AppColors.primary,
                 ),
                 const SizedBox(width: 8),
-                
+
                 ..._roleLabels.entries.map((entry) {
                   final isSelected = _filterRole == entry.key;
                   return Padding(
@@ -393,7 +393,7 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
     final status = member['status'] ?? 'active';
     final isOwner = role == 'owner';
     final isCurrentUser = member['is_current_user'] == true;
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
@@ -428,9 +428,9 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
                           )
                         : null,
                   ),
-                  
+
                   const SizedBox(width: 16),
-                  
+
                   // Name and email
                   Expanded(
                     child: Column(
@@ -441,24 +441,32 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
                             Expanded(
                               child: Text(
                                 member['name'] ?? '',
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
                               ),
                             ),
                             if (isCurrentUser)
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: Colors.blue.withOpacity(0.1),
+                                  color: Colors.AppColors.withAlphaFraction(
+                                      blue, 0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
                                   'Jij',
-                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: Colors.blue,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelSmall
+                                      ?.copyWith(
+                                        color: Colors.blue,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                 ),
                               ),
                           ],
@@ -466,14 +474,15 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
                         const SizedBox(height: 4),
                         Text(
                           member['email'] ?? '',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
                         ),
                       ],
                     ),
                   ),
-                  
+
                   // Actions menu
                   if (!isCurrentUser || !isOwner)
                     PopupMenuButton<String>(
@@ -510,7 +519,8 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
                             value: 'suspend',
                             child: ListTile(
                               leading: Icon(Icons.block, color: Colors.orange),
-                              title: Text('Schorsen', style: TextStyle(color: Colors.orange)),
+                              title: Text('Schorsen',
+                                  style: TextStyle(color: Colors.orange)),
                               contentPadding: EdgeInsets.zero,
                             ),
                           )
@@ -518,8 +528,10 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
                           const PopupMenuItem(
                             value: 'activate',
                             child: ListTile(
-                              leading: Icon(Icons.check_circle, color: Colors.green),
-                              title: Text('Activeren', style: TextStyle(color: Colors.green)),
+                              leading:
+                                  Icon(Icons.check_circle, color: Colors.green),
+                              title: Text('Activeren',
+                                  style: TextStyle(color: Colors.green)),
                               contentPadding: EdgeInsets.zero,
                             ),
                           ),
@@ -527,8 +539,10 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
                           const PopupMenuItem(
                             value: 'remove',
                             child: ListTile(
-                              leading: Icon(Icons.person_remove, color: Colors.red),
-                              title: Text('Verwijderen', style: TextStyle(color: Colors.red)),
+                              leading:
+                                  Icon(Icons.person_remove, color: Colors.red),
+                              title: Text('Verwijderen',
+                                  style: TextStyle(color: Colors.red)),
                               contentPadding: EdgeInsets.zero,
                             ),
                           ),
@@ -536,14 +550,15 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
                     ),
                 ],
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Role and status badges
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: _roleColors[role]?.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
@@ -559,19 +574,21 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
                         const SizedBox(width: 4),
                         Text(
                           _roleLabels[role] ?? role,
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: _roleColors[role],
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: _roleColors[role],
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(width: 8),
-                  
+
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: _statusColors[status]?.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
@@ -590,57 +607,62 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
                         const SizedBox(width: 4),
                         Text(
                           _statusLabels[status] ?? status,
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: _statusColors[status],
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: _statusColors[status],
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
                       ],
                     ),
                   ),
-                  
+
                   const Spacer(),
-                  
+
                   // Last seen
                   if (member['last_seen'] != null)
                     Text(
                       'Laatst gezien: ${_formatDateTime(member['last_seen'])}',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                            color: AppColors.textSecondary,
+                          ),
                     ),
                 ],
               ),
-              
+
               // Restaurant access
-              if (member['restaurant_access'] != null && member['restaurant_access'].isNotEmpty) ...[
+              if (member['restaurant_access'] != null &&
+                  member['restaurant_access'].isNotEmpty) ...[
                 const SizedBox(height: 12),
                 Text(
                   'Toegang tot restaurants:',
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
                 const SizedBox(height: 4),
                 Wrap(
                   spacing: 4,
                   runSpacing: 4,
-                  children: (member['restaurant_access'] as List).map<Widget>((restaurantId) {
+                  children: (member['restaurant_access'] as List)
+                      .map<Widget>((restaurantId) {
                     final restaurant = _restaurants.firstWhere(
                       (r) => r['id'] == restaurantId,
                       orElse: () => {'name': 'Onbekend Restaurant'},
                     );
                     return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
+                        color:
+                            AppColors.withAlphaFraction(AppColors.primary, 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
                         restaurant['name'] ?? '',
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: AppColors.primary,
-                        ),
+                              color: AppColors.primary,
+                            ),
                       ),
                     );
                   }).toList(),
@@ -672,8 +694,9 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
   Widget _buildInvitationCard(Map<String, dynamic> invitation) {
     final role = invitation['role'] ?? 'viewer';
     final expiresAt = invitation['expires_at'];
-    final isExpired = expiresAt != null && DateTime.parse(expiresAt).isBefore(DateTime.now());
-    
+    final isExpired =
+        expiresAt != null && DateTime.parse(expiresAt).isBefore(DateTime.now());
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
@@ -699,22 +722,24 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
                     children: [
                       Text(
                         invitation['email'] ?? '',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'Uitgenodigd als ${_roleLabels[role] ?? role}',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
+                              color: AppColors.textSecondary,
+                            ),
                       ),
                     ],
                   ),
                 ),
                 PopupMenuButton<String>(
-                  onSelected: (value) => _handleInvitationAction(value, invitation),
+                  onSelected: (value) =>
+                      _handleInvitationAction(value, invitation),
                   itemBuilder: (context) => [
                     const PopupMenuItem(
                       value: 'resend',
@@ -736,7 +761,8 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
                       value: 'cancel',
                       child: ListTile(
                         leading: Icon(Icons.cancel, color: Colors.red),
-                        title: Text('Annuleren', style: TextStyle(color: Colors.red)),
+                        title: Text('Annuleren',
+                            style: TextStyle(color: Colors.red)),
                         contentPadding: EdgeInsets.zero,
                       ),
                     ),
@@ -744,51 +770,51 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             // Status and expiry
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: isExpired 
-                        ? Colors.red.withOpacity(0.1)
-                        : Colors.orange.withOpacity(0.1),
+                    color: isExpired
+                        ? Colors.AppColors.withAlphaFraction(red, 0.1)
+                        : Colors.AppColors.withAlphaFraction(orange, 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     isExpired ? 'Verlopen' : 'In afwachting',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: isExpired ? Colors.red : Colors.orange,
-                      fontWeight: FontWeight.w600,
-                    ),
+                          color: isExpired ? Colors.red : Colors.orange,
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                 ),
-                
                 const Spacer(),
-                
                 if (expiresAt != null)
                   Text(
-                    isExpired 
+                    isExpired
                         ? 'Verlopen op ${_formatDate(expiresAt)}'
                         : 'Verloopt op ${_formatDate(expiresAt)}',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: isExpired ? Colors.red : AppColors.textSecondary,
-                    ),
+                          color:
+                              isExpired ? Colors.red : AppColors.textSecondary,
+                        ),
                   ),
               ],
             ),
-            
+
             // Sent info
             if (invitation['sent_at'] != null) ...[
               const SizedBox(height: 8),
               Text(
                 'Verstuurd op ${_formatDateTime(invitation['sent_at'])}',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+                      color: AppColors.textSecondary,
+                    ),
               ),
             ],
           ],
@@ -806,19 +832,19 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
           Text(
             'Rollen & Rechten Overzicht',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 8),
           Text(
             'Hieronder vind je een overzicht van alle beschikbare rollen en hun rechten.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSecondary,
-            ),
+                  color: AppColors.textSecondary,
+                ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Role cards
           ..._roleLabels.entries.map((entry) {
             return _buildRoleCard(entry.key, entry.value);
@@ -831,7 +857,7 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
   Widget _buildRoleCard(String role, String label) {
     final permissions = _rolePermissions[role] ?? [];
     final color = _roleColors[role] ?? Colors.grey;
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 2,
@@ -849,7 +875,7 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
+                    color: AppColors.withAlphaFraction(color, 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -865,34 +891,35 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
                     children: [
                       Text(
                         label,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: color,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: color,
+                                ),
                       ),
                       Text(
                         _getRoleDescription(role),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
+                              color: AppColors.textSecondary,
+                            ),
                       ),
                     ],
                   ),
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Permissions
             Text(
               'Rechten:',
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const SizedBox(height: 8),
-            
+
             ...permissions.map((permission) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 4),
@@ -934,24 +961,30 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
             ),
             const SizedBox(height: 16),
             Text(
-              _searchQuery.isNotEmpty || _filterRole != 'all' || _filterStatus != 'all'
+              _searchQuery.isNotEmpty ||
+                      _filterRole != 'all' ||
+                      _filterStatus != 'all'
                   ? 'Geen teamleden gevonden'
                   : 'Nog geen teamleden',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
-              _searchQuery.isNotEmpty || _filterRole != 'all' || _filterStatus != 'all'
+              _searchQuery.isNotEmpty ||
+                      _filterRole != 'all' ||
+                      _filterStatus != 'all'
                   ? 'Probeer een andere zoekopdracht of filter'
                   : 'Nodig je eerste teamlid uit om samen te werken',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
-            if (_searchQuery.isEmpty && _filterRole == 'all' && _filterStatus == 'all') ...[
+            if (_searchQuery.isEmpty &&
+                _filterRole == 'all' &&
+                _filterStatus == 'all') ...[
               const SizedBox(height: 24),
               ElevatedButton.icon(
                 onPressed: () => _showInviteDialog(),
@@ -985,15 +1018,15 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
             Text(
               'Geen Openstaande Uitnodigingen',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               'Alle uitnodigingen zijn geaccepteerd of verlopen',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -1015,7 +1048,7 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
   void _showInviteDialog() {
     String selectedRole = 'staff';
     List<String> selectedRestaurants = [];
-    
+
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -1037,19 +1070,21 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
                   ),
                   keyboardType: TextInputType.emailAddress,
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Role selection
                 Text(
                   'Rol:',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
                 const SizedBox(height: 8),
-                
-                ..._roleLabels.entries.where((entry) => entry.key != 'owner').map((entry) {
+
+                ..._roleLabels.entries
+                    .where((entry) => entry.key != 'owner')
+                    .map((entry) {
                   return RadioListTile<String>(
                     title: Text(entry.value),
                     subtitle: Text(_getRoleDescription(entry.key)),
@@ -1063,20 +1098,21 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
                     contentPadding: EdgeInsets.zero,
                   );
                 }).toList(),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Restaurant access
                 Text(
                   'Restaurant Toegang:',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
                 const SizedBox(height: 8),
-                
+
                 ..._restaurants.map((restaurant) {
-                  final isSelected = selectedRestaurants.contains(restaurant['id']);
+                  final isSelected =
+                      selectedRestaurants.contains(restaurant['id']);
                   return CheckboxListTile(
                     title: Text(restaurant['name'] ?? ''),
                     value: isSelected,
@@ -1127,16 +1163,17 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
     );
   }
 
-  Future<void> _sendInvitation(String email, String role, List<String> restaurantAccess) async {
+  Future<void> _sendInvitation(
+      String email, String role, List<String> restaurantAccess) async {
     try {
       await _apiService.inviteTeamMember({
         'email': email,
         'role': role,
         'restaurant_access': restaurantAccess,
       });
-      
+
       await _loadData();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1171,7 +1208,8 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
               const SizedBox(height: 8),
               Text('Rol: ${_roleLabels[member['role']] ?? member['role']}'),
               const SizedBox(height: 8),
-              Text('Status: ${_statusLabels[member['status']] ?? member['status']}'),
+              Text(
+                  'Status: ${_statusLabels[member['status']] ?? member['status']}'),
               if (member['last_seen'] != null) ...[
                 const SizedBox(height: 8),
                 Text('Laatst gezien: ${_formatDateTime(member['last_seen'])}'),
@@ -1232,7 +1270,7 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
 
   void _showEditRoleDialog(Map<String, dynamic> member) {
     String currentRole = member['role'] ?? 'viewer';
-    
+
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -1240,7 +1278,9 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
           title: Text('Rol wijzigen voor ${member['name']}'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
-            children: _roleLabels.entries.where((entry) => entry.key != 'owner').map((entry) {
+            children: _roleLabels.entries
+                .where((entry) => entry.key != 'owner')
+                .map((entry) {
               return RadioListTile<String>(
                 title: Text(entry.value),
                 subtitle: Text(_getRoleDescription(entry.key)),
@@ -1277,7 +1317,8 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Rechten voor ${member['name']}'),
-        content: const Text('Aangepaste rechten functionaliteit wordt binnenkort toegevoegd'),
+        content: const Text(
+            'Aangepaste rechten functionaliteit wordt binnenkort toegevoegd'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -1288,15 +1329,17 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
     );
   }
 
-  Future<void> _updateMemberRole(Map<String, dynamic> member, String newRole) async {
+  Future<void> _updateMemberRole(
+      Map<String, dynamic> member, String newRole) async {
     try {
       await _apiService.updateTeamMemberRole(member['id'], newRole);
       await _loadData();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Rol van ${member['name']} gewijzigd naar ${_roleLabels[newRole]}'),
+            content: Text(
+                'Rol van ${member['name']} gewijzigd naar ${_roleLabels[newRole]}'),
             backgroundColor: Colors.green,
           ),
         );
@@ -1316,7 +1359,8 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
   void _sendMessage(Map<String, dynamic> member) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Bericht functionaliteit naar ${member['name']} wordt binnenkort toegevoegd'),
+        content: Text(
+            'Bericht functionaliteit naar ${member['name']} wordt binnenkort toegevoegd'),
       ),
     );
   }
@@ -1325,7 +1369,7 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
     try {
       await _apiService.suspendTeamMember(member['id']);
       await _loadData();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1350,7 +1394,7 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
     try {
       await _apiService.activateTeamMember(member['id']);
       await _loadData();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1376,7 +1420,8 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Teamlid Verwijderen'),
-        content: Text('Weet je zeker dat je ${member['name']} uit het team wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.'),
+        content: Text(
+            'Weet je zeker dat je ${member['name']} uit het team wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -1388,11 +1433,12 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
               try {
                 await _apiService.removeTeamMember(member['id']);
                 await _loadData();
-                
+
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('${member['name']} is verwijderd uit het team'),
+                      content:
+                          Text('${member['name']} is verwijderd uit het team'),
                       backgroundColor: Colors.green,
                     ),
                   );
@@ -1420,11 +1466,12 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
     try {
       await _apiService.resendInvitation(invitation['id']);
       await _loadData();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Uitnodiging opnieuw verstuurd naar ${invitation['email']}'),
+            content: Text(
+                'Uitnodiging opnieuw verstuurd naar ${invitation['email']}'),
             backgroundColor: Colors.green,
           ),
         );
@@ -1443,9 +1490,10 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
 
   Future<void> _copyInvitationLink(Map<String, dynamic> invitation) async {
     try {
-      final link = invitation['invitation_link'] ?? 'https://menutri.app/invite/${invitation['token']}';
+      final link = invitation['invitation_link'] ??
+          'https://menutri.app/invite/${invitation['token']}';
       await Clipboard.setData(ClipboardData(text: link));
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -1470,11 +1518,12 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
     try {
       await _apiService.cancelInvitation(invitation['id']);
       await _loadData();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Uitnodiging naar ${invitation['email']} geannuleerd'),
+            content:
+                Text('Uitnodiging naar ${invitation['email']} geannuleerd'),
             backgroundColor: Colors.green,
           ),
         );
@@ -1496,7 +1545,8 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Bulk Uitnodigen'),
-        content: const Text('Bulk uitnodiging functionaliteit wordt binnenkort toegevoegd'),
+        content: const Text(
+            'Bulk uitnodiging functionaliteit wordt binnenkort toegevoegd'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -1576,12 +1626,12 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
 
   String _formatDateTime(String? dateTime) {
     if (dateTime == null) return '';
-    
+
     try {
       final date = DateTime.parse(dateTime);
       final now = DateTime.now();
       final difference = now.difference(date);
-      
+
       if (difference.inDays > 0) {
         return '${difference.inDays} dagen geleden';
       } else if (difference.inHours > 0) {
@@ -1598,7 +1648,7 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
 
   String _formatDate(String? dateTime) {
     if (dateTime == null) return '';
-    
+
     try {
       final date = DateTime.parse(dateTime);
       return '${date.day}/${date.month}/${date.year}';
@@ -1607,4 +1657,3 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
     }
   }
 }
-
