@@ -85,7 +85,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                   .textTheme
                                   .bodyLarge
                                   ?.copyWith(
-                                    color: AppColors.darkBrown.withOpacity(0.7),
+                                    color: AppColors.withAlphaFraction(
+                                        AppColors.darkBrown, 0.7),
                                   ),
                             ),
                           ],
@@ -329,10 +330,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: AppColors.error.withOpacity(0.1),
+                              color: AppColors.withAlphaFraction(
+                                  AppColors.error, 0.1),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
-                                color: AppColors.error.withOpacity(0.3),
+                                color: AppColors.withAlphaFraction(
+                                    AppColors.error, 0.3),
                               ),
                             ),
                             child: Row(
