@@ -35,7 +35,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       // Load user profile
       final userResponse = await ApiService().getCurrentUser();
       final healthResponse = await ApiService().getHealthProfile();
-      
+
       setState(() {
         _userProfile = userResponse;
         _healthProfile = healthResponse;
@@ -77,22 +77,22 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   children: [
                     // Profile header
                     _buildProfileHeader(),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Health profile summary
                     _buildHealthProfileCard(),
-                    
+
                     const SizedBox(height: 16),
-                    
+
                     // Quick stats
                     _buildQuickStats(),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Menu options
                     _buildMenuOptions(),
-                    
+
                     const SizedBox(height: 100),
                   ],
                 ),
@@ -113,18 +113,18 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             // Avatar
             CircleAvatar(
               radius: 40,
-              backgroundColor: AppColors.mediumBrown.withOpacity(0.1),
+              backgroundColor: AppColors.withAlphaFraction(mediumBrown, 0.1),
               child: Text(
                 _getInitials(user['full_name'] ?? user['email'] ?? ''),
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: AppColors.mediumBrown,
-                  fontWeight: FontWeight.bold,
-                ),
+                      color: AppColors.mediumBrown,
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
             ),
-            
+
             const SizedBox(width: 16),
-            
+
             // User info
             Expanded(
               child: Column(
@@ -133,42 +133,44 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   Text(
                     user['full_name'] ?? 'Gebruiker',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     user['email'] ?? '',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.grey,
-                    ),
+                          color: AppColors.grey,
+                        ),
                   ),
                   const SizedBox(height: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppColors.mediumBrown.withOpacity(0.1),
+                      color: AppColors.withAlphaFraction(mediumBrown, 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       'Gast',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: AppColors.mediumBrown,
-                        fontWeight: FontWeight.w600,
-                      ),
+                            color: AppColors.mediumBrown,
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                   ),
                 ],
               ),
             ),
-            
+
             // Edit button
             IconButton(
               icon: const Icon(Icons.edit),
               onPressed: () {
                 // TODO: Navigate to edit profile
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Profiel bewerken komt binnenkort')),
+                  const SnackBar(
+                      content: Text('Profiel bewerken komt binnenkort')),
                 );
               },
             ),
@@ -190,43 +192,47 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.health_and_safety, color: AppColors.mediumBrown),
+                  const Icon(Icons.health_and_safety,
+                      color: AppColors.mediumBrown),
                   const SizedBox(width: 8),
                   Text(
                     'Gezondheidsprofiel',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                   const Spacer(),
-                  const Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.grey),
+                  const Icon(Icons.arrow_forward_ios,
+                      size: 16, color: AppColors.grey),
                 ],
               ),
-              
               const SizedBox(height: 12),
-              
               if (_healthProfile != null) ...[
                 Row(
                   children: [
-                    _buildHealthStat('BMI', _healthProfile!['bmi']?.toStringAsFixed(1) ?? '-'),
+                    _buildHealthStat('BMI',
+                        _healthProfile!['bmi']?.toStringAsFixed(1) ?? '-'),
                     const SizedBox(width: 24),
-                    _buildHealthStat('Doel', _healthProfile!['goal'] ?? 'Niet ingesteld'),
+                    _buildHealthStat(
+                        'Doel', _healthProfile!['goal'] ?? 'Niet ingesteld'),
                   ],
                 ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    _buildHealthStat('Calorieën', '${_healthProfile!['daily_calories']?.round() ?? '-'} kcal'),
+                    _buildHealthStat('Calorieën',
+                        '${_healthProfile!['daily_calories']?.round() ?? '-'} kcal'),
                     const SizedBox(width: 24),
-                    _buildHealthStat('Activiteit', _healthProfile!['activity_level'] ?? '-'),
+                    _buildHealthStat(
+                        'Activiteit', _healthProfile!['activity_level'] ?? '-'),
                   ],
                 ),
               ] else ...[
                 Text(
                   'Stel je gezondheidsprofiel in voor gepersonaliseerde aanbevelingen',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.grey,
-                  ),
+                        color: AppColors.grey,
+                      ),
                 ),
                 const SizedBox(height: 12),
                 ElevatedButton(
@@ -248,14 +254,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         Text(
           label,
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: AppColors.grey,
-          ),
+                color: AppColors.grey,
+              ),
         ),
         Text(
           value,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+                fontWeight: FontWeight.w600,
+              ),
         ),
       ],
     );
@@ -313,16 +319,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               Text(
                 value,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.mediumBrown,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.mediumBrown,
+                    ),
               ),
               const SizedBox(height: 4),
               Text(
                 title,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: AppColors.grey,
-                ),
+                      color: AppColors.grey,
+                    ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -363,7 +369,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           subtitle: 'Privacy-instellingen',
           onTap: () {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Privacy-instellingen komen binnenkort')),
+              const SnackBar(
+                  content: Text('Privacy-instellingen komen binnenkort')),
             );
           },
         ),
@@ -421,20 +428,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: isDestructive 
-                      ? AppColors.error.withOpacity(0.1)
-                      : AppColors.mediumBrown.withOpacity(0.1),
+                  color: isDestructive
+                      ? AppColors.withAlphaFraction(AppColors.error, 0.1)
+                      : AppColors.withAlphaFraction(mediumBrown, 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   icon,
-                  color: isDestructive ? AppColors.error : AppColors.mediumBrown,
+                  color:
+                      isDestructive ? AppColors.error : AppColors.mediumBrown,
                   size: 20,
                 ),
               ),
-              
               const SizedBox(width: 16),
-              
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -442,21 +448,20 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     Text(
                       title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: isDestructive ? AppColors.error : null,
-                      ),
+                            fontWeight: FontWeight.w600,
+                            color: isDestructive ? AppColors.error : null,
+                          ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.grey,
-                      ),
+                            color: AppColors.grey,
+                          ),
                     ),
                   ],
                 ),
               ),
-              
               const Icon(
                 Icons.arrow_forward_ios,
                 size: 16,
@@ -471,7 +476,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   String _getInitials(String name) {
     if (name.isEmpty) return '?';
-    
+
     final parts = name.split(' ');
     if (parts.length >= 2) {
       return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
@@ -506,7 +511,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       try {
         await ApiService().logout();
         await _storage.deleteAll();
-        
+
         if (mounted) {
           context.go(AppRoutes.onboarding);
         }
@@ -523,4 +528,3 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     }
   }
 }
-
