@@ -15,9 +15,9 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
     with TickerProviderStateMixin {
   final ApiService _apiService = ApiService();
   final TextEditingController _searchController = TextEditingController();
-  
+
   late TabController _tabController;
-  
+
   bool _isLoading = true;
   List<Map<String, dynamic>> _restaurants = [];
   Map<String, dynamic>? _selectedRestaurant;
@@ -43,13 +43,12 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
 
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final restaurantsResponse = await _apiService.getRestaurants();
       final restaurants = List<Map<String, dynamic>>.from(
-        restaurantsResponse['restaurants'] ?? []
-      );
-      
+          restaurantsResponse['restaurants'] ?? []);
+
       setState(() {
         _restaurants = restaurants;
         if (restaurants.isNotEmpty) {
@@ -57,7 +56,7 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
         }
         _isLoading = false;
       });
-      
+
       if (_selectedRestaurant != null) {
         await _loadMenuData();
       }
@@ -73,16 +72,30 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
 
   Future<void> _loadMenuData() async {
     if (_selectedRestaurant == null) return;
-    
+
     try {
-      final futures = await Future.wait([
-        _apiService.getCategories(_selectedRestaurant!['id']),
-        _apiService.getMenuItems(_selectedRestaurant!['id']),
+      // Haal het restaurantId veilig als int op
+      final int restaurantId = (_selectedRestaurant!['id'] as num).toInt();
+
+      // Getypte Future.wait voorkomt unnecessary_cast warnings
+      final results = await Future.wait<Map<String, dynamic>>([
+        _apiService.getCategories(menuId: restaurantId),
+        _apiService.getMenuItems(restaurantId: restaurantId),
       ]);
-      
+
+      final catsResp = results[0];
+      final itemsResp = results[1];
+
       setState(() {
-        _categories = List<Map<String, dynamic>>.from(futures[0]['categories'] ?? []);
-        _menuItems = List<Map<String, dynamic>>.from(futures[1]['menu_items'] ?? []);
+        _categories = List<Map<String, dynamic>>.from(
+          catsResp['categories'] ?? const [],
+        );
+
+        // Backend kan "items" of "menu_items" teruggeven
+        _menuItems = List<Map<String, dynamic>>.from(
+          (itemsResp['items'] ?? itemsResp['menu_items'] ?? const []),
+        );
+
         _filteredMenuItems = _menuItems;
       });
     } catch (e) {
@@ -96,13 +109,14 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
 
   void _filterMenuItems() {
     final query = _searchController.text.toLowerCase();
-    
+
     setState(() {
       _filteredMenuItems = _menuItems.where((item) {
-        final matchesSearch = item['name']?.toLowerCase().contains(query) ?? false;
-        final matchesCategory = _selectedCategory == 'all' || 
-                               item['category_id'].toString() == _selectedCategory;
-        
+        final matchesSearch =
+            item['name']?.toLowerCase().contains(query) ?? false;
+        final matchesCategory = _selectedCategory == 'all' ||
+            item['category_id'].toString() == _selectedCategory;
+
         return matchesSearch && matchesCategory;
       }).toList();
     });
@@ -130,7 +144,8 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
                   controller: _tabController,
                   indicatorColor: AppColors.onPrimary,
                   labelColor: AppColors.onPrimary,
-                  unselectedLabelColor: AppColors.onPrimary.withOpacity(0.7),
+                  unselectedLabelColor:
+                      AppColors.onPrimary.withValues(alpha: 179),
                   tabs: const [
                     Tab(text: 'Menu Items'),
                     Tab(text: 'Categorieën'),
@@ -148,7 +163,7 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
                   children: [
                     // Restaurant selector
                     _buildRestaurantSelector(),
-                    
+
                     // Tab content
                     Expanded(
                       child: TabBarView(
@@ -189,15 +204,15 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
             Text(
               'Geen Restaurants',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               'Voeg eerst een restaurant toe om menu\'s te kunnen beheren',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -223,7 +238,7 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
         color: AppColors.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 13),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -239,7 +254,8 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
               decoration: const InputDecoration(
                 labelText: 'Selecteer Restaurant',
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
               items: _restaurants.map((restaurant) {
                 return DropdownMenuItem(
@@ -280,9 +296,9 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Category filter
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -300,7 +316,8 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
                     ),
                     const SizedBox(width: 8),
                     ..._categories.map((category) {
-                      final isSelected = _selectedCategory == category['id'].toString();
+                      final isSelected =
+                          _selectedCategory == category['id'].toString();
                       return Padding(
                         padding: const EdgeInsets.only(right: 8),
                         child: FilterChip(
@@ -308,7 +325,8 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
                           selected: isSelected,
                           onSelected: (selected) {
                             setState(() {
-                              _selectedCategory = selected ? category['id'].toString() : 'all';
+                              _selectedCategory =
+                                  selected ? category['id'].toString() : 'all';
                             });
                             _filterMenuItems();
                           },
@@ -321,7 +339,7 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
             ],
           ),
         ),
-        
+
         // Menu items list
         Expanded(
           child: _filteredMenuItems.isEmpty
@@ -358,15 +376,15 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
             Text(
               'Geen Menu Items',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               'Voeg je eerste menu item toe',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
           ],
         ),
@@ -396,7 +414,7 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
+                  color: AppColors.primary.withValues(alpha: 26),
                   borderRadius: BorderRadius.circular(8),
                   image: item['image_url'] != null
                       ? DecorationImage(
@@ -413,9 +431,9 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
                       )
                     : null,
               ),
-              
+
               const SizedBox(width: 16),
-              
+
               // Item info
               Expanded(
                 child: Column(
@@ -426,37 +444,37 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
                         Expanded(
                           child: Text(
                             item['name'] ?? '',
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         Text(
                           '€${price.toStringAsFixed(2)}',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.primary,
+                                  ),
                         ),
                       ],
                     ),
-                    
                     const SizedBox(height: 4),
-                    
                     if (item['description'] != null)
                       Text(
                         item['description'],
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
+                              color: AppColors.textSecondary,
+                            ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                    
                     const SizedBox(height: 8),
-                    
                     Row(
                       children: [
                         if (calories > 0) ...[
@@ -472,28 +490,31 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
                           ),
                           const SizedBox(width: 16),
                         ],
-                        
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            color: isAvailable 
-                                ? Colors.green.withOpacity(0.1)
-                                : Colors.red.withOpacity(0.1),
+                            color: isAvailable
+                                ? Colors.green.withValues(alpha: 26)
+                                : Colors.red.withValues(alpha: 26),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             isAvailable ? 'Beschikbaar' : 'Niet beschikbaar',
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: isAvailable ? Colors.green : Colors.red,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  color:
+                                      isAvailable ? Colors.green : Colors.red,
+                                  fontWeight: FontWeight.w600,
+                                ),
                           ),
                         ),
-                        
                         const Spacer(),
-                        
                         PopupMenuButton<String>(
-                          onSelected: (value) => _handleMenuItemAction(value, item),
+                          onSelected: (value) =>
+                              _handleMenuItemAction(value, item),
                           itemBuilder: (context) => [
                             const PopupMenuItem(
                               value: 'edit',
@@ -507,9 +528,13 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
                               value: isAvailable ? 'disable' : 'enable',
                               child: ListTile(
                                 leading: Icon(
-                                  isAvailable ? Icons.visibility_off : Icons.visibility,
+                                  isAvailable
+                                      ? Icons.visibility_off
+                                      : Icons.visibility,
                                 ),
-                                title: Text(isAvailable ? 'Uitschakelen' : 'Inschakelen'),
+                                title: Text(isAvailable
+                                    ? 'Uitschakelen'
+                                    : 'Inschakelen'),
                                 contentPadding: EdgeInsets.zero,
                               ),
                             ),
@@ -525,7 +550,8 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
                               value: 'delete',
                               child: ListTile(
                                 leading: Icon(Icons.delete, color: Colors.red),
-                                title: Text('Verwijderen', style: TextStyle(color: Colors.red)),
+                                title: Text('Verwijderen',
+                                    style: TextStyle(color: Colors.red)),
                                 contentPadding: EdgeInsets.zero,
                               ),
                             ),
@@ -581,15 +607,15 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
             Text(
               'Geen Categorieën',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               'Voeg categorieën toe om je menu te organiseren',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -599,9 +625,9 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
   }
 
   Widget _buildCategoryCard(Map<String, dynamic> category) {
-    final itemCount = _menuItems.where((item) => 
-      item['category_id'] == category['id']
-    ).length;
+    final itemCount = _menuItems
+        .where((item) => item['category_id'] == category['id'])
+        .length;
 
     return Card(
       elevation: 2,
@@ -613,7 +639,7 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: AppColors.primary.withOpacity(0.1),
+            color: AppColors.primary.withValues(alpha: 26),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
@@ -624,8 +650,8 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
         title: Text(
           category['name'] ?? '',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+                fontWeight: FontWeight.w600,
+              ),
         ),
         subtitle: Text('$itemCount items'),
         trailing: PopupMenuButton<String>(
@@ -670,15 +696,15 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
             Text(
               'Recepten Beheer',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               'Recepten functionaliteit wordt binnenkort toegevoegd',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -725,7 +751,8 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
   }
 
   void _addMenuItem() {
-    context.push('/cateraar/menu-items/add?restaurant_id=${_selectedRestaurant!['id']}');
+    context.push(
+        '/cateraar/menu-items/add?restaurant_id=${_selectedRestaurant!['id']}');
   }
 
   void _editMenuItem(Map<String, dynamic> item) {
@@ -733,7 +760,8 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
   }
 
   void _addCategory() {
-    context.push('/cateraar/categories/add?restaurant_id=${_selectedRestaurant!['id']}');
+    context.push(
+        '/cateraar/categories/add?restaurant_id=${_selectedRestaurant!['id']}');
   }
 
   void _editCategory(Map<String, dynamic> category) {
@@ -775,17 +803,17 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
 
   Future<void> _toggleMenuItemAvailability(Map<String, dynamic> item) async {
     final newAvailability = !(item['is_available'] ?? true);
-    
+
     try {
       await _apiService.updateMenuItem(
         item['id'],
         {'is_available': newAvailability},
       );
-      
+
       setState(() {
         item['is_available'] = newAvailability;
       });
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -812,10 +840,10 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
       final newItem = Map<String, dynamic>.from(item);
       newItem.remove('id');
       newItem['name'] = '${item['name']} (Kopie)';
-      
+
       await _apiService.createMenuItem(newItem);
       await _loadMenuData();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -866,9 +894,9 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
   }
 
   void _showDeleteCategoryConfirmation(Map<String, dynamic> category) {
-    final itemCount = _menuItems.where((item) => 
-      item['category_id'] == category['id']
-    ).length;
+    final itemCount = _menuItems
+        .where((item) => item['category_id'] == category['id'])
+        .length;
 
     showDialog(
       context: context,
@@ -877,7 +905,7 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
         content: Text(
           itemCount > 0
               ? 'Deze categorie bevat $itemCount menu items. '
-                'Weet je zeker dat je "${category['name']}" wilt verwijderen?'
+                  'Weet je zeker dat je "${category['name']}" wilt verwijderen?'
               : 'Weet je zeker dat je "${category['name']}" wilt verwijderen?',
         ),
         actions: [
@@ -905,7 +933,7 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
     try {
       await _apiService.deleteMenuItem(item['id']);
       await _loadMenuData();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -930,7 +958,7 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
     try {
       await _apiService.deleteCategory(category['id']);
       await _loadMenuData();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -951,4 +979,3 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
     }
   }
 }
-
