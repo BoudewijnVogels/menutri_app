@@ -16,9 +16,9 @@ class QRGeneratorPage extends ConsumerStatefulWidget {
 class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
     with TickerProviderStateMixin {
   final ApiService _apiService = ApiService();
-  
+
   late TabController _tabController;
-  
+
   bool _isLoading = true;
   bool _isGenerating = false;
   List<Map<String, dynamic>> _restaurants = [];
@@ -26,7 +26,7 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
   Map<String, dynamic>? _selectedRestaurant;
   Map<String, dynamic>? _selectedMenu;
   Map<String, dynamic>? _generatedQR;
-  
+
   // QR Code customization options
   String _qrType = 'restaurant'; // restaurant, menu, custom
   String _customUrl = '';
@@ -71,13 +71,12 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
 
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final restaurantsResponse = await _apiService.getRestaurants();
       final restaurants = List<Map<String, dynamic>>.from(
-        restaurantsResponse['restaurants'] ?? []
-      );
-      
+          restaurantsResponse['restaurants'] ?? []);
+
       setState(() {
         _restaurants = restaurants;
         if (restaurants.isNotEmpty) {
@@ -85,7 +84,7 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
         }
         _isLoading = false;
       });
-      
+
       if (_selectedRestaurant != null) {
         await _loadMenus();
       }
@@ -101,11 +100,11 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
 
   Future<void> _loadMenus() async {
     if (_selectedRestaurant == null) return;
-    
+
     try {
       final response = await _apiService.getMenus(_selectedRestaurant!['id']);
       final menus = List<Map<String, dynamic>>.from(response['menus'] ?? []);
-      
+
       setState(() {
         _menus = menus;
         if (menus.isNotEmpty) {
@@ -143,7 +142,8 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
             controller: _tabController,
             indicatorColor: AppColors.onPrimary,
             labelColor: AppColors.onPrimary,
-            unselectedLabelColor: AppColors.onPrimary.withOpacity(0.7),
+            unselectedLabelColor:
+                AppColors.withAlphaFraction(AppColors.onPrimary, 0.7),
             tabs: const [
               Tab(text: 'Generator'),
               Tab(text: 'Aanpassen'),
@@ -173,22 +173,22 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
         children: [
           // QR Type Selection
           _buildQRTypeSelection(),
-          
+
           const SizedBox(height: 24),
-          
+
           // Content Selection
           _buildContentSelection(),
-          
+
           const SizedBox(height: 24),
-          
+
           // QR Preview
           _buildQRPreview(),
-          
+
           const SizedBox(height: 24),
-          
+
           // Generate Button
           _buildGenerateButton(),
-          
+
           if (_generatedQR != null) ...[
             const SizedBox(height: 24),
             _buildQRActions(),
@@ -205,11 +205,10 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
         Text(
           'QR Code Type',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 16),
-        
         Row(
           children: [
             Expanded(
@@ -265,7 +264,9 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withOpacity(0.1) : AppColors.surface,
+          color: isSelected
+              ? AppColors.withAlphaFraction(AppColors.primary, 0.1)
+              : AppColors.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected ? AppColors.primary : AppColors.outline,
@@ -283,17 +284,17 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
             Text(
               title,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: isSelected ? AppColors.primary : null,
-              ),
+                    fontWeight: FontWeight.w600,
+                    color: isSelected ? AppColors.primary : null,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 4),
             Text(
               subtitle,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -309,11 +310,10 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
         Text(
           'Content Selectie',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 16),
-        
         if (_qrType == 'restaurant') ...[
           // Restaurant selector
           DropdownButtonFormField<Map<String, dynamic>>(
@@ -365,9 +365,9 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
               }
             },
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Menu selector
           DropdownButtonFormField<Map<String, dynamic>>(
             value: _selectedMenu,
@@ -427,11 +427,10 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
         Text(
           'QR Code Preview',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 16),
-        
         Center(
           child: Container(
             width: _qrSize + 40,
@@ -443,7 +442,7 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
               border: Border.all(color: AppColors.outline),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: AppColors.withAlphaFraction(AppColors.black, 0.1),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),
@@ -462,7 +461,6 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
                 : _buildQRPlaceholder(),
           ),
         ),
-        
         if (_generatedQR != null) ...[
           const SizedBox(height: 16),
           Center(
@@ -471,15 +469,15 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
                 Text(
                   'QR Code URL:',
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+                        color: AppColors.textSecondary,
+                      ),
                 ),
                 const SizedBox(height: 4),
                 SelectableText(
                   _generatedQR!['target_url'] ?? '',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.primary,
-                  ),
+                        color: AppColors.primary,
+                      ),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -510,8 +508,8 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
           Text(
             'QR Code Preview',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.grey.shade600,
-            ),
+                  color: Colors.grey.shade600,
+                ),
           ),
         ],
       ),
@@ -519,9 +517,10 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
   }
 
   Widget _buildGenerateButton() {
-    final canGenerate = _qrType == 'restaurant' && _selectedRestaurant != null ||
-                       _qrType == 'menu' && _selectedMenu != null ||
-                       _qrType == 'custom' && _customUrl.isNotEmpty;
+    final canGenerate =
+        _qrType == 'restaurant' && _selectedRestaurant != null ||
+            _qrType == 'menu' && _selectedMenu != null ||
+            _qrType == 'custom' && _customUrl.isNotEmpty;
 
     return SizedBox(
       width: double.infinity,
@@ -554,11 +553,10 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
         Text(
           'Acties',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 16),
-        
         Row(
           children: [
             Expanded(
@@ -610,19 +608,19 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
         children: [
           // Size customization
           _buildSizeCustomization(),
-          
+
           const SizedBox(height: 24),
-          
+
           // Color customization
           _buildColorCustomization(),
-          
+
           const SizedBox(height: 24),
-          
+
           // Format selection
           _buildFormatSelection(),
-          
+
           const SizedBox(height: 24),
-          
+
           // Logo options
           _buildLogoOptions(),
         ],
@@ -637,11 +635,10 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
         Text(
           'Grootte',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 16),
-        
         Row(
           children: [
             Text('Klein'),
@@ -662,13 +659,12 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
             Text('Groot'),
           ],
         ),
-        
         Center(
           child: Text(
             '${_qrSize.round()} x ${_qrSize.round()} pixels',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSecondary,
-            ),
+                  color: AppColors.textSecondary,
+                ),
           ),
         ),
       ],
@@ -682,20 +678,20 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
         Text(
           'Kleuren',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 16),
-        
+
         // QR Color
         Text(
           'QR Code Kleur',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+                fontWeight: FontWeight.w600,
+              ),
         ),
         const SizedBox(height: 8),
-        
+
         Wrap(
           spacing: 8,
           children: _colorOptions.map((color) {
@@ -713,7 +709,8 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
                   color: color,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: isSelected ? AppColors.primary : Colors.grey.shade300,
+                    color:
+                        isSelected ? AppColors.primary : Colors.grey.shade300,
                     width: isSelected ? 3 : 1,
                   ),
                 ),
@@ -724,18 +721,18 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
             );
           }).toList(),
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         // Background Color
         Text(
           'Achtergrond Kleur',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+                fontWeight: FontWeight.w600,
+              ),
         ),
         const SizedBox(height: 8),
-        
+
         Wrap(
           spacing: 8,
           children: _backgroundOptions.map((color) {
@@ -753,7 +750,8 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
                   color: color,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: isSelected ? AppColors.primary : Colors.grey.shade300,
+                    color:
+                        isSelected ? AppColors.primary : Colors.grey.shade300,
                     width: isSelected ? 3 : 1,
                   ),
                 ),
@@ -775,11 +773,10 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
         Text(
           'Bestandsformaat',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 16),
-        
         Row(
           children: [
             Expanded(
@@ -821,11 +818,10 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
         Text(
           'Logo Opties',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 16),
-        
         RadioListTile<String>(
           title: const Text('Geen Logo'),
           subtitle: const Text('Alleen QR code'),
@@ -837,7 +833,6 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
             });
           },
         ),
-        
         RadioListTile<String>(
           title: const Text('Logo in Centrum'),
           subtitle: const Text('Menutri logo in het midden'),
@@ -869,15 +864,15 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
             Text(
               'QR Code Geschiedenis',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               'Geschiedenis van gegenereerde QR codes wordt binnenkort toegevoegd',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -888,14 +883,15 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
 
   Future<void> _generateQRCode() async {
     setState(() => _isGenerating = true);
-    
+
     try {
       String targetUrl;
       String description;
-      
+
       switch (_qrType) {
         case 'restaurant':
-          targetUrl = 'https://menutri.app/restaurant/${_selectedRestaurant!['id']}';
+          targetUrl =
+              'https://menutri.app/restaurant/${_selectedRestaurant!['id']}';
           description = 'QR code voor ${_selectedRestaurant!['name']}';
           break;
         case 'menu':
@@ -909,24 +905,25 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
         default:
           throw Exception('Onbekend QR type');
       }
-      
+
       final response = await _apiService.generateQRCode({
         'target_url': targetUrl,
         'description': description,
         'qr_color': '#${_qrColor.value.toRadixString(16).substring(2)}',
-        'background_color': '#${_backgroundColor.value.toRadixString(16).substring(2)}',
+        'background_color':
+            '#${_backgroundColor.value.toRadixString(16).substring(2)}',
         'size': _qrSize.round(),
         'format': _format,
         'logo_position': _logoPosition,
         'restaurant_id': _selectedRestaurant?['id'],
         'menu_id': _selectedMenu?['id'],
       });
-      
+
       setState(() {
         _generatedQR = response;
         _isGenerating = false;
       });
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -950,7 +947,7 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
 
   Future<void> _downloadQRCode() async {
     if (_generatedQR == null) return;
-    
+
     try {
       // In a real app, this would trigger a download
       // For now, we'll show a success message
@@ -972,7 +969,7 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
 
   Future<void> _shareQRCode() async {
     if (_generatedQR == null) return;
-    
+
     try {
       await Share.share(
         'Bekijk ons menu via deze QR code: ${_generatedQR!['target_url']}',
@@ -990,12 +987,12 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
 
   Future<void> _copyQRUrl() async {
     if (_generatedQR == null) return;
-    
+
     try {
       await Clipboard.setData(
         ClipboardData(text: _generatedQR!['target_url']),
       );
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('URL gekopieerd naar klembord'),
@@ -1012,4 +1009,3 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
     }
   }
 }
-
