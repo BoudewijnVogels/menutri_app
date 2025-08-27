@@ -8,7 +8,8 @@ class ReviewsModerationPage extends ConsumerStatefulWidget {
   const ReviewsModerationPage({super.key});
 
   @override
-  ConsumerState<ReviewsModerationPage> createState() => _ReviewsModerationPageState();
+  ConsumerState<ReviewsModerationPage> createState() =>
+      _ReviewsModerationPageState();
 }
 
 class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
@@ -16,9 +17,9 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
   final ApiService _apiService = ApiService();
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _responseController = TextEditingController();
-  
+
   late TabController _tabController;
-  
+
   bool _isLoading = true;
   List<Map<String, dynamic>> _reviews = [];
   List<Map<String, dynamic>> _filteredReviews = [];
@@ -83,24 +84,22 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
 
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final reviewsResponse = await _apiService.getReviews();
       final restaurantsResponse = await _apiService.getRestaurants();
-      
-      final reviews = List<Map<String, dynamic>>.from(
-        reviewsResponse['reviews'] ?? []
-      );
+
+      final reviews =
+          List<Map<String, dynamic>>.from(reviewsResponse['reviews'] ?? []);
       final restaurants = List<Map<String, dynamic>>.from(
-        restaurantsResponse['restaurants'] ?? []
-      );
-      
+          restaurantsResponse['restaurants'] ?? []);
+
       setState(() {
         _reviews = reviews;
         _restaurants = restaurants;
         _isLoading = false;
       });
-      
+
       _filterReviews();
     } catch (e) {
       setState(() => _isLoading = false);
@@ -114,7 +113,7 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
 
   void _filterReviews() {
     List<Map<String, dynamic>> filtered = List.from(_reviews);
-    
+
     // Apply search filter
     if (_searchQuery.isNotEmpty) {
       filtered = filtered.where((review) {
@@ -122,19 +121,19 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
         final userName = (review['user_name'] ?? '').toLowerCase();
         final restaurantName = (review['restaurant_name'] ?? '').toLowerCase();
         final query = _searchQuery.toLowerCase();
-        return comment.contains(query) || 
-               userName.contains(query) || 
-               restaurantName.contains(query);
+        return comment.contains(query) ||
+            userName.contains(query) ||
+            restaurantName.contains(query);
       }).toList();
     }
-    
+
     // Apply status filter
     if (_filterStatus != 'all') {
       filtered = filtered.where((review) {
         return review['status'] == _filterStatus;
       }).toList();
     }
-    
+
     // Apply rating filter
     if (_filterRating != 'all') {
       final rating = int.tryParse(_filterRating);
@@ -144,19 +143,19 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
         }).toList();
       }
     }
-    
+
     // Apply restaurant filter
     if (_selectedRestaurant != null) {
       filtered = filtered.where((review) {
         return review['restaurant_id'] == _selectedRestaurant;
       }).toList();
     }
-    
+
     // Apply sorting
     filtered.sort((a, b) {
       dynamic aValue = a[_sortBy];
       dynamic bValue = b[_sortBy];
-      
+
       if (_sortBy == 'created_at') {
         aValue = DateTime.tryParse(aValue ?? '') ?? DateTime.now();
         bValue = DateTime.tryParse(bValue ?? '') ?? DateTime.now();
@@ -167,11 +166,11 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
         aValue = (aValue ?? '').toString().toLowerCase();
         bValue = (bValue ?? '').toString().toLowerCase();
       }
-      
+
       int comparison = Comparable.compare(aValue, bValue);
       return _sortAscending ? comparison : -comparison;
     });
-    
+
     setState(() {
       _filteredReviews = filtered;
     });
@@ -251,12 +250,17 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
             controller: _tabController,
             indicatorColor: AppColors.onPrimary,
             labelColor: AppColors.onPrimary,
-            unselectedLabelColor: AppColors.onPrimary.withOpacity(0.7),
+            unselectedLabelColor:
+                AppColors.withAlphaFraction(AppColors.onPrimary, 0.7),
             isScrollable: true,
             tabs: [
               Tab(text: 'Alle Reviews (${_reviews.length})'),
-              Tab(text: 'In Afwachting (${_reviews.where((r) => r['status'] == 'pending').length})'),
-              Tab(text: 'Gemeld (${_reviews.where((r) => r['status'] == 'flagged').length})'),
+              Tab(
+                  text:
+                      'In Afwachting (${_reviews.where((r) => r['status'] == 'pending').length})'),
+              Tab(
+                  text:
+                      'Gemeld (${_reviews.where((r) => r['status'] == 'flagged').length})'),
               const Tab(text: 'Statistieken'),
             ],
           ),
@@ -281,7 +285,7 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
       children: [
         // Search and filter bar
         _buildSearchAndFilter(),
-        
+
         // Reviews list
         Expanded(
           child: _filteredReviews.isEmpty
@@ -303,8 +307,9 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
   }
 
   Widget _buildPendingReviewsTab() {
-    final pendingReviews = _reviews.where((r) => r['status'] == 'pending').toList();
-    
+    final pendingReviews =
+        _reviews.where((r) => r['status'] == 'pending').toList();
+
     return pendingReviews.isEmpty
         ? _buildEmptyPendingState()
         : RefreshIndicator(
@@ -321,8 +326,9 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
   }
 
   Widget _buildFlaggedReviewsTab() {
-    final flaggedReviews = _reviews.where((r) => r['status'] == 'flagged').toList();
-    
+    final flaggedReviews =
+        _reviews.where((r) => r['status'] == 'flagged').toList();
+
     return flaggedReviews.isEmpty
         ? _buildEmptyFlaggedState()
         : RefreshIndicator(
@@ -341,15 +347,19 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
   Widget _buildStatisticsTab() {
     final totalReviews = _reviews.length;
     final pendingCount = _reviews.where((r) => r['status'] == 'pending').length;
-    final approvedCount = _reviews.where((r) => r['status'] == 'approved').length;
-    final rejectedCount = _reviews.where((r) => r['status'] == 'rejected').length;
+    final approvedCount =
+        _reviews.where((r) => r['status'] == 'approved').length;
+    final rejectedCount =
+        _reviews.where((r) => r['status'] == 'rejected').length;
     final flaggedCount = _reviews.where((r) => r['status'] == 'flagged').length;
-    final respondedCount = _reviews.where((r) => r['status'] == 'responded').length;
-    
+    final respondedCount =
+        _reviews.where((r) => r['status'] == 'responded').length;
+
     final averageRating = _reviews.isNotEmpty
-        ? _reviews.map((r) => r['rating'] ?? 0).reduce((a, b) => a + b) / _reviews.length
+        ? _reviews.map((r) => r['rating'] ?? 0).reduce((a, b) => a + b) /
+            _reviews.length
         : 0.0;
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -359,11 +369,11 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
           Text(
             'Reviews Overzicht',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 16),
-          
+
           GridView.count(
             crossAxisCount: 2,
             shrinkWrap: true,
@@ -372,31 +382,38 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
             mainAxisSpacing: 12,
             childAspectRatio: 1.5,
             children: [
-              _buildStatCard('Totaal Reviews', totalReviews.toString(), Icons.rate_review, Colors.blue),
-              _buildStatCard('Gemiddelde Rating', averageRating.toStringAsFixed(1), Icons.star, Colors.orange),
-              _buildStatCard('In Afwachting', pendingCount.toString(), Icons.hourglass_empty, Colors.orange),
-              _buildStatCard('Goedgekeurd', approvedCount.toString(), Icons.check_circle, Colors.green),
-              _buildStatCard('Afgewezen', rejectedCount.toString(), Icons.cancel, Colors.red),
-              _buildStatCard('Gemeld', flaggedCount.toString(), Icons.flag, Colors.purple),
+              _buildStatCard('Totaal Reviews', totalReviews.toString(),
+                  Icons.rate_review, Colors.blue),
+              _buildStatCard('Gemiddelde Rating',
+                  averageRating.toStringAsFixed(1), Icons.star, Colors.orange),
+              _buildStatCard('In Afwachting', pendingCount.toString(),
+                  Icons.hourglass_empty, Colors.orange),
+              _buildStatCard('Goedgekeurd', approvedCount.toString(),
+                  Icons.check_circle, Colors.green),
+              _buildStatCard('Afgewezen', rejectedCount.toString(),
+                  Icons.cancel, Colors.red),
+              _buildStatCard(
+                  'Gemeld', flaggedCount.toString(), Icons.flag, Colors.purple),
             ],
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Rating distribution
           Text(
             'Rating Verdeling',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 16),
-          
+
           ...List.generate(5, (index) {
             final rating = 5 - index;
             final count = _reviews.where((r) => r['rating'] == rating).length;
-            final percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0.0;
-            
+            final percentage =
+                totalReviews > 0 ? (count / totalReviews) * 100 : 0.0;
+
             return Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Row(
@@ -416,9 +433,11 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
                       value: percentage / 100,
                       backgroundColor: Colors.grey.shade300,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        rating >= 4 ? Colors.green :
-                        rating >= 3 ? Colors.orange :
-                        Colors.red,
+                        rating >= 4
+                            ? Colors.green
+                            : rating >= 3
+                                ? Colors.orange
+                                : Colors.red,
                       ),
                     ),
                   ),
@@ -434,24 +453,25 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
               ),
             );
           }).toList(),
-          
+
           const SizedBox(height: 24),
-          
+
           // Recent activity
           Text(
             'Recente Activiteit',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 16),
-          
+
           ..._reviews.take(5).map((review) {
             return Card(
               margin: const EdgeInsets.only(bottom: 8),
               child: ListTile(
                 leading: CircleAvatar(
-                  backgroundColor: _statusColors[review['status']]?.withOpacity(0.2),
+                  backgroundColor:
+                      _statusColors[review['status']]?.withOpacity(0.2),
                   child: Icon(
                     _getStatusIcon(review['status']),
                     color: _statusColors[review['status']],
@@ -459,7 +479,8 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
                   ),
                 ),
                 title: Text(review['restaurant_name'] ?? ''),
-                subtitle: Text('${review['user_name']} - ${_formatDateTime(review['created_at'])}'),
+                subtitle: Text(
+                    '${review['user_name']} - ${_formatDateTime(review['created_at'])}'),
                 trailing: _buildRatingStars(review['rating'] ?? 0),
               ),
             );
@@ -476,7 +497,7 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
         color: AppColors.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.AppColors.withAlphaFraction(AppColors.black, 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -503,7 +524,8 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
                     )
                   : null,
               border: const OutlineInputBorder(),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
             onChanged: (value) {
               setState(() {
@@ -512,9 +534,9 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
               _filterReviews();
             },
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           // Filter chips
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -535,15 +557,17 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
                         _filterReviews();
                       },
                       backgroundColor: AppColors.background,
-                      selectedColor: _statusColors[entry.key]?.withOpacity(0.2) ?? 
-                                   AppColors.primary.withOpacity(0.2),
-                      checkmarkColor: _statusColors[entry.key] ?? AppColors.primary,
+                      selectedColor: _statusColors[entry.key]
+                              ?.withOpacity(0.2) ??
+                          AppColors.withAlphaFraction(AppColors.primary, 0.2),
+                      checkmarkColor:
+                          _statusColors[entry.key] ?? AppColors.primary,
                     ),
                   );
                 }).toList(),
-                
+
                 const SizedBox(width: 8),
-                
+
                 // Rating filters
                 ..._ratingFilters.entries.map((entry) {
                   final isSelected = _filterRating == entry.key;
@@ -559,7 +583,8 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
                         _filterReviews();
                       },
                       backgroundColor: AppColors.background,
-                      selectedColor: Colors.orange.withOpacity(0.2),
+                      selectedColor:
+                          Colors.AppColors.withAlphaFraction(orange, 0.2),
                       checkmarkColor: Colors.orange,
                     ),
                   );
@@ -567,7 +592,7 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
               ],
             ),
           ),
-          
+
           // Restaurant filter
           if (_restaurants.isNotEmpty) ...[
             const SizedBox(height: 12),
@@ -576,7 +601,8 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
               decoration: const InputDecoration(
                 labelText: 'Filter op Restaurant',
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
               items: [
                 const DropdownMenuItem<String>(
@@ -603,21 +629,26 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
     );
   }
 
-  Widget _buildReviewCard(Map<String, dynamic> review, {
+  Widget _buildReviewCard(
+    Map<String, dynamic> review, {
     bool showQuickActions = false,
     bool showModerationActions = false,
   }) {
     final status = review['status'] ?? 'pending';
     final rating = review['rating'] ?? 0;
-    final hasResponse = review['response'] != null && review['response'].isNotEmpty;
+    final hasResponse =
+        review['response'] != null && review['response'].isNotEmpty;
     final isFlagged = status == 'flagged';
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: isFlagged ? BorderSide(color: Colors.red.withOpacity(0.3), width: 2) : BorderSide.none,
+        side: isFlagged
+            ? BorderSide(
+                color: Colors.AppColors.withAlphaFraction(red, 0.3), width: 2)
+            : BorderSide.none,
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -629,7 +660,8 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
               children: [
                 CircleAvatar(
                   radius: 20,
-                  backgroundColor: AppColors.primary.withOpacity(0.2),
+                  backgroundColor:
+                      AppColors.withAlphaFraction(AppColors.primary, 0.2),
                   backgroundImage: review['user_avatar'] != null
                       ? NetworkImage(review['user_avatar'])
                       : null,
@@ -643,9 +675,9 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
                         )
                       : null,
                 ),
-                
+
                 const SizedBox(width: 12),
-                
+
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -655,9 +687,12 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
                           Expanded(
                             child: Text(
                               review['user_name'] ?? 'Anonieme Gebruiker',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                             ),
                           ),
                           _buildRatingStars(rating),
@@ -668,26 +703,31 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
                         children: [
                           Text(
                             review['restaurant_name'] ?? '',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
                           ),
                           const SizedBox(width: 8),
                           Text(
                             '• ${_formatDateTime(review['created_at'])}',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
                           ),
                         ],
                       ),
                     ],
                   ),
                 ),
-                
+
                 // Status badge
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: _statusColors[status]?.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -704,14 +744,14 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
                       Text(
                         _statusLabels[status] ?? status,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: _statusColors[status],
-                          fontWeight: FontWeight.w600,
-                        ),
+                              color: _statusColors[status],
+                              fontWeight: FontWeight.w600,
+                            ),
                       ),
                     ],
                   ),
                 ),
-                
+
                 // Actions menu
                 PopupMenuButton<String>(
                   onSelected: (value) => _handleReviewAction(value, review),
@@ -720,7 +760,8 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
                       const PopupMenuItem(
                         value: 'approve',
                         child: ListTile(
-                          leading: Icon(Icons.check_circle, color: Colors.green),
+                          leading:
+                              Icon(Icons.check_circle, color: Colors.green),
                           title: Text('Goedkeuren'),
                           contentPadding: EdgeInsets.zero,
                         ),
@@ -762,7 +803,8 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
                       value: 'delete',
                       child: ListTile(
                         leading: Icon(Icons.delete, color: Colors.red),
-                        title: Text('Verwijderen', style: TextStyle(color: Colors.red)),
+                        title: Text('Verwijderen',
+                            style: TextStyle(color: Colors.red)),
                         contentPadding: EdgeInsets.zero,
                       ),
                     ),
@@ -770,9 +812,9 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             // Review comment
             if (review['comment'] != null && review['comment'].isNotEmpty) ...[
               Text(
@@ -781,7 +823,7 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
               ),
               const SizedBox(height: 12),
             ],
-            
+
             // Review images
             if (review['images'] != null && review['images'].isNotEmpty) ...[
               SizedBox(
@@ -807,15 +849,16 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
               ),
               const SizedBox(height: 12),
             ],
-            
+
             // Flag reason if flagged
             if (isFlagged && review['flag_reason'] != null) ...[
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
+                  color: Colors.AppColors.withAlphaFraction(red, 0.1),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.red.withOpacity(0.3)),
+                  border: Border.all(
+                      color: Colors.AppColors.withAlphaFraction(red, 0.3)),
                 ),
                 child: Row(
                   children: [
@@ -825,9 +868,9 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
                       child: Text(
                         'Gemeld: ${review['flag_reason']}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.red.shade700,
-                          fontWeight: FontWeight.w500,
-                        ),
+                              color: Colors.red.shade700,
+                              fontWeight: FontWeight.w500,
+                            ),
                       ),
                     ),
                   ],
@@ -835,13 +878,13 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
               ),
               const SizedBox(height: 12),
             ],
-            
+
             // Response section
             if (hasResponse) ...[
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
+                  color: AppColors.withAlphaFraction(AppColors.primary, 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(
@@ -853,17 +896,19 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
                         const SizedBox(width: 8),
                         Text(
                           'Reactie van ${review['response_author'] ?? 'Restaurant'}',
-                          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.labelMedium?.copyWith(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
                         const Spacer(),
                         Text(
                           _formatDateTime(review['response_date']),
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
                         ),
                       ],
                     ),
@@ -877,7 +922,7 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
               ),
               const SizedBox(height: 12),
             ],
-            
+
             // Quick actions for pending reviews
             if (showQuickActions && status == 'pending') ...[
               Row(
@@ -908,7 +953,7 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
                 ],
               ),
             ],
-            
+
             // Moderation actions for flagged reviews
             if (showModerationActions && isFlagged) ...[
               Row(
@@ -970,7 +1015,8 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+      String title, String value, IconData icon, Color color) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -986,16 +1032,16 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
             Text(
               value,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
             ),
             const SizedBox(height: 4),
             Text(
               title,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -1018,21 +1064,27 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
             ),
             const SizedBox(height: 16),
             Text(
-              _searchQuery.isNotEmpty || _filterStatus != 'all' || _filterRating != 'all' || _selectedRestaurant != null
+              _searchQuery.isNotEmpty ||
+                      _filterStatus != 'all' ||
+                      _filterRating != 'all' ||
+                      _selectedRestaurant != null
                   ? 'Geen reviews gevonden'
                   : 'Nog geen reviews',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
-              _searchQuery.isNotEmpty || _filterStatus != 'all' || _filterRating != 'all' || _selectedRestaurant != null
+              _searchQuery.isNotEmpty ||
+                      _filterStatus != 'all' ||
+                      _filterRating != 'all' ||
+                      _selectedRestaurant != null
                   ? 'Probeer een andere zoekopdracht of filter'
                   : 'Reviews verschijnen hier zodra klanten ze achterlaten',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -1057,15 +1109,15 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
             Text(
               'Geen Reviews in Afwachting',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               'Alle reviews zijn beoordeeld of er zijn nog geen nieuwe reviews',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -1090,15 +1142,15 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
             Text(
               'Geen Gemelde Reviews',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               'Er zijn momenteel geen reviews gemeld door gebruikers',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -1132,7 +1184,8 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
             const Divider(),
             SwitchListTile(
               title: const Text('Oplopend'),
-              subtitle: Text(_sortAscending ? 'Oud naar nieuw' : 'Nieuw naar oud'),
+              subtitle:
+                  Text(_sortAscending ? 'Oud naar nieuw' : 'Nieuw naar oud'),
               value: _sortAscending,
               onChanged: (value) {
                 setState(() {
@@ -1181,7 +1234,7 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
     try {
       await _apiService.approveReview(review['id']);
       await _loadData();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -1206,7 +1259,7 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
     try {
       await _apiService.rejectReview(review['id']);
       await _loadData();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -1229,7 +1282,7 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
 
   void _showResponseDialog(Map<String, dynamic> review) {
     _responseController.clear();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -1254,9 +1307,9 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Response input
             TextField(
               controller: _responseController,
@@ -1292,11 +1345,12 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
     );
   }
 
-  Future<void> _respondToReview(Map<String, dynamic> review, String response) async {
+  Future<void> _respondToReview(
+      Map<String, dynamic> review, String response) async {
     try {
       await _apiService.respondToReview(review['id'], response);
       await _loadData();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -1321,7 +1375,7 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
     try {
       await _apiService.flagReview(review['id'], 'Inappropriate content');
       await _loadData();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -1346,7 +1400,7 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
     try {
       await _apiService.hideReview(review['id']);
       await _loadData();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -1372,7 +1426,8 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Review Verwijderen'),
-        content: Text('Weet je zeker dat je deze review van ${review['user_name']} wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.'),
+        content: Text(
+            'Weet je zeker dat je deze review van ${review['user_name']} wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -1384,7 +1439,7 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
               try {
                 await _apiService.deleteReview(review['id']);
                 await _loadData();
-                
+
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -1417,7 +1472,8 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Bulk ${action == 'approve' ? 'Goedkeuren' : 'Afwijzen'}'),
-        content: Text('${action == 'approve' ? 'Goedkeuren' : 'Afwijzen'} functionaliteit wordt binnenkort toegevoegd'),
+        content: Text(
+            '${action == 'approve' ? 'Goedkeuren' : 'Afwijzen'} functionaliteit wordt binnenkort toegevoegd'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -1441,7 +1497,8 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Moderatie Instellingen'),
-        content: const Text('Moderatie instellingen worden binnenkort toegevoegd'),
+        content:
+            const Text('Moderatie instellingen worden binnenkort toegevoegd'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -1482,12 +1539,12 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
 
   String _formatDateTime(String? dateTime) {
     if (dateTime == null) return '';
-    
+
     try {
       final date = DateTime.parse(dateTime);
       final now = DateTime.now();
       final difference = now.difference(date);
-      
+
       if (difference.inDays > 0) {
         return '${difference.inDays} dagen geleden';
       } else if (difference.inHours > 0) {
@@ -1502,4 +1559,3 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
     }
   }
 }
-
