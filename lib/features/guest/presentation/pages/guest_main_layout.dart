@@ -26,7 +26,7 @@ class GuestBottomNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentLocation = GoRouterState.of(context).uri.toString();
-    
+
     int currentIndex = 0;
     if (currentLocation.startsWith('/guest/search')) {
       currentIndex = 1;
@@ -41,7 +41,7 @@ class GuestBottomNavigation extends StatelessWidget {
         color: AppColors.white,
         boxShadow: [
           BoxShadow(
-            color: AppColors.darkBrown.withOpacity(0.1),
+            color: AppColors.withAlphaFraction(darkBrown, 0.1),
             blurRadius: 8,
             offset: const Offset(0, -2),
           ),
@@ -112,8 +112,8 @@ class GuestBottomNavigation extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: isActive 
-                      ? AppColors.mediumBrown.withOpacity(0.1)
+                  color: isActive
+                      ? AppColors.withAlphaFraction(mediumBrown, 0.1)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -127,9 +127,10 @@ class GuestBottomNavigation extends StatelessWidget {
               Text(
                 label,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: isActive ? AppColors.mediumBrown : AppColors.grey,
-                  fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-                ),
+                      color: isActive ? AppColors.mediumBrown : AppColors.grey,
+                      fontWeight:
+                          isActive ? FontWeight.w600 : FontWeight.normal,
+                    ),
               ),
             ],
           ),
@@ -138,4 +139,3 @@ class GuestBottomNavigation extends StatelessWidget {
     );
   }
 }
-
