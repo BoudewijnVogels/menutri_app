@@ -11,17 +11,24 @@ class ActivitiesPage extends ConsumerStatefulWidget {
   ConsumerState<ActivitiesPage> createState() => _ActivitiesPageState();
 }
 
-class _ActivitiesPageState extends ConsumerState<ActivitiesPage> with TickerProviderStateMixin {
+class _ActivitiesPageState extends ConsumerState<ActivitiesPage>
+    with TickerProviderStateMixin {
   final ApiService _apiService = ApiService();
   late TabController _tabController;
-  
+
   bool _isLoading = false;
   List<Map<String, dynamic>> _activities = [];
   List<Map<String, dynamic>> _favorites = [];
   List<Map<String, dynamic>> _eatenHistory = [];
-  
+
   String _selectedFilter = 'all';
-  final List<String> _filterOptions = ['all', 'scan', 'favorite', 'eaten', 'review'];
+  final List<String> _filterOptions = [
+    'all',
+    'scan',
+    'favorite',
+    'eaten',
+    'review'
+  ];
 
   @override
   void initState() {
@@ -44,11 +51,14 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> with TickerProv
         _apiService.getFavorites(),
         _apiService.getEatenHistory(),
       ]);
-      
+
       setState(() {
-        _activities = List<Map<String, dynamic>>.from(futures[0]['activities'] ?? []);
-        _favorites = List<Map<String, dynamic>>.from(futures[1]['favorites'] ?? []);
-        _eatenHistory = List<Map<String, dynamic>>.from(futures[2]['eaten_items'] ?? []);
+        _activities =
+            List<Map<String, dynamic>>.from(futures[0]['activities'] ?? []);
+        _favorites =
+            List<Map<String, dynamic>>.from(futures[1]['favorites'] ?? []);
+        _eatenHistory =
+            List<Map<String, dynamic>>.from(futures[2]['eaten_items'] ?? []);
       });
     } catch (e) {
       if (mounted) {
@@ -74,7 +84,8 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> with TickerProv
           controller: _tabController,
           indicatorColor: AppColors.onPrimary,
           labelColor: AppColors.onPrimary,
-          unselectedLabelColor: AppColors.onPrimary.withOpacity(0.7),
+          unselectedLabelColor:
+              AppColors.withAlphaFraction(AppColors.onPrimary, 0.7),
           tabs: const [
             Tab(text: 'Alle Activiteiten'),
             Tab(text: 'Favorieten'),
@@ -103,7 +114,9 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> with TickerProv
                       backgroundColor: AppColors.surface,
                       selectedColor: AppColors.primary,
                       labelStyle: TextStyle(
-                        color: isSelected ? AppColors.onPrimary : AppColors.textPrimary,
+                        color: isSelected
+                            ? AppColors.onPrimary
+                            : AppColors.textPrimary,
                       ),
                     ),
                   );
@@ -111,7 +124,7 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> with TickerProv
               ),
             ),
           ),
-          
+
           // Content
           Expanded(
             child: _isLoading
@@ -131,9 +144,11 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> with TickerProv
   }
 
   Widget _buildActivitiesTab() {
-    final filteredActivities = _selectedFilter == 'all' 
-        ? _activities 
-        : _activities.where((activity) => activity['activity_type'] == _selectedFilter).toList();
+    final filteredActivities = _selectedFilter == 'all'
+        ? _activities
+        : _activities
+            .where((activity) => activity['activity_type'] == _selectedFilter)
+            .toList();
 
     if (filteredActivities.isEmpty) {
       return _buildEmptyState(
@@ -202,8 +217,9 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> with TickerProv
 
   Widget _buildActivityCard(Map<String, dynamic> activity) {
     final activityType = activity['activity_type'] ?? '';
-    final createdAt = DateTime.tryParse(activity['created_at'] ?? '') ?? DateTime.now();
-    
+    final createdAt =
+        DateTime.tryParse(activity['created_at'] ?? '') ?? DateTime.now();
+
     IconData icon;
     Color iconColor;
     String title;
@@ -247,7 +263,7 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> with TickerProv
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: iconColor.withOpacity(0.1),
+            color: AppColors.withAlphaFraction(iconColor, 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, color: iconColor),
@@ -280,16 +296,17 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> with TickerProv
   }
 
   Widget _buildFavoriteCard(Map<String, dynamic> favorite) {
-    final createdAt = DateTime.tryParse(favorite['created_at'] ?? '') ?? DateTime.now();
+    final createdAt =
+        DateTime.tryParse(favorite['created_at'] ?? '') ?? DateTime.now();
     final targetType = favorite['target_type'] ?? '';
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.red.withOpacity(0.1),
+            color: Colors.AppColors.withAlphaFraction(red, 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
@@ -325,15 +342,16 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> with TickerProv
   }
 
   Widget _buildEatenCard(Map<String, dynamic> eaten) {
-    final eatenAt = DateTime.tryParse(eaten['eaten_at'] ?? '') ?? DateTime.now();
-    
+    final eatenAt =
+        DateTime.tryParse(eaten['eaten_at'] ?? '') ?? DateTime.now();
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.green.withOpacity(0.1),
+            color: Colors.AppColors.withAlphaFraction(green, 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: const Icon(Icons.restaurant, color: Colors.green),
@@ -399,16 +417,16 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> with TickerProv
             Text(
               title,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               subtitle,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
           ],
         ),
@@ -418,12 +436,18 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> with TickerProv
 
   String _getFilterLabel(String filter) {
     switch (filter) {
-      case 'all': return 'Alle';
-      case 'scan': return 'Scans';
-      case 'favorite': return 'Favorieten';
-      case 'eaten': return 'Gegeten';
-      case 'review': return 'Reviews';
-      default: return filter;
+      case 'all':
+        return 'Alle';
+      case 'scan':
+        return 'Scans';
+      case 'favorite':
+        return 'Favorieten';
+      case 'eaten':
+        return 'Gegeten';
+      case 'review':
+        return 'Reviews';
+      default:
+        return filter;
     }
   }
 
@@ -501,4 +525,3 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> with TickerProv
     // Navigate to nutrition log or item detail
   }
 }
-
