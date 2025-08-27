@@ -95,59 +95,65 @@ class _ExternalAppsPageState extends ConsumerState<ExternalAppsPage> {
                   Text(
                     'Koppel je favoriete apps',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Synchroniseer je voedingsdata met externe apps voor een compleet overzicht.',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                          color: AppColors.textSecondary,
+                        ),
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // MyFitnessPal
                   _buildAppCard(
                     title: 'MyFitnessPal',
-                    description: 'Synchroniseer je voedingslogboek en calorieën',
+                    description:
+                        'Synchroniseer je voedingslogboek en calorieën',
                     icon: Icons.fitness_center,
                     iconColor: Colors.blue,
-                    isConnected: _healthProfile?['myfitnesspal_connected'] ?? false,
+                    isConnected:
+                        _healthProfile?['myfitnesspal_connected'] ?? false,
                     username: _healthProfile?['myfitnesspal_username'],
                     onConnect: _connectMyFitnessPal,
                     onDisconnect: () => _disconnectApp('myfitnesspal'),
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Google Fit
                   _buildAppCard(
                     title: 'Google Fit',
-                    description: 'Synchroniseer je activiteiten en verbrande calorieën',
+                    description:
+                        'Synchroniseer je activiteiten en verbrande calorieën',
                     icon: Icons.directions_run,
                     iconColor: Colors.green,
-                    isConnected: _healthProfile?['google_fit_connected'] ?? false,
+                    isConnected:
+                        _healthProfile?['google_fit_connected'] ?? false,
                     onConnect: () => _showComingSoon('Google Fit'),
                     onDisconnect: () => _disconnectApp('google_fit'),
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Apple Health
                   _buildAppCard(
                     title: 'Apple Health',
-                    description: 'Synchroniseer je gezondheidsdata en activiteiten',
+                    description:
+                        'Synchroniseer je gezondheidsdata en activiteiten',
                     icon: Icons.favorite,
                     iconColor: Colors.red,
-                    isConnected: _healthProfile?['apple_health_connected'] ?? false,
+                    isConnected:
+                        _healthProfile?['apple_health_connected'] ?? false,
                     onConnect: () => _showComingSoon('Apple Health'),
                     onDisconnect: () => _disconnectApp('apple_health'),
                   ),
-                  
+
                   const SizedBox(height: 32),
-                  
+
                   // Privacy Settings
                   Container(
                     padding: const EdgeInsets.all(16),
@@ -165,36 +171,42 @@ class _ExternalAppsPageState extends ConsumerState<ExternalAppsPage> {
                             const SizedBox(width: 8),
                             Text(
                               'Privacy Instellingen',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textPrimary,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.textPrimary,
+                                  ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 16),
-                        
                         SwitchListTile(
                           title: const Text('Gezondheidsdata delen'),
-                          subtitle: const Text('Sta toe dat je data wordt gebruikt voor aanbevelingen'),
+                          subtitle: const Text(
+                              'Sta toe dat je data wordt gebruikt voor aanbevelingen'),
                           value: _healthProfile?['share_health_data'] ?? false,
-                          onChanged: (value) => _updatePrivacySetting('share_health_data', value),
+                          onChanged: (value) =>
+                              _updatePrivacySetting('share_health_data', value),
                           activeColor: AppColors.primary,
                         ),
-                        
                         SwitchListTile(
                           title: const Text('Gepersonaliseerde aanbevelingen'),
-                          subtitle: const Text('Ontvang aanbevelingen op basis van je voorkeuren'),
-                          value: _healthProfile?['allow_recommendations'] ?? true,
-                          onChanged: (value) => _updatePrivacySetting('allow_recommendations', value),
+                          subtitle: const Text(
+                              'Ontvang aanbevelingen op basis van je voorkeuren'),
+                          value:
+                              _healthProfile?['allow_recommendations'] ?? true,
+                          onChanged: (value) => _updatePrivacySetting(
+                              'allow_recommendations', value),
                           activeColor: AppColors.primary,
                         ),
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Help Section
                   Container(
                     padding: const EdgeInsets.all(16),
@@ -211,19 +223,23 @@ class _ExternalAppsPageState extends ConsumerState<ExternalAppsPage> {
                             const SizedBox(width: 8),
                             Text(
                               'Hulp nodig?',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primary,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.primary,
+                                  ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Heb je problemen met het koppelen van apps? Bekijk onze handleiding of neem contact op met support.',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.primary,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: AppColors.primary,
+                                  ),
                         ),
                         const SizedBox(height: 12),
                         ElevatedButton.icon(
@@ -274,7 +290,7 @@ class _ExternalAppsPageState extends ConsumerState<ExternalAppsPage> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: iconColor.withOpacity(0.1),
+                  color: AppColors.withAlphaFraction(iconColor, 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(icon, color: iconColor, size: 24),
@@ -287,22 +303,23 @@ class _ExternalAppsPageState extends ConsumerState<ExternalAppsPage> {
                     Text(
                       title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
                     ),
                     Text(
                       description,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                            color: AppColors.textSecondary,
+                          ),
                     ),
                   ],
                 ),
               ),
               if (isConnected)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: AppColors.primary,
                     borderRadius: BorderRadius.circular(12),
@@ -310,34 +327,32 @@ class _ExternalAppsPageState extends ConsumerState<ExternalAppsPage> {
                   child: Text(
                     'Verbonden',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.onPrimary,
-                      fontWeight: FontWeight.bold,
-                    ),
+                          color: AppColors.onPrimary,
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                 ),
             ],
           ),
-          
           if (isConnected && username != null) ...[
             const SizedBox(height: 8),
             Text(
               'Verbonden als: $username',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w500,
-              ),
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w500,
+                  ),
             ),
           ],
-          
           const SizedBox(height: 12),
-          
           Row(
             children: [
               Expanded(
                 child: ElevatedButton(
                   onPressed: isConnected ? onDisconnect : onConnect,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isConnected ? AppColors.error : AppColors.primary,
+                    backgroundColor:
+                        isConnected ? AppColors.error : AppColors.primary,
                     foregroundColor: AppColors.onPrimary,
                   ),
                   child: Text(isConnected ? 'Loskoppelen' : 'Verbinden'),
@@ -426,4 +441,3 @@ class _ExternalAppsPageState extends ConsumerState<ExternalAppsPage> {
     );
   }
 }
-
