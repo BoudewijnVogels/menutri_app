@@ -9,16 +9,18 @@ class CateraarProfileManagementPage extends ConsumerStatefulWidget {
   const CateraarProfileManagementPage({super.key});
 
   @override
-  ConsumerState<CateraarProfileManagementPage> createState() => _CateraarProfileManagementPageState();
+  ConsumerState<CateraarProfileManagementPage> createState() =>
+      _CateraarProfileManagementPageState();
 }
 
-class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileManagementPage>
+class _CateraarProfileManagementPageState
+    extends ConsumerState<CateraarProfileManagementPage>
     with TickerProviderStateMixin {
   final ApiService _apiService = ApiService();
   final ImagePicker _imagePicker = ImagePicker();
-  
+
   late TabController _tabController;
-  
+
   // Form controllers
   final TextEditingController _companyNameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
@@ -30,17 +32,20 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
   final TextEditingController _postalCodeController = TextEditingController();
   final TextEditingController _countryController = TextEditingController();
   final TextEditingController _vatNumberController = TextEditingController();
-  final TextEditingController _chamberOfCommerceController = TextEditingController();
+  final TextEditingController _chamberOfCommerceController =
+      TextEditingController();
   final TextEditingController _bankAccountController = TextEditingController();
-  
+
   // Personal profile controllers
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
-  final TextEditingController _personalEmailController = TextEditingController();
-  final TextEditingController _personalPhoneController = TextEditingController();
+  final TextEditingController _personalEmailController =
+      TextEditingController();
+  final TextEditingController _personalPhoneController =
+      TextEditingController();
   final TextEditingController _jobTitleController = TextEditingController();
   final TextEditingController _bioController = TextEditingController();
-  
+
   bool _isLoading = true;
   bool _isSaving = false;
   Map<String, dynamic> _profileData = {};
@@ -49,18 +54,39 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
   List<Map<String, dynamic>> _teamMembers = [];
   String? _profileImagePath;
   String? _companyLogoPath;
-  
+
   final List<String> _cuisineTypes = [
-    'Italiaans', 'Frans', 'Chinees', 'Japans', 'Indiaas', 'Mexicaans',
-    'Grieks', 'Thais', 'Amerikaans', 'Mediterraans', 'Vegetarisch',
-    'Veganistisch', 'Glutenvrij', 'Biologisch', 'Fast Food', 'Fine Dining'
+    'Italiaans',
+    'Frans',
+    'Chinees',
+    'Japans',
+    'Indiaas',
+    'Mexicaans',
+    'Grieks',
+    'Thais',
+    'Amerikaans',
+    'Mediterraans',
+    'Vegetarisch',
+    'Veganistisch',
+    'Glutenvrij',
+    'Biologisch',
+    'Fast Food',
+    'Fine Dining'
   ];
-  
+
   final List<String> _businessTypes = [
-    'Restaurant', 'Café', 'Bar', 'Bakkerij', 'Catering', 'Food Truck',
-    'Pizzeria', 'Snackbar', 'Hotel Restaurant', 'Brasserie'
+    'Restaurant',
+    'Café',
+    'Bar',
+    'Bakkerij',
+    'Catering',
+    'Food Truck',
+    'Pizzeria',
+    'Snackbar',
+    'Hotel Restaurant',
+    'Brasserie'
   ];
-  
+
   List<String> _selectedCuisineTypes = [];
   String _selectedBusinessType = 'Restaurant';
   String _selectedLanguage = 'nl';
@@ -103,26 +129,24 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
 
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
-    
+
     try {
-      final profileResponse = await _apiService.getUserProfile();
+      final profileResponse = await _apiService.getCurrentUser();
       final businessResponse = await _apiService.getBusinessProfile();
-      final statsResponse = await _apiService.getProfileStatistics();
       final teamResponse = await _apiService.getTeamMembers();
-      
+
       final profile = profileResponse['profile'] ?? {};
       final business = businessResponse['business'] ?? {};
-      final stats = statsResponse['statistics'] ?? {};
-      final team = List<Map<String, dynamic>>.from(teamResponse['members'] ?? []);
-      
+      final team =
+          List<Map<String, dynamic>>.from(teamResponse['members'] ?? []);
+
       setState(() {
         _profileData = profile;
         _businessData = business;
-        _statistics = stats;
         _teamMembers = team;
         _isLoading = false;
       });
-      
+
       _populateControllers();
     } catch (e) {
       setState(() => _isLoading = false);
@@ -146,9 +170,10 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
     _postalCodeController.text = _businessData['postal_code'] ?? '';
     _countryController.text = _businessData['country'] ?? 'Nederland';
     _vatNumberController.text = _businessData['vat_number'] ?? '';
-    _chamberOfCommerceController.text = _businessData['chamber_of_commerce'] ?? '';
+    _chamberOfCommerceController.text =
+        _businessData['chamber_of_commerce'] ?? '';
     _bankAccountController.text = _businessData['bank_account'] ?? '';
-    
+
     // Personal data
     _firstNameController.text = _profileData['first_name'] ?? '';
     _lastNameController.text = _profileData['last_name'] ?? '';
@@ -156,9 +181,10 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
     _personalPhoneController.text = _profileData['phone'] ?? '';
     _jobTitleController.text = _profileData['job_title'] ?? '';
     _bioController.text = _profileData['bio'] ?? '';
-    
+
     // Settings
-    _selectedCuisineTypes = List<String>.from(_businessData['cuisine_types'] ?? []);
+    _selectedCuisineTypes =
+        List<String>.from(_businessData['cuisine_types'] ?? []);
     _selectedBusinessType = _businessData['business_type'] ?? 'Restaurant';
     _selectedLanguage = _profileData['language'] ?? 'nl';
     _selectedTimezone = _profileData['timezone'] ?? 'Europe/Amsterdam';
@@ -166,7 +192,7 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
     _smsNotifications = _profileData['sms_notifications'] ?? false;
     _marketingEmails = _profileData['marketing_emails'] ?? false;
     _publicProfile = _businessData['public_profile'] ?? true;
-    
+
     _profileImagePath = _profileData['profile_image'];
     _companyLogoPath = _businessData['logo'];
   }
@@ -233,7 +259,8 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
                 value: 'delete_account',
                 child: ListTile(
                   leading: Icon(Icons.delete_forever, color: Colors.red),
-                  title: Text('Account Verwijderen', style: TextStyle(color: Colors.red)),
+                  title: Text('Account Verwijderen',
+                      style: TextStyle(color: Colors.red)),
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
@@ -246,7 +273,8 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
             controller: _tabController,
             indicatorColor: AppColors.onPrimary,
             labelColor: AppColors.onPrimary,
-            unselectedLabelColor: AppColors.onPrimary.withOpacity(0.7),
+            unselectedLabelColor:
+                AppColors.withAlphaFraction(AppColors.onPrimary, 0.7),
             isScrollable: true,
             tabs: const [
               Tab(text: 'Persoonlijk'),
@@ -279,13 +307,13 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
         children: [
           // Profile header
           _buildProfileHeader(),
-          
+
           const SizedBox(height: 24),
-          
+
           // Personal information
           _buildSectionTitle('Persoonlijke Informatie'),
           const SizedBox(height: 16),
-          
+
           Row(
             children: [
               Expanded(
@@ -310,9 +338,9 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
               ),
             ],
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           TextFormField(
             controller: _jobTitleController,
             decoration: const InputDecoration(
@@ -321,9 +349,9 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
               prefixIcon: Icon(Icons.work),
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           TextFormField(
             controller: _bioController,
             decoration: const InputDecoration(
@@ -334,13 +362,13 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
             ),
             maxLines: 3,
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Contact information
           _buildSectionTitle('Contactgegevens'),
           const SizedBox(height: 16),
-          
+
           TextFormField(
             controller: _personalEmailController,
             decoration: const InputDecoration(
@@ -350,9 +378,9 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
             ),
             keyboardType: TextInputType.emailAddress,
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           TextFormField(
             controller: _personalPhoneController,
             decoration: const InputDecoration(
@@ -362,15 +390,15 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
             ),
             keyboardType: TextInputType.phone,
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Preferences
           _buildSectionTitle('Voorkeuren'),
           const SizedBox(height: 16),
-          
+
           DropdownButtonFormField<String>(
-            value: _selectedLanguage,
+            initialValue: _selectedLanguage,
             decoration: const InputDecoration(
               labelText: 'Taal',
               border: OutlineInputBorder(),
@@ -389,21 +417,26 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
               });
             },
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           DropdownButtonFormField<String>(
-            value: _selectedTimezone,
+            initialValue: _selectedTimezone,
             decoration: const InputDecoration(
               labelText: 'Tijdzone',
               border: OutlineInputBorder(),
               prefixIcon: Icon(Icons.access_time),
             ),
             items: const [
-              DropdownMenuItem(value: 'Europe/Amsterdam', child: Text('Amsterdam (CET)')),
-              DropdownMenuItem(value: 'Europe/London', child: Text('London (GMT)')),
-              DropdownMenuItem(value: 'America/New_York', child: Text('New York (EST)')),
-              DropdownMenuItem(value: 'America/Los_Angeles', child: Text('Los Angeles (PST)')),
+              DropdownMenuItem(
+                  value: 'Europe/Amsterdam', child: Text('Amsterdam (CET)')),
+              DropdownMenuItem(
+                  value: 'Europe/London', child: Text('London (GMT)')),
+              DropdownMenuItem(
+                  value: 'America/New_York', child: Text('New York (EST)')),
+              DropdownMenuItem(
+                  value: 'America/Los_Angeles',
+                  child: Text('Los Angeles (PST)')),
               DropdownMenuItem(value: 'Asia/Tokyo', child: Text('Tokyo (JST)')),
             ],
             onChanged: (value) {
@@ -412,13 +445,13 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
               });
             },
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Notification preferences
           _buildSectionTitle('Notificatie Voorkeuren'),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Column(
               children: [
@@ -473,13 +506,13 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
         children: [
           // Company logo
           _buildCompanyLogoSection(),
-          
+
           const SizedBox(height: 24),
-          
+
           // Company information
           _buildSectionTitle('Bedrijfsinformatie'),
           const SizedBox(height: 16),
-          
+
           TextFormField(
             controller: _companyNameController,
             decoration: const InputDecoration(
@@ -488,11 +521,11 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
               prefixIcon: Icon(Icons.business),
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           DropdownButtonFormField<String>(
-            value: _selectedBusinessType,
+            initialValue: _selectedBusinessType,
             decoration: const InputDecoration(
               labelText: 'Bedrijfstype',
               border: OutlineInputBorder(),
@@ -507,9 +540,9 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
               });
             },
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           TextFormField(
             controller: _descriptionController,
             decoration: const InputDecoration(
@@ -520,9 +553,9 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
             ),
             maxLines: 3,
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           TextFormField(
             controller: _websiteController,
             decoration: const InputDecoration(
@@ -533,13 +566,13 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
             ),
             keyboardType: TextInputType.url,
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Cuisine types
           _buildSectionTitle('Keuken Types'),
           const SizedBox(height: 16),
-          
+
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -558,18 +591,19 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
                   });
                 },
                 backgroundColor: AppColors.background,
-                selectedColor: AppColors.primary.withOpacity(0.2),
+                selectedColor:
+                    AppColors.withAlphaFraction(AppColors.primary, 0.2),
                 checkmarkColor: AppColors.primary,
               );
             }).toList(),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Contact information
           _buildSectionTitle('Contactgegevens'),
           const SizedBox(height: 16),
-          
+
           Row(
             children: [
               Expanded(
@@ -597,13 +631,13 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
               ),
             ],
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Address information
           _buildSectionTitle('Adresgegevens'),
           const SizedBox(height: 16),
-          
+
           TextFormField(
             controller: _addressController,
             decoration: const InputDecoration(
@@ -612,9 +646,9 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
               prefixIcon: Icon(Icons.location_on),
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           Row(
             children: [
               Expanded(
@@ -639,9 +673,9 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
               ),
             ],
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           TextFormField(
             controller: _countryController,
             decoration: const InputDecoration(
@@ -650,13 +684,13 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
               prefixIcon: Icon(Icons.public),
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Business details
           _buildSectionTitle('Bedrijfsgegevens'),
           const SizedBox(height: 16),
-          
+
           TextFormField(
             controller: _vatNumberController,
             decoration: const InputDecoration(
@@ -666,9 +700,9 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
               hintText: 'NL123456789B01',
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           TextFormField(
             controller: _chamberOfCommerceController,
             decoration: const InputDecoration(
@@ -677,9 +711,9 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
               prefixIcon: Icon(Icons.business_center),
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           TextFormField(
             controller: _bankAccountController,
             decoration: const InputDecoration(
@@ -689,17 +723,18 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
               hintText: 'NL91 ABNA 0417 1643 00',
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Privacy settings
           _buildSectionTitle('Privacy Instellingen'),
           const SizedBox(height: 16),
-          
+
           Card(
             child: SwitchListTile(
               title: const Text('Openbaar Profiel'),
-              subtitle: const Text('Maak je bedrijfsprofiel zichtbaar voor gasten'),
+              subtitle:
+                  const Text('Maak je bedrijfsprofiel zichtbaar voor gasten'),
               value: _publicProfile,
               onChanged: (value) {
                 setState(() {
@@ -727,8 +762,8 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
               Text(
                 'Team Leden (${_teamMembers.length})',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               ElevatedButton.icon(
                 onPressed: () => _inviteTeamMember(),
@@ -741,21 +776,21 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
               ),
             ],
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Team members list
           if (_teamMembers.isEmpty)
             _buildEmptyTeamState()
           else
-            ..._teamMembers.map((member) => _buildTeamMemberCard(member)).toList(),
-          
+            ..._teamMembers.map((member) => _buildTeamMemberCard(member)),
+
           const SizedBox(height: 24),
-          
+
           // Team settings
           _buildSectionTitle('Team Instellingen'),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Column(
               children: [
@@ -770,7 +805,8 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
                 ListTile(
                   leading: const Icon(Icons.notifications),
                   title: const Text('Team Notificaties'),
-                  subtitle: const Text('Configureer team notificatie instellingen'),
+                  subtitle:
+                      const Text('Configureer team notificatie instellingen'),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () => _configureTeamNotifications(),
                 ),
@@ -799,7 +835,7 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
           // Profile statistics
           _buildSectionTitle('Profiel Statistieken'),
           const SizedBox(height: 16),
-          
+
           GridView.count(
             crossAxisCount: 2,
             shrinkWrap: true,
@@ -846,13 +882,13 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
               ),
             ],
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Account information
           _buildSectionTitle('Account Informatie'),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Column(
               children: [
@@ -871,7 +907,9 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
                 ListTile(
                   leading: const Icon(Icons.verified),
                   title: const Text('Account Status'),
-                  subtitle: Text(_profileData['is_verified'] == true ? 'Geverifieerd' : 'Niet geverifieerd'),
+                  subtitle: Text(_profileData['is_verified'] == true
+                      ? 'Geverifieerd'
+                      : 'Niet geverifieerd'),
                   trailing: _profileData['is_verified'] == true
                       ? const Icon(Icons.check_circle, color: Colors.green)
                       : const Icon(Icons.warning, color: Colors.orange),
@@ -887,13 +925,13 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Data & Privacy
           _buildSectionTitle('Data & Privacy'),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Column(
               children: [
@@ -923,9 +961,11 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
                 const Divider(height: 1),
                 ListTile(
                   leading: const Icon(Icons.delete_forever, color: Colors.red),
-                  title: const Text('Account Verwijderen', style: TextStyle(color: Colors.red)),
+                  title: const Text('Account Verwijderen',
+                      style: TextStyle(color: Colors.red)),
                   subtitle: const Text('Permanent je account verwijderen'),
-                  trailing: const Icon(Icons.arrow_forward_ios, color: Colors.red),
+                  trailing:
+                      const Icon(Icons.arrow_forward_ios, color: Colors.red),
                   onTap: () => _showDeleteAccountDialog(),
                 ),
               ],
@@ -953,13 +993,15 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
                 children: [
                   CircleAvatar(
                     radius: 40,
-                    backgroundColor: AppColors.primary.withOpacity(0.2),
+                    backgroundColor:
+                        AppColors.withAlphaFraction(AppColors.primary, 0.2),
                     backgroundImage: _profileImagePath != null
                         ? NetworkImage(_profileImagePath!)
                         : null,
                     child: _profileImagePath == null
                         ? Text(
-                            _getInitials('${_firstNameController.text} ${_lastNameController.text}'),
+                            _getInitials(
+                                '${_firstNameController.text} ${_lastNameController.text}'),
                             style: TextStyle(
                               color: AppColors.primary,
                               fontSize: 24,
@@ -987,21 +1029,23 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
                 ],
               ),
             ),
-            
+
             const SizedBox(width: 16),
-            
+
             // Profile info
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${_firstNameController.text} ${_lastNameController.text}'.trim().isEmpty
+                    '${_firstNameController.text} ${_lastNameController.text}'
+                            .trim()
+                            .isEmpty
                         ? 'Naam niet ingesteld'
                         : '${_firstNameController.text} ${_lastNameController.text}',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -1009,23 +1053,31 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
                         ? 'Functietitel niet ingesteld'
                         : _jobTitleController.text,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                          color: AppColors.textSecondary,
+                        ),
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
                       Icon(
-                        _profileData['is_verified'] == true ? Icons.verified : Icons.warning,
+                        _profileData['is_verified'] == true
+                            ? Icons.verified
+                            : Icons.warning,
                         size: 16,
-                        color: _profileData['is_verified'] == true ? Colors.green : Colors.orange,
+                        color: _profileData['is_verified'] == true
+                            ? Colors.green
+                            : Colors.orange,
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        _profileData['is_verified'] == true ? 'Geverifieerd' : 'Niet geverifieerd',
+                        _profileData['is_verified'] == true
+                            ? 'Geverifieerd'
+                            : 'Niet geverifieerd',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: _profileData['is_verified'] == true ? Colors.green : Colors.orange,
-                        ),
+                              color: _profileData['is_verified'] == true
+                                  ? Colors.green
+                                  : Colors.orange,
+                            ),
                       ),
                     ],
                   ),
@@ -1052,8 +1104,8 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
             Text(
               'Bedrijfslogo',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 16),
             Row(
@@ -1065,10 +1117,12 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
+                      color:
+                          AppColors.withAlphaFraction(AppColors.primary, 0.1),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: AppColors.primary.withOpacity(0.3),
+                        color:
+                            AppColors.withAlphaFraction(AppColors.primary, 0.3),
                         width: 2,
                         style: BorderStyle.solid,
                       ),
@@ -1088,9 +1142,9 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
                           ),
                   ),
                 ),
-                
+
                 const SizedBox(width: 16),
-                
+
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1099,22 +1153,24 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
                         _companyNameController.text.isEmpty
                             ? 'Bedrijfsnaam niet ingesteld'
                             : _companyNameController.text,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         _selectedBusinessType,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
+                              color: AppColors.textSecondary,
+                            ),
                       ),
                       const SizedBox(height: 8),
                       ElevatedButton.icon(
                         onPressed: () => _changeCompanyLogo(),
                         icon: const Icon(Icons.upload),
-                        label: Text(_companyLogoPath != null ? 'Wijzigen' : 'Uploaden'),
+                        label: Text(
+                            _companyLogoPath != null ? 'Wijzigen' : 'Uploaden'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: AppColors.onPrimary,
@@ -1140,10 +1196,9 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
       ),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: AppColors.primary.withOpacity(0.2),
-          backgroundImage: member['avatar'] != null
-              ? NetworkImage(member['avatar'])
-              : null,
+          backgroundColor: AppColors.withAlphaFraction(AppColors.primary, 0.2),
+          backgroundImage:
+              member['avatar'] != null ? NetworkImage(member['avatar']) : null,
           child: member['avatar'] == null
               ? Text(
                   _getInitials(member['name'] ?? ''),
@@ -1163,16 +1218,21 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
             Row(
               children: [
                 Icon(
-                  member['is_active'] == true ? Icons.circle : Icons.circle_outlined,
+                  member['is_active'] == true
+                      ? Icons.circle
+                      : Icons.circle_outlined,
                   size: 12,
-                  color: member['is_active'] == true ? Colors.green : Colors.grey,
+                  color:
+                      member['is_active'] == true ? Colors.green : Colors.grey,
                 ),
                 const SizedBox(width: 4),
                 Text(
                   member['is_active'] == true ? 'Actief' : 'Inactief',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: member['is_active'] == true ? Colors.green : Colors.grey,
-                  ),
+                        color: member['is_active'] == true
+                            ? Colors.green
+                            : Colors.grey,
+                      ),
                 ),
               ],
             ),
@@ -1200,8 +1260,11 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
             PopupMenuItem(
               value: member['is_active'] == true ? 'deactivate' : 'activate',
               child: ListTile(
-                leading: Icon(member['is_active'] == true ? Icons.block : Icons.check_circle),
-                title: Text(member['is_active'] == true ? 'Deactiveren' : 'Activeren'),
+                leading: Icon(member['is_active'] == true
+                    ? Icons.block
+                    : Icons.check_circle),
+                title: Text(
+                    member['is_active'] == true ? 'Deactiveren' : 'Activeren'),
                 contentPadding: EdgeInsets.zero,
               ),
             ),
@@ -1234,15 +1297,15 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
             Text(
               'Nog geen teamleden',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               'Nodig teamleden uit om samen te werken',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
@@ -1261,7 +1324,8 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+      String title, String value, IconData icon, Color color) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -1277,16 +1341,16 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
             Text(
               value,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
             ),
             const SizedBox(height: 4),
             Text(
               title,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -1299,8 +1363,8 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
     return Text(
       title,
       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-        fontWeight: FontWeight.bold,
-      ),
+            fontWeight: FontWeight.bold,
+          ),
     );
   }
 
@@ -1311,14 +1375,14 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
       maxHeight: 512,
       imageQuality: 80,
     );
-    
+
     if (image != null) {
       try {
         final response = await _apiService.uploadProfileImage(image.path);
         setState(() {
           _profileImagePath = response['image_url'];
         });
-        
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -1347,14 +1411,14 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
       maxHeight: 512,
       imageQuality: 80,
     );
-    
+
     if (image != null) {
       try {
         final response = await _apiService.uploadCompanyLogo(image.path);
         setState(() {
           _companyLogoPath = response['logo_url'];
         });
-        
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -1378,7 +1442,7 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
 
   Future<void> _saveProfile() async {
     setState(() => _isSaving = true);
-    
+
     try {
       // Prepare profile data
       final profileData = {
@@ -1394,7 +1458,7 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
         'sms_notifications': _smsNotifications,
         'marketing_emails': _marketingEmails,
       };
-      
+
       // Prepare business data
       final businessData = {
         'company_name': _companyNameController.text,
@@ -1413,13 +1477,13 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
         'cuisine_types': _selectedCuisineTypes,
         'public_profile': _publicProfile,
       };
-      
+
       // Save to API
-      await _apiService.updateUserProfile(profileData);
+      await _apiService.updateProfile(profileData);
       await _apiService.updateBusinessProfile(businessData);
-      
+
       setState(() => _isSaving = false);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -1445,7 +1509,8 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
     // Navigate to team invitation page or show dialog
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Team uitnodiging functionaliteit wordt binnenkort toegevoegd'),
+        content: Text(
+            'Team uitnodiging functionaliteit wordt binnenkort toegevoegd'),
       ),
     );
   }
@@ -1466,7 +1531,7 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
         // Remove team member
         break;
     }
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('$action functionaliteit wordt binnenkort toegevoegd'),
@@ -1485,7 +1550,8 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
   void _configureTeamNotifications() {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Team notificatie instellingen worden binnenkort toegevoegd'),
+        content:
+            Text('Team notificatie instellingen worden binnenkort toegevoegd'),
       ),
     );
   }
@@ -1535,7 +1601,8 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Privacy Instellingen'),
-        content: const Text('Privacy instellingen worden binnenkort toegevoegd'),
+        content:
+            const Text('Privacy instellingen worden binnenkort toegevoegd'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -1551,7 +1618,8 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Account Verwijderen'),
-        content: const Text('Weet je zeker dat je je account permanent wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.'),
+        content: const Text(
+            'Weet je zeker dat je je account permanent wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -1563,7 +1631,8 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
               // Implement account deletion
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Account verwijdering wordt binnenkort toegevoegd'),
+                  content:
+                      Text('Account verwijdering wordt binnenkort toegevoegd'),
                   backgroundColor: Colors.red,
                 ),
               );
@@ -1587,7 +1656,7 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
 
   String _formatDate(String? dateTime) {
     if (dateTime == null) return 'Onbekend';
-    
+
     try {
       final date = DateTime.parse(dateTime);
       return '${date.day}/${date.month}/${date.year}';
@@ -1596,4 +1665,3 @@ class _CateraarProfileManagementPageState extends ConsumerState<CateraarProfileM
     }
   }
 }
-
