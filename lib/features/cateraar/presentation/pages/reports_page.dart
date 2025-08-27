@@ -7,15 +7,16 @@ class CateraarReportsPage extends ConsumerStatefulWidget {
   const CateraarReportsPage({super.key});
 
   @override
-  ConsumerState<CateraarReportsPage> createState() => _CateraarReportsPageState();
+  ConsumerState<CateraarReportsPage> createState() =>
+      _CateraarReportsPageState();
 }
 
 class _CateraarReportsPageState extends ConsumerState<CateraarReportsPage>
     with TickerProviderStateMixin {
   final ApiService _apiService = ApiService();
-  
+
   late TabController _tabController;
-  
+
   bool _isLoading = true;
   bool _isExporting = false;
   Map<String, dynamic> _reportsData = {};
@@ -83,16 +84,17 @@ class _CateraarReportsPageState extends ConsumerState<CateraarReportsPage>
 
   Future<void> _loadReportsData() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final response = await _apiService.getReportsData(
         period: _selectedPeriod,
         restaurantId: _selectedRestaurant,
       );
-      
+
       setState(() {
         _reportsData = response['reports'] ?? {};
-        _restaurants = List<Map<String, dynamic>>.from(response['restaurants'] ?? []);
+        _restaurants =
+            List<Map<String, dynamic>>.from(response['restaurants'] ?? []);
         _isLoading = false;
       });
     } catch (e) {
@@ -182,7 +184,12 @@ class _CateraarReportsPageState extends ConsumerState<CateraarReportsPage>
           'Instagram': 12,
         },
         'campaign_performance': [
-          {'name': 'Zomer Actie', 'clicks': 1234, 'conversions': 89, 'roi': 245},
+          {
+            'name': 'Zomer Actie',
+            'clicks': 1234,
+            'conversions': 89,
+            'roi': 245
+          },
           {'name': 'Happy Hour', 'clicks': 876, 'conversions': 67, 'roi': 189},
         ],
       },
@@ -284,7 +291,8 @@ class _CateraarReportsPageState extends ConsumerState<CateraarReportsPage>
             children: [
               // Filters
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   children: [
                     Expanded(
@@ -293,7 +301,8 @@ class _CateraarReportsPageState extends ConsumerState<CateraarReportsPage>
                         decoration: const InputDecoration(
                           labelText: 'Periode',
                           border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          contentPadding:
+                              EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         ),
                         dropdownColor: AppColors.surface,
                         items: _periodOptions.entries.map((entry) {
@@ -315,7 +324,8 @@ class _CateraarReportsPageState extends ConsumerState<CateraarReportsPage>
                         decoration: const InputDecoration(
                           labelText: 'Restaurant',
                           border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          contentPadding:
+                              EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         ),
                         dropdownColor: AppColors.surface,
                         items: _restaurants.map((restaurant) {
@@ -333,18 +343,21 @@ class _CateraarReportsPageState extends ConsumerState<CateraarReportsPage>
                   ],
                 ),
               ),
-              
+
               // Tabs
               TabBar(
                 controller: _tabController,
                 indicatorColor: AppColors.onPrimary,
                 labelColor: AppColors.onPrimary,
-                unselectedLabelColor: AppColors.onPrimary.withOpacity(0.7),
+                unselectedLabelColor:
+                    AppColors.withAlphaFraction(AppColors.onPrimary, 0.7),
                 isScrollable: true,
-                tabs: _reportTypes.map((type) => Tab(
-                  text: type['name'],
-                  icon: Icon(type['icon'], size: 16),
-                )).toList(),
+                tabs: _reportTypes
+                    .map((type) => Tab(
+                          text: type['name'],
+                          icon: Icon(type['icon'], size: 16),
+                        ))
+                    .toList(),
               ),
             ],
           ),
@@ -367,7 +380,7 @@ class _CateraarReportsPageState extends ConsumerState<CateraarReportsPage>
 
   Widget _buildOverviewTab() {
     final overview = _reportsData['overview'] ?? {};
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -377,11 +390,11 @@ class _CateraarReportsPageState extends ConsumerState<CateraarReportsPage>
           Text(
             'Belangrijkste Statistieken',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 16),
-          
+
           GridView.count(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -420,18 +433,18 @@ class _CateraarReportsPageState extends ConsumerState<CateraarReportsPage>
               ),
             ],
           ),
-          
+
           const SizedBox(height: 32),
-          
+
           // Engagement Metrics
           Text(
             'Betrokkenheid',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 16),
-          
+
           GridView.count(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -470,9 +483,9 @@ class _CateraarReportsPageState extends ConsumerState<CateraarReportsPage>
               ),
             ],
           ),
-          
+
           const SizedBox(height: 32),
-          
+
           // Quick Actions
           Card(
             child: Padding(
@@ -483,11 +496,10 @@ class _CateraarReportsPageState extends ConsumerState<CateraarReportsPage>
                   Text(
                     'Snelle Acties',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                   const SizedBox(height: 16),
-                  
                   Row(
                     children: [
                       Expanded(
@@ -515,9 +527,7 @@ class _CateraarReportsPageState extends ConsumerState<CateraarReportsPage>
                       ),
                     ],
                   ),
-                  
                   const SizedBox(height: 12),
-                  
                   Row(
                     children: [
                       Expanded(
@@ -548,7 +558,7 @@ class _CateraarReportsPageState extends ConsumerState<CateraarReportsPage>
 
   Widget _buildRevenueTab() {
     final revenue = _reportsData['revenue'] ?? {};
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -564,14 +574,15 @@ class _CateraarReportsPageState extends ConsumerState<CateraarReportsPage>
                   Text(
                     'Omzet Trend',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                   const SizedBox(height: 16),
                   Container(
                     height: 200,
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
+                      color:
+                          AppColors.withAlphaFraction(AppColors.primary, 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Center(
@@ -606,77 +617,88 @@ class _CateraarReportsPageState extends ConsumerState<CateraarReportsPage>
               ),
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Revenue by Category
           Text(
             'Omzet per Categorie',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
-                children: (revenue['revenue_by_category'] as Map<String, dynamic>?)?.entries.map((entry) {
-                  final total = (revenue['revenue_by_category'] as Map<String, dynamic>).values.fold(0.0, (sum, value) => sum + value);
-                  final percentage = (entry.value / total * 100).toStringAsFixed(1);
-                  
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: 2,
-                          child: Text(
-                            entry.key,
-                            style: const TextStyle(fontWeight: FontWeight.w500),
-                          ),
+                children: (revenue['revenue_by_category']
+                            as Map<String, dynamic>?)
+                        ?.entries
+                        .map((entry) {
+                      final total = (revenue['revenue_by_category']
+                              as Map<String, dynamic>)
+                          .values
+                          .fold(0.0, (sum, value) => sum + value);
+                      final percentage =
+                          (entry.value / total * 100).toStringAsFixed(1);
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: Text(
+                                entry.key,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w500),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 3,
+                              child: LinearProgressIndicator(
+                                value: entry.value / total,
+                                backgroundColor: Colors.grey[300],
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                    AppColors.primary),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              '€${entry.value.toStringAsFixed(0)}',
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              '($percentage%)',
+                              style: TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
                         ),
-                        Expanded(
-                          flex: 3,
-                          child: LinearProgressIndicator(
-                            value: entry.value / total,
-                            backgroundColor: Colors.grey[300],
-                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          '€${entry.value.toStringAsFixed(0)}',
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '($percentage%)',
-                          style: TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList() ?? [],
+                      );
+                    }).toList() ??
+                    [],
               ),
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Payment Methods
           Text(
             'Betaalmethoden',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 16),
-          
+
           GridView.count(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -684,57 +706,60 @@ class _CateraarReportsPageState extends ConsumerState<CateraarReportsPage>
             childAspectRatio: 1.2,
             crossAxisSpacing: 12,
             mainAxisSpacing: 12,
-            children: (revenue['payment_methods'] as Map<String, dynamic>?)?.entries.map((entry) {
-              IconData icon;
-              Color color;
-              
-              switch (entry.key) {
-                case 'Creditcard':
-                  icon = Icons.credit_card;
-                  color = Colors.blue;
-                  break;
-                case 'Contant':
-                  icon = Icons.money;
-                  color = Colors.green;
-                  break;
-                case 'Pin':
-                  icon = Icons.payment;
-                  color = Colors.orange;
-                  break;
-                default:
-                  icon = Icons.payment;
-                  color = Colors.grey;
-              }
-              
-              return Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(icon, color: color, size: 32),
-                      const SizedBox(height: 8),
-                      Text(
-                        entry.key,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
-                        ),
-                        textAlign: TextAlign.center,
+            children: (revenue['payment_methods'] as Map<String, dynamic>?)
+                    ?.entries
+                    .map((entry) {
+                  IconData icon;
+                  Color color;
+
+                  switch (entry.key) {
+                    case 'Creditcard':
+                      icon = Icons.credit_card;
+                      color = Colors.blue;
+                      break;
+                    case 'Contant':
+                      icon = Icons.money;
+                      color = Colors.green;
+                      break;
+                    case 'Pin':
+                      icon = Icons.payment;
+                      color = Colors.orange;
+                      break;
+                    default:
+                      icon = Icons.payment;
+                      color = Colors.grey;
+                  }
+
+                  return Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(icon, color: color, size: 32),
+                          const SizedBox(height: 8),
+                          Text(
+                            entry.key,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          Text(
+                            '${entry.value}%',
+                            style: TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
-                      Text(
-                        '${entry.value}%',
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }).toList() ?? [],
+                    ),
+                  );
+                }).toList() ??
+                [],
           ),
         ],
       ),
@@ -743,7 +768,7 @@ class _CateraarReportsPageState extends ConsumerState<CateraarReportsPage>
 
   Widget _buildCustomersTab() {
     final customers = _reportsData['customers'] ?? {};
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -788,100 +813,115 @@ class _CateraarReportsPageState extends ConsumerState<CateraarReportsPage>
               ),
             ],
           ),
-          
+
           const SizedBox(height: 32),
-          
+
           // Peak Hours
           Text(
             'Piekuren',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
-                children: (customers['peak_hours'] as Map<String, dynamic>?)?.entries.map((entry) {
-                  final maxValue = (customers['peak_hours'] as Map<String, dynamic>).values.fold(0, (max, value) => value > max ? value : max);
-                  
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 60,
-                          child: Text(
-                            entry.key,
-                            style: const TextStyle(fontWeight: FontWeight.w500),
-                          ),
+                children: (customers['peak_hours'] as Map<String, dynamic>?)
+                        ?.entries
+                        .map((entry) {
+                      final maxValue = (customers['peak_hours']
+                              as Map<String, dynamic>)
+                          .values
+                          .fold(0, (max, value) => value > max ? value : max);
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 60,
+                              child: Text(
+                                entry.key,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w500),
+                              ),
+                            ),
+                            Expanded(
+                              child: LinearProgressIndicator(
+                                value: entry.value / maxValue,
+                                backgroundColor: Colors.grey[300],
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                    AppColors.primary),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              '${entry.value}',
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                          ],
                         ),
-                        Expanded(
-                          child: LinearProgressIndicator(
-                            value: entry.value / maxValue,
-                            backgroundColor: Colors.grey[300],
-                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          '${entry.value}',
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList() ?? [],
+                      );
+                    }).toList() ??
+                    [],
               ),
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Demographics
           Text(
             'Leeftijdsgroepen',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
-                children: (customers['demographics'] as Map<String, dynamic>?)?.entries.map((entry) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: 2,
-                          child: Text(
-                            entry.key,
-                            style: const TextStyle(fontWeight: FontWeight.w500),
-                          ),
+                children: (customers['demographics'] as Map<String, dynamic>?)
+                        ?.entries
+                        .map((entry) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: Text(
+                                entry.key,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w500),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 3,
+                              child: LinearProgressIndicator(
+                                value: entry.value / 100,
+                                backgroundColor: Colors.grey[300],
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                    AppColors.primary),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              '${entry.value}%',
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                          ],
                         ),
-                        Expanded(
-                          flex: 3,
-                          child: LinearProgressIndicator(
-                            value: entry.value / 100,
-                            backgroundColor: Colors.grey[300],
-                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          '${entry.value}%',
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList() ?? [],
+                      );
+                    }).toList() ??
+                    [],
               ),
             ),
           ),
@@ -892,7 +932,7 @@ class _CateraarReportsPageState extends ConsumerState<CateraarReportsPage>
 
   Widget _buildMenuPerformanceTab() {
     final menuPerformance = _reportsData['menu_performance'] ?? {};
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -902,143 +942,154 @@ class _CateraarReportsPageState extends ConsumerState<CateraarReportsPage>
           Text(
             'Top Menu Items',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Column(
-              children: (menuPerformance['top_items'] as List<dynamic>?)?.asMap().entries.map((entry) {
-                final index = entry.key;
-                final item = entry.value;
-                
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: AppColors.primary,
-                    child: Text(
-                      '${index + 1}',
-                      style: TextStyle(
-                        color: AppColors.onPrimary,
-                        fontWeight: FontWeight.bold,
+              children: (menuPerformance['top_items'] as List<dynamic>?)
+                      ?.asMap()
+                      .entries
+                      .map((entry) {
+                    final index = entry.key;
+                    final item = entry.value;
+
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: AppColors.primary,
+                        child: Text(
+                          '${index + 1}',
+                          style: TextStyle(
+                            color: AppColors.onPrimary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  title: Text(
-                    item['name'],
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  subtitle: Text('${item['orders']} bestellingen'),
-                  trailing: Text(
-                    '€${item['revenue'].toStringAsFixed(2)}',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                );
-              }).toList() ?? [],
+                      title: Text(
+                        item['name'],
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      subtitle: Text('${item['orders']} bestellingen'),
+                      trailing: Text(
+                        '€${item['revenue'].toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    );
+                  }).toList() ??
+                  [],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Category Performance
           Text(
             'Categorie Prestaties',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 16),
-          
+
           GridView.count(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             crossAxisCount: 1,
             childAspectRatio: 4,
             mainAxisSpacing: 12,
-            children: (menuPerformance['category_performance'] as Map<String, dynamic>?)?.entries.map((entry) {
-              final category = entry.key;
-              final data = entry.value;
-              
-              return Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              category,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
+            children: (menuPerformance['category_performance']
+                        as Map<String, dynamic>?)
+                    ?.entries
+                    .map((entry) {
+                  final category = entry.key;
+                  final data = entry.value;
+
+                  return Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  category,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                Text(
+                                  '${data['orders']} bestellingen',
+                                  style: TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
                             ),
-                            Text(
-                              '${data['orders']} bestellingen',
-                              style: TextStyle(
-                                color: AppColors.textSecondary,
-                                fontSize: 12,
-                              ),
+                          ),
+                          Expanded(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  '€${data['revenue']}',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                                Text(
+                                  'Omzet',
+                                  style: TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                          Expanded(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  '${data['margin']}%',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                    color: data['margin'] > 70
+                                        ? Colors.green
+                                        : data['margin'] > 50
+                                            ? Colors.orange
+                                            : Colors.red,
+                                  ),
+                                ),
+                                Text(
+                                  'Marge',
+                                  style: TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '€${data['revenue']}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                              ),
-                            ),
-                            Text(
-                              'Omzet',
-                              style: TextStyle(
-                                color: AppColors.textSecondary,
-                                fontSize: 10,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '${data['margin']}%',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                                color: data['margin'] > 70 ? Colors.green : 
-                                       data['margin'] > 50 ? Colors.orange : Colors.red,
-                              ),
-                            ),
-                            Text(
-                              'Marge',
-                              style: TextStyle(
-                                color: AppColors.textSecondary,
-                                fontSize: 10,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }).toList() ?? [],
+                    ),
+                  );
+                }).toList() ??
+                [],
           ),
         ],
       ),
@@ -1047,7 +1098,7 @@ class _CateraarReportsPageState extends ConsumerState<CateraarReportsPage>
 
   Widget _buildMarketingTab() {
     final marketing = _reportsData['marketing'] ?? {};
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -1057,11 +1108,11 @@ class _CateraarReportsPageState extends ConsumerState<CateraarReportsPage>
           Text(
             'QR Scan Bronnen',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 16),
-          
+
           GridView.count(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -1069,223 +1120,243 @@ class _CateraarReportsPageState extends ConsumerState<CateraarReportsPage>
             childAspectRatio: 1.2,
             crossAxisSpacing: 12,
             mainAxisSpacing: 12,
-            children: (marketing['qr_scan_sources'] as Map<String, dynamic>?)?.entries.map((entry) {
-              IconData icon;
-              Color color;
-              
-              switch (entry.key) {
-                case 'Tafel QR':
-                  icon = Icons.table_restaurant;
-                  color = Colors.blue;
-                  break;
-                case 'Social Media':
-                  icon = Icons.share;
-                  color = Colors.purple;
-                  break;
-                case 'Website':
-                  icon = Icons.web;
-                  color = Colors.green;
-                  break;
-                default:
-                  icon = Icons.qr_code;
-                  color = Colors.grey;
-              }
-              
-              return Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(icon, color: color, size: 32),
-                      const SizedBox(height: 8),
-                      Text(
-                        entry.key,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      Text(
-                        '${entry.value}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }).toList() ?? [],
-          ),
-          
-          const SizedBox(height: 24),
-          
-          // Referral Sources
-          Text(
-            'Verwijzingsbronnen',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 16),
-          
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: (marketing['referral_sources'] as Map<String, dynamic>?)?.entries.map((entry) {
-                  final total = (marketing['referral_sources'] as Map<String, dynamic>).values.fold(0, (sum, value) => sum + value);
-                  final percentage = (entry.value / total * 100).toStringAsFixed(1);
-                  
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: 2,
-                          child: Text(
-                            entry.key,
-                            style: const TextStyle(fontWeight: FontWeight.w500),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 3,
-                          child: LinearProgressIndicator(
-                            value: entry.value / total,
-                            backgroundColor: Colors.grey[300],
-                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          '${entry.value}',
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '($percentage%)',
-                          style: TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList() ?? [],
-              ),
-            ),
-          ),
-          
-          const SizedBox(height: 24),
-          
-          // Campaign Performance
-          Text(
-            'Campagne Prestaties',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 16),
-          
-          Column(
-            children: (marketing['campaign_performance'] as List<dynamic>?)?.map((campaign) {
-              return Card(
-                margin: const EdgeInsets.only(bottom: 12),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        campaign['name'],
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
+            children: (marketing['qr_scan_sources'] as Map<String, dynamic>?)
+                    ?.entries
+                    .map((entry) {
+                  IconData icon;
+                  Color color;
+
+                  switch (entry.key) {
+                    case 'Tafel QR':
+                      icon = Icons.table_restaurant;
+                      color = Colors.blue;
+                      break;
+                    case 'Social Media':
+                      icon = Icons.share;
+                      color = Colors.purple;
+                      break;
+                    case 'Website':
+                      icon = Icons.web;
+                      color = Colors.green;
+                      break;
+                    default:
+                      icon = Icons.qr_code;
+                      color = Colors.grey;
+                  }
+
+                  return Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Expanded(
-                            child: Column(
-                              children: [
-                                Text(
-                                  '${campaign['clicks']}',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                  ),
-                                ),
-                                Text(
-                                  'Clicks',
-                                  style: TextStyle(
-                                    color: AppColors.textSecondary,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
+                          Icon(icon, color: color, size: 32),
+                          const SizedBox(height: 8),
+                          Text(
+                            entry.key,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
                             ),
+                            textAlign: TextAlign.center,
                           ),
-                          Expanded(
-                            child: Column(
-                              children: [
-                                Text(
-                                  '${campaign['conversions']}',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                  ),
-                                ),
-                                Text(
-                                  'Conversies',
-                                  style: TextStyle(
-                                    color: AppColors.textSecondary,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            child: Column(
-                              children: [
-                                Text(
-                                  '${campaign['roi']}%',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                    color: campaign['roi'] > 200 ? Colors.green : 
-                                           campaign['roi'] > 100 ? Colors.orange : Colors.red,
-                                  ),
-                                ),
-                                Text(
-                                  'ROI',
-                                  style: TextStyle(
-                                    color: AppColors.textSecondary,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
+                          Text(
+                            '${entry.value}',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                  );
+                }).toList() ??
+                [],
+          ),
+
+          const SizedBox(height: 24),
+
+          // Referral Sources
+          Text(
+            'Verwijzingsbronnen',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
                 ),
-              );
-            }).toList() ?? [],
+          ),
+          const SizedBox(height: 16),
+
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: (marketing['referral_sources']
+                            as Map<String, dynamic>?)
+                        ?.entries
+                        .map((entry) {
+                      final total = (marketing['referral_sources']
+                              as Map<String, dynamic>)
+                          .values
+                          .fold(0, (sum, value) => sum + value);
+                      final percentage =
+                          (entry.value / total * 100).toStringAsFixed(1);
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: Text(
+                                entry.key,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w500),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 3,
+                              child: LinearProgressIndicator(
+                                value: entry.value / total,
+                                backgroundColor: Colors.grey[300],
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                    AppColors.primary),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              '${entry.value}',
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              '($percentage%)',
+                              style: TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList() ??
+                    [],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // Campaign Performance
+          Text(
+            'Campagne Prestaties',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 16),
+
+          Column(
+            children: (marketing['campaign_performance'] as List<dynamic>?)
+                    ?.map((campaign) {
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            campaign['name'],
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      '${campaign['clicks']}',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Clicks',
+                                      style: TextStyle(
+                                        color: AppColors.textSecondary,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      '${campaign['conversions']}',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Conversies',
+                                      style: TextStyle(
+                                        color: AppColors.textSecondary,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      '${campaign['roi']}%',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                        color: campaign['roi'] > 200
+                                            ? Colors.green
+                                            : campaign['roi'] > 100
+                                                ? Colors.orange
+                                                : Colors.red,
+                                      ),
+                                    ),
+                                    Text(
+                                      'ROI',
+                                      style: TextStyle(
+                                        color: AppColors.textSecondary,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList() ??
+                [],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildMetricCard(String title, String value, IconData icon, Color color, String? growth) {
+  Widget _buildMetricCard(
+      String title, String value, IconData icon, Color color, String? growth) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -1298,15 +1369,19 @@ class _CateraarReportsPageState extends ConsumerState<CateraarReportsPage>
                 const Spacer(),
                 if (growth != null)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: growth.startsWith('-') ? Colors.red.withOpacity(0.1) : Colors.green.withOpacity(0.1),
+                      color: growth.startsWith('-')
+                          ? Colors.AppColors.withAlphaFraction(red, 0.1)
+                          : Colors.AppColors.withAlphaFraction(green, 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       growth,
                       style: TextStyle(
-                        color: growth.startsWith('-') ? Colors.red : Colors.green,
+                        color:
+                            growth.startsWith('-') ? Colors.red : Colors.green,
                         fontSize: 10,
                         fontWeight: FontWeight.w500,
                       ),
@@ -1337,7 +1412,7 @@ class _CateraarReportsPageState extends ConsumerState<CateraarReportsPage>
 
   Future<void> _exportReport(String format) async {
     setState(() => _isExporting = true);
-    
+
     try {
       await _apiService.exportReport(
         format: format,
@@ -1345,9 +1420,9 @@ class _CateraarReportsPageState extends ConsumerState<CateraarReportsPage>
         restaurantId: _selectedRestaurant,
         reportType: _reportTypes[_tabController.index]['id'],
       );
-      
+
       setState(() => _isExporting = false);
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Rapport geëxporteerd als ${format.toUpperCase()}'),
@@ -1370,7 +1445,8 @@ class _CateraarReportsPageState extends ConsumerState<CateraarReportsPage>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Rapport Inplannen'),
-        content: const Text('Automatische rapporten worden binnenkort toegevoegd.'),
+        content:
+            const Text('Automatische rapporten worden binnenkort toegevoegd.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -1383,8 +1459,8 @@ class _CateraarReportsPageState extends ConsumerState<CateraarReportsPage>
 
   void _shareReport() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Rapport delen wordt binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('Rapport delen wordt binnenkort toegevoegd')),
     );
   }
 }
-
