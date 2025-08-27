@@ -293,6 +293,15 @@ class ApiService {
     return response.data;
   }
 
+  Future<Map<String, dynamic>> markAllNotificationsRead() async {
+    final response = await _dio.put('/notifications/read-all');
+    return response.data;
+  }
+
+  Future<void> clearAllNotifications() async {
+    await _dio.delete('/notifications/clear-all');
+  }
+
   Future<void> deleteNotification(int id) async {
     await _dio.delete('/notifications/$id');
   }
@@ -576,6 +585,23 @@ class ApiService {
     return response.data;
   }
 
+  Future<Map<String, dynamic>> getMenuItems({
+    int page = 1,
+    int perPage = 20,
+    int? menuId,
+    int? restaurantId,
+    String? search,
+  }) async {
+    final response = await _dio.get('/menu-items', queryParameters: {
+      'page': page,
+      'per_page': perPage,
+      if (menuId != null) 'menu_id': menuId,
+      if (restaurantId != null) 'restaurant_id': restaurantId,
+      if (search != null && search.isNotEmpty) 'search': search,
+    });
+    return response.data;
+  }
+
   Future<Map<String, dynamic>> createMenuItem(
       Map<String, dynamic> menuItemData) async {
     final response = await _dio.post('/menu-items', data: menuItemData);
@@ -690,6 +716,17 @@ class ApiService {
     return response.data;
   }
 
+  Future<Map<String, dynamic>> uploadProfileImage(String filePath) async {
+    final fileName = filePath.split('/').last;
+    final formData = FormData.fromMap({
+      'image': await MultipartFile.fromFile(filePath, filename: fileName),
+    });
+
+    final response = await _dio.post('/api/v1/profile/image', data: formData);
+    // Backend geeft: { "image_url": "https://.../uploads/..." }
+    return response.data as Map<String, dynamic>;
+  }
+
   Future<Map<String, dynamic>> changePassword({
     required String currentPassword,
     required String newPassword,
@@ -717,6 +754,29 @@ class ApiService {
       'language': language,
     });
     return response.data;
+  }
+
+  // === Business Profile ===
+  Future<Map<String, dynamic>> getBusinessProfile() async {
+    final response = await _dio.get('/api/v1/business');
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>> updateBusinessProfile(
+      Map<String, dynamic> body) async {
+    final response = await _dio.patch('/api/v1/business', data: body);
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>> uploadCompanyLogo(String filePath) async {
+    final fileName = filePath.split('/').last;
+    final formData = FormData.fromMap({
+      'logo': await MultipartFile.fromFile(filePath, filename: fileName),
+    });
+
+    final response = await _dio.post('/api/v1/business/logo', data: formData);
+    // Backend geeft: { "logo_url": "https://.../uploads/..." }
+    return response.data as Map<String, dynamic>;
   }
 
   // External integrations
