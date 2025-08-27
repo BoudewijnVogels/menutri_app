@@ -10,22 +10,23 @@ import '../../../../core/models/menu_item.dart';
 
 class RestaurantDetailPage extends ConsumerStatefulWidget {
   final int restaurantId;
-  
+
   const RestaurantDetailPage({
     super.key,
     required this.restaurantId,
   });
 
   @override
-  ConsumerState<RestaurantDetailPage> createState() => _RestaurantDetailPageState();
+  ConsumerState<RestaurantDetailPage> createState() =>
+      _RestaurantDetailPageState();
 }
 
-class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> 
+class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
     with TickerProviderStateMixin {
   final ApiService _apiService = ApiService();
   late TabController _tabController;
   late PageController _imageController;
-  
+
   Restaurant? _restaurant;
   List<MenuItem> _menuItems = [];
   List<Map<String, dynamic>> _reviews = [];
@@ -60,7 +61,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
         _apiService.checkIfFavorite('restaurant', widget.restaurantId),
         _apiService.getRestaurantImages(widget.restaurantId),
       ]);
-      
+
       setState(() {
         _restaurant = Restaurant.fromJson(futures[0]['restaurant']);
         _menuItems = (futures[1]['menu_items'] as List)
@@ -69,7 +70,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
         _reviews = List<Map<String, dynamic>>.from(futures[2]['reviews'] ?? []);
         _isFavorite = futures[3]['is_favorite'] ?? false;
         _images = List<String>.from(futures[4]['images'] ?? []);
-        
+
         if (_images.isEmpty && _restaurant?.imageUrl != null) {
           _images.add(_restaurant!.imageUrl!);
         }
@@ -181,7 +182,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                   color: AppColors.textSecondary,
                 ),
               ),
-            
+
             // Gradient overlay
             Container(
               decoration: BoxDecoration(
@@ -190,12 +191,12 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    Colors.black.withOpacity(0.7),
+                    Colors.AppColors.withAlphaFraction(AppColors.black, 0.7),
                   ],
                 ),
               ),
             ),
-            
+
             // Image indicators
             if (_images.length > 1)
               Positioned(
@@ -213,13 +214,13 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                         shape: BoxShape.circle,
                         color: _currentImageIndex == entry.key
                             ? Colors.white
-                            : Colors.white.withOpacity(0.4),
+                            : Colors.AppColors.withAlphaFraction(white, 0.4),
                       ),
                     );
                   }).toList(),
                 ),
               ),
-            
+
             // Restaurant info overlay
             Positioned(
               bottom: 16,
@@ -231,9 +232,9 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                   Text(
                     _restaurant!.name,
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                   const SizedBox(height: 8),
                   Row(
@@ -243,16 +244,17 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                       Text(
                         '${_restaurant!.rating.toStringAsFixed(1)}',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
                       ),
                       const SizedBox(width: 4),
                       Text(
                         '(${_reviews.length} reviews)',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.white.withOpacity(0.8),
-                        ),
+                              color: Colors.AppColors.withAlphaFraction(
+                                  white, 0.8),
+                            ),
                       ),
                       const SizedBox(width: 16),
                       Icon(Icons.location_on, color: Colors.white, size: 20),
@@ -260,9 +262,10 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                       Expanded(
                         child: Text(
                           _restaurant!.address,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.white,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Colors.white,
+                                  ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -271,7 +274,8 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      _buildStatusChip(_restaurant!.isOpen ? 'Open' : 'Gesloten',
+                      _buildStatusChip(
+                          _restaurant!.isOpen ? 'Open' : 'Gesloten',
                           _restaurant!.isOpen ? Colors.green : Colors.red),
                       const SizedBox(width: 8),
                       if (_restaurant!.deliveryAvailable)
@@ -363,9 +367,9 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                     _formatOpeningHours(_restaurant!.openingHours)),
               ],
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Description
             if (_restaurant!.description != null) ...[
               _buildInfoCard(
@@ -379,7 +383,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
               ),
               const SizedBox(height: 16),
             ],
-            
+
             // Cuisine types
             if (_restaurant!.cuisineTypes.isNotEmpty) ...[
               _buildInfoCard(
@@ -400,7 +404,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
               ),
               const SizedBox(height: 16),
             ],
-            
+
             // Features
             _buildInfoCard(
               'Voorzieningen',
@@ -410,21 +414,26 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                   runSpacing: 8,
                   children: [
                     if (_restaurant!.deliveryAvailable)
-                      _buildFeatureChip('Bezorging', Icons.delivery_dining, Colors.blue),
+                      _buildFeatureChip(
+                          'Bezorging', Icons.delivery_dining, Colors.blue),
                     if (_restaurant!.takeawayAvailable)
-                      _buildFeatureChip('Afhalen', Icons.takeout_dining, Colors.orange),
+                      _buildFeatureChip(
+                          'Afhalen', Icons.takeout_dining, Colors.orange),
                     if (_restaurant!.reservationRequired)
-                      _buildFeatureChip('Reservering vereist', Icons.event_seat, Colors.purple),
-                    _buildFeatureChip('Toegankelijk', Icons.accessible, Colors.green),
+                      _buildFeatureChip('Reservering vereist', Icons.event_seat,
+                          Colors.purple),
+                    _buildFeatureChip(
+                        'Toegankelijk', Icons.accessible, Colors.green),
                     _buildFeatureChip('WiFi', Icons.wifi, Colors.teal),
-                    _buildFeatureChip('Parking', Icons.local_parking, Colors.indigo),
+                    _buildFeatureChip(
+                        'Parking', Icons.local_parking, Colors.indigo),
                   ],
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Location
             _buildInfoCard(
               'Locatie & Routebeschrijving',
@@ -439,13 +448,15 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                     borderRadius: BorderRadius.circular(12),
                     child: GoogleMap(
                       initialCameraPosition: CameraPosition(
-                        target: LatLng(_restaurant!.latitude, _restaurant!.longitude),
+                        target: LatLng(
+                            _restaurant!.latitude, _restaurant!.longitude),
                         zoom: 15,
                       ),
                       markers: {
                         Marker(
                           markerId: MarkerId('restaurant_${_restaurant!.id}'),
-                          position: LatLng(_restaurant!.latitude, _restaurant!.longitude),
+                          position: LatLng(
+                              _restaurant!.latitude, _restaurant!.longitude),
                           infoWindow: InfoWindow(
                             title: _restaurant!.name,
                             snippet: _restaurant!.address,
@@ -465,8 +476,8 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                 Text(
                   _restaurant!.address,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+                        fontWeight: FontWeight.w500,
+                      ),
                 ),
                 const SizedBox(height: 12),
                 Row(
@@ -509,20 +520,21 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.restaurant_menu, size: 64, color: AppColors.textSecondary),
+            Icon(Icons.restaurant_menu,
+                size: 64, color: AppColors.textSecondary),
             const SizedBox(height: 16),
             Text(
               'Geen menu beschikbaar',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               'Het menu wordt binnenkort toegevoegd',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
           ],
         ),
@@ -545,7 +557,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
         itemBuilder: (context, index) {
           final category = groupedItems.keys.elementAt(index);
           final items = groupedItems[category]!;
-          
+
           return _buildMenuCategory(category, items);
         },
       ),
@@ -560,20 +572,21 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.rate_review, size: 64, color: AppColors.textSecondary),
+                  Icon(Icons.rate_review,
+                      size: 64, color: AppColors.textSecondary),
                   const SizedBox(height: 16),
                   Text(
                     'Geen reviews',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                          color: AppColors.textSecondary,
+                        ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Wees de eerste om een review te schrijven!',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                          color: AppColors.textSecondary,
+                        ),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton.icon(
@@ -592,7 +605,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                   color: AppColors.surface,
                   child: _buildReviewSummary(),
                 ),
-                
+
                 // Reviews list
                 Expanded(
                   child: ListView.builder(
@@ -620,9 +633,9 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
             Text(
               title,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppColors.primary,
-              ),
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
             ),
             const SizedBox(height: 12),
             ...children,
@@ -632,7 +645,8 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String label, String value, {VoidCallback? onTap}) {
+  Widget _buildInfoRow(IconData icon, String label, String value,
+      {VoidCallback? onTap}) {
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -644,16 +658,17 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
             Text(
               '$label: ',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             Expanded(
               child: Text(
                 value,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: onTap != null ? AppColors.primary : null,
-                  decoration: onTap != null ? TextDecoration.underline : null,
-                ),
+                      color: onTap != null ? AppColors.primary : null,
+                      decoration:
+                          onTap != null ? TextDecoration.underline : null,
+                    ),
               ),
             ),
             if (onTap != null)
@@ -668,7 +683,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
     return Chip(
       avatar: Icon(icon, size: 16, color: color),
       label: Text(label),
-      backgroundColor: color.withOpacity(0.1),
+      backgroundColor: AppColors.withAlphaFraction(color, 0.1),
       labelStyle: TextStyle(color: color, fontWeight: FontWeight.w500),
     );
   }
@@ -687,13 +702,14 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                 Text(
                   category,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
-                  ),
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
                 ),
                 const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: AppColors.primaryContainer,
                     borderRadius: BorderRadius.circular(12),
@@ -721,7 +737,8 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
     // Calculate calorie margin color
     Color calorieColor = AppColors.calorieMarginGrey;
     if (item.calories != null) {
-      final margin = (item.calories! / 500 * 100) - 100; // Assuming 500 as target
+      final margin =
+          (item.calories! / 500 * 100) - 100; // Assuming 500 as target
       if (margin <= 5) {
         calorieColor = AppColors.calorieMarginGrey;
       } else if (margin <= 10) {
@@ -749,33 +766,33 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                 child: Text(
                   item.name,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
               ),
               if (item.price != null)
                 Text(
                   '€${item.price!.toStringAsFixed(2)}',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
-                  ),
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
                 ),
             ],
           ),
-          
+
           if (item.description != null) ...[
             const SizedBox(height: 4),
             Text(
               item.description!,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
           ],
-          
+
           const SizedBox(height: 8),
-          
+
           // Nutrition and allergen info
           Wrap(
             spacing: 8,
@@ -783,72 +800,73 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
             children: [
               if (item.calories != null)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: calorieColor.withOpacity(0.1),
+                    color: AppColors.withAlphaFraction(calorieColor, 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     '${item.calories!.round()} kcal',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: calorieColor,
-                      fontWeight: FontWeight.w600,
-                    ),
+                          color: calorieColor,
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                 ),
-              
               if (item.allergens.isNotEmpty)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.1),
+                    color: Colors.AppColors.withAlphaFraction(orange, 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     'Allergenen: ${item.allergens.join(', ')}',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Colors.orange,
-                      fontWeight: FontWeight.w600,
-                    ),
+                          color: Colors.orange,
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                 ),
-              
               if (item.isVegetarian)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.1),
+                    color: Colors.AppColors.withAlphaFraction(green, 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     'Vegetarisch',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Colors.green,
-                      fontWeight: FontWeight.w600,
-                    ),
+                          color: Colors.green,
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                 ),
-              
               if (item.isVegan)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.lightGreen.withOpacity(0.1),
+                    color: Colors.AppColors.withAlphaFraction(lightGreen, 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     'Veganistisch',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Colors.lightGreen,
-                      fontWeight: FontWeight.w600,
-                    ),
+                          color: Colors.lightGreen,
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                 ),
             ],
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           // Action buttons
           Row(
             children: [
@@ -881,13 +899,13 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
   Widget _buildReviewSummary() {
     final avgRating = _restaurant!.rating;
     final totalReviews = _reviews.length;
-    
+
     // Calculate rating distribution
     final ratingCounts = <int, int>{};
     for (int i = 1; i <= 5; i++) {
       ratingCounts[i] = 0;
     }
-    
+
     for (final review in _reviews) {
       final rating = (review['rating'] as num?)?.round() ?? 0;
       if (rating >= 1 && rating <= 5) {
@@ -904,22 +922,26 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                 Text(
                   avgRating.toStringAsFixed(1),
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
-                  ),
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
                 ),
                 Row(
-                  children: List.generate(5, (index) => Icon(
-                    index < avgRating.round() ? Icons.star : Icons.star_border,
-                    color: Colors.amber,
-                    size: 20,
-                  )),
+                  children: List.generate(
+                      5,
+                      (index) => Icon(
+                            index < avgRating.round()
+                                ? Icons.star
+                                : Icons.star_border,
+                            color: Colors.amber,
+                            size: 20,
+                          )),
                 ),
                 Text(
                   '$totalReviews reviews',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+                        color: AppColors.textSecondary,
+                      ),
                 ),
               ],
             ),
@@ -936,11 +958,12 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                           const SizedBox(width: 8),
                           Expanded(
                             child: LinearProgressIndicator(
-                              value: totalReviews > 0 
-                                  ? (ratingCounts[i]! / totalReviews) 
+                              value: totalReviews > 0
+                                  ? (ratingCounts[i]! / totalReviews)
                                   : 0,
                               backgroundColor: AppColors.outline,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.amber),
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.amber),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -975,7 +998,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
     final comment = review['comment'] ?? '';
     final userName = review['user_name'] ?? 'Anoniem';
     final createdAt = DateTime.tryParse(review['created_at'] ?? '');
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
@@ -1000,23 +1023,30 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                       Text(
                         userName,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                              fontWeight: FontWeight.w600,
+                            ),
                       ),
                       Row(
                         children: [
-                          ...List.generate(5, (index) => Icon(
-                            index < rating ? Icons.star : Icons.star_border,
-                            color: Colors.amber,
-                            size: 16,
-                          )),
+                          ...List.generate(
+                              5,
+                              (index) => Icon(
+                                    index < rating
+                                        ? Icons.star
+                                        : Icons.star_border,
+                                    color: Colors.amber,
+                                    size: 16,
+                                  )),
                           const SizedBox(width: 8),
                           if (createdAt != null)
                             Text(
                               '${createdAt.day}/${createdAt.month}/${createdAt.year}',
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
                             ),
                         ],
                       ),
@@ -1025,7 +1055,6 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                 ),
               ],
             ),
-            
             if (comment.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(
@@ -1063,19 +1092,29 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
 
   String _formatOpeningHours(Map<String, dynamic>? openingHours) {
     if (openingHours == null) return 'Niet beschikbaar';
-    
+
     // Format opening hours from map
     final today = DateTime.now().weekday;
-    final dayNames = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    final dayNames = [
+      'monday',
+      'tuesday',
+      'wednesday',
+      'thursday',
+      'friday',
+      'saturday',
+      'sunday'
+    ];
     final todayName = dayNames[today - 1];
-    
+
     if (openingHours.containsKey(todayName)) {
       final todayHours = openingHours[todayName];
-      if (todayHours is Map && todayHours.containsKey('open') && todayHours.containsKey('close')) {
+      if (todayHours is Map &&
+          todayHours.containsKey('open') &&
+          todayHours.containsKey('close')) {
         return 'Vandaag: ${todayHours['open']} - ${todayHours['close']}';
       }
     }
-    
+
     return 'Ma-Zo: 09:00-22:00'; // Fallback
   }
 
@@ -1086,16 +1125,16 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
       } else {
         await _apiService.addFavorite('restaurant', widget.restaurantId);
       }
-      
+
       setState(() {
         _isFavorite = !_isFavorite;
       });
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(_isFavorite 
-                ? 'Restaurant toegevoegd aan favorieten' 
+            content: Text(_isFavorite
+                ? 'Restaurant toegevoegd aan favorieten'
                 : 'Restaurant verwijderd uit favorieten'),
           ),
         );
@@ -1131,7 +1170,8 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
 
   Future<void> _openInMaps() async {
     try {
-      final url = 'https://www.google.com/maps/search/?api=1&query=${_restaurant!.latitude},${_restaurant!.longitude}';
+      final url =
+          'https://www.google.com/maps/search/?api=1&query=${_restaurant!.latitude},${_restaurant!.longitude}';
       if (await canLaunchUrl(Uri.parse(url))) {
         await launchUrl(Uri.parse(url));
       } else {
@@ -1148,7 +1188,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
 
   Future<void> _callRestaurant() async {
     if (_restaurant!.phone == null) return;
-    
+
     try {
       final url = 'tel:${_restaurant!.phone}';
       if (await canLaunchUrl(Uri.parse(url))) {
@@ -1167,7 +1207,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
 
   Future<void> _emailRestaurant() async {
     if (_restaurant!.email == null) return;
-    
+
     try {
       final url = 'mailto:${_restaurant!.email}';
       if (await canLaunchUrl(Uri.parse(url))) {
@@ -1186,7 +1226,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
 
   Future<void> _openWebsite() async {
     if (_restaurant!.website == null) return;
-    
+
     try {
       final url = _restaurant!.website!;
       if (await canLaunchUrl(Uri.parse(url))) {
@@ -1361,14 +1401,14 @@ class _ReviewDialogState extends State<_ReviewDialog> {
 
   Future<void> _submitReview() async {
     setState(() => _isSubmitting = true);
-    
+
     try {
       await _apiService.submitReview(
         widget.restaurantId,
         _rating,
         _commentController.text.trim(),
       );
-      
+
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1389,4 +1429,3 @@ class _ReviewDialogState extends State<_ReviewDialog> {
     }
   }
 }
-
