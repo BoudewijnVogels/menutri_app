@@ -14,7 +14,7 @@ class RestaurantsPage extends ConsumerStatefulWidget {
 class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
   final ApiService _apiService = ApiService();
   final TextEditingController _searchController = TextEditingController();
-  
+
   bool _isLoading = true;
   List<Map<String, dynamic>> _restaurants = [];
   List<Map<String, dynamic>> _filteredRestaurants = [];
@@ -42,11 +42,12 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
 
   Future<void> _loadRestaurants() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final response = await _apiService.getRestaurants();
-      final restaurants = List<Map<String, dynamic>>.from(response['restaurants'] ?? []);
-      
+      final restaurants =
+          List<Map<String, dynamic>>.from(response['restaurants'] ?? []);
+
       setState(() {
         _restaurants = restaurants;
         _filteredRestaurants = restaurants;
@@ -64,13 +65,14 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
 
   void _filterRestaurants() {
     final query = _searchController.text.toLowerCase();
-    
+
     setState(() {
       _filteredRestaurants = _restaurants.where((restaurant) {
-        final matchesSearch = restaurant['name']?.toLowerCase().contains(query) ?? false;
-        final matchesFilter = _selectedFilter == 'all' || 
-                             restaurant['status'] == _selectedFilter;
-        
+        final matchesSearch =
+            restaurant['name']?.toLowerCase().contains(query) ?? false;
+        final matchesFilter =
+            _selectedFilter == 'all' || restaurant['status'] == _selectedFilter;
+
         return matchesSearch && matchesFilter;
       }).toList();
     });
@@ -101,7 +103,8 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
               color: AppColors.surface,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color:
+                      Colors.AppColors.withAlphaFraction(AppColors.black, 0.05),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
@@ -131,9 +134,9 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
                     fillColor: AppColors.background,
                   ),
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Filter chips
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
@@ -152,11 +155,16 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
                             _filterRestaurants();
                           },
                           backgroundColor: AppColors.background,
-                          selectedColor: AppColors.primary.withOpacity(0.2),
+                          selectedColor: AppColors.withAlphaFraction(
+                              AppColors.primary, 0.2),
                           checkmarkColor: AppColors.primary,
                           labelStyle: TextStyle(
-                            color: isSelected ? AppColors.primary : AppColors.textSecondary,
-                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                            color: isSelected
+                                ? AppColors.primary
+                                : AppColors.textSecondary,
+                            fontWeight: isSelected
+                                ? FontWeight.w600
+                                : FontWeight.normal,
                           ),
                         ),
                       );
@@ -166,7 +174,7 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
               ],
             ),
           ),
-          
+
           // Restaurants list
           Expanded(
             child: _isLoading
@@ -213,8 +221,8 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
                   ? 'Geen restaurants gevonden'
                   : 'Nog geen restaurants',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
@@ -222,8 +230,8 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
                   ? 'Probeer een andere zoekopdracht of filter'
                   : 'Voeg je eerste restaurant toe om te beginnen',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
             if (_searchController.text.isEmpty && _selectedFilter == 'all') ...[
@@ -270,7 +278,8 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
                     width: 60,
                     height: 60,
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
+                      color:
+                          AppColors.withAlphaFraction(AppColors.primary, 0.1),
                       borderRadius: BorderRadius.circular(8),
                       image: restaurant['image_url'] != null
                           ? DecorationImage(
@@ -287,9 +296,9 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
                           )
                         : null,
                   ),
-                  
+
                   const SizedBox(width: 16),
-                  
+
                   // Restaurant info
                   Expanded(
                     child: Column(
@@ -300,44 +309,49 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
                             Expanded(
                               child: Text(
                                 restaurant['name'] ?? '',
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: statusColor.withOpacity(0.1),
+                                color: AppColors.withAlphaFraction(
+                                    statusColor, 0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
                                 statusText,
-                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                  color: statusColor,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(
+                                      color: statusColor,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                               ),
                             ),
                           ],
                         ),
-                        
                         const SizedBox(height: 4),
-                        
                         if (restaurant['cuisine_types'] != null)
                           Text(
                             (restaurant['cuisine_types'] as List).join(', '),
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                        
                         const SizedBox(height: 4),
-                        
                         Row(
                           children: [
                             Icon(
@@ -349,9 +363,12 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
                             Expanded(
                               child: Text(
                                 '${restaurant['address'] ?? 'Geen adres'}',
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -361,7 +378,7 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
                       ],
                     ),
                   ),
-                  
+
                   // More options
                   PopupMenuButton<String>(
                     onSelected: (value) => _handleMenuAction(value, restaurant),
@@ -404,7 +421,8 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
                           leading: Icon(
                             status == 'active' ? Icons.pause : Icons.play_arrow,
                           ),
-                          title: Text(status == 'active' ? 'Deactiveren' : 'Activeren'),
+                          title: Text(
+                              status == 'active' ? 'Deactiveren' : 'Activeren'),
                           contentPadding: EdgeInsets.zero,
                         ),
                       ),
@@ -412,7 +430,8 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
                         value: 'delete',
                         child: ListTile(
                           leading: Icon(Icons.delete, color: Colors.red),
-                          title: Text('Verwijderen', style: TextStyle(color: Colors.red)),
+                          title: Text('Verwijderen',
+                              style: TextStyle(color: Colors.red)),
                           contentPadding: EdgeInsets.zero,
                         ),
                       ),
@@ -420,9 +439,9 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Stats row
               Row(
                 children: [
@@ -455,7 +474,7 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
                   ),
                 ],
               ),
-              
+
               if (restaurant['description'] != null) ...[
                 const SizedBox(height: 12),
                 Text(
@@ -489,14 +508,14 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
             Text(
               value,
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             Text(
               label,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
           ],
         ),
@@ -539,7 +558,8 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
         context.push('/cateraar/restaurants/${restaurant['id']}/menu');
         break;
       case 'qr':
-        context.push('/cateraar/qr-generator?restaurant_id=${restaurant['id']}');
+        context
+            .push('/cateraar/qr-generator?restaurant_id=${restaurant['id']}');
         break;
       case 'analytics':
         context.push('/cateraar/analytics?restaurant_id=${restaurant['id']}');
@@ -556,17 +576,17 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
 
   Future<void> _toggleRestaurantStatus(Map<String, dynamic> restaurant) async {
     final newStatus = restaurant['status'] == 'active' ? 'inactive' : 'active';
-    
+
     try {
       await _apiService.updateRestaurant(
         restaurant['id'],
         {'status': newStatus},
       );
-      
+
       setState(() {
         restaurant['status'] = newStatus;
       });
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -621,12 +641,12 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
   Future<void> _deleteRestaurant(Map<String, dynamic> restaurant) async {
     try {
       await _apiService.deleteRestaurant(restaurant['id']);
-      
+
       setState(() {
         _restaurants.removeWhere((r) => r['id'] == restaurant['id']);
         _filteredRestaurants.removeWhere((r) => r['id'] == restaurant['id']);
       });
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -647,4 +667,3 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
     }
   }
 }
-
