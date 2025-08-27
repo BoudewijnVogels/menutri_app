@@ -7,22 +7,23 @@ class CateraarPromotionsPage extends ConsumerStatefulWidget {
   const CateraarPromotionsPage({super.key});
 
   @override
-  ConsumerState<CateraarPromotionsPage> createState() => _CateraarPromotionsPageState();
+  ConsumerState<CateraarPromotionsPage> createState() =>
+      _CateraarPromotionsPageState();
 }
 
 class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
     with TickerProviderStateMixin {
   final ApiService _apiService = ApiService();
-  
+
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
-  
+
   bool _isLoading = true;
   List<Map<String, dynamic>> _promotions = [];
   List<Map<String, dynamic>> _filteredPromotions = [];
   List<Map<String, dynamic>> _campaigns = [];
   List<Map<String, dynamic>> _templates = [];
-  
+
   String _selectedStatus = 'all';
   String _selectedType = 'all';
   String _sortBy = 'created_date';
@@ -73,17 +74,20 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
 
   Future<void> _loadPromotionsData() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final response = await _apiService.getPromotionsData();
-      
+
       setState(() {
-        _promotions = List<Map<String, dynamic>>.from(response['promotions'] ?? []);
-        _campaigns = List<Map<String, dynamic>>.from(response['campaigns'] ?? []);
-        _templates = List<Map<String, dynamic>>.from(response['templates'] ?? []);
+        _promotions =
+            List<Map<String, dynamic>>.from(response['promotions'] ?? []);
+        _campaigns =
+            List<Map<String, dynamic>>.from(response['campaigns'] ?? []);
+        _templates =
+            List<Map<String, dynamic>>.from(response['templates'] ?? []);
         _isLoading = false;
       });
-      
+
       _filterPromotions();
     } catch (e) {
       setState(() {
@@ -116,7 +120,13 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
         'restaurants': ['1', '2'],
         'menu_items': ['drinks'],
         'time_restrictions': '17:00-19:00',
-        'day_restrictions': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
+        'day_restrictions': [
+          'monday',
+          'tuesday',
+          'wednesday',
+          'thursday',
+          'friday'
+        ],
       },
       {
         'id': '2',
@@ -247,7 +257,13 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
         'discount_type': 'percentage',
         'discount_value': 25,
         'time_restrictions': '17:00-19:00',
-        'day_restrictions': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
+        'day_restrictions': [
+          'monday',
+          'tuesday',
+          'wednesday',
+          'thursday',
+          'friday'
+        ],
         'usage_count': 12,
       },
       {
@@ -275,39 +291,51 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
 
   void _filterPromotions() {
     List<Map<String, dynamic>> filtered = List.from(_promotions);
-    
+
     // Search filter
     if (_searchController.text.isNotEmpty) {
       filtered = filtered.where((promotion) {
-        return promotion['name'].toLowerCase().contains(_searchController.text.toLowerCase()) ||
-               promotion['description'].toLowerCase().contains(_searchController.text.toLowerCase());
+        return promotion['name']
+                .toLowerCase()
+                .contains(_searchController.text.toLowerCase()) ||
+            promotion['description']
+                .toLowerCase()
+                .contains(_searchController.text.toLowerCase());
       }).toList();
     }
-    
+
     // Status filter
     if (_selectedStatus != 'all') {
-      filtered = filtered.where((promotion) => promotion['status'] == _selectedStatus).toList();
+      filtered = filtered
+          .where((promotion) => promotion['status'] == _selectedStatus)
+          .toList();
     }
-    
+
     // Type filter
     if (_selectedType != 'all') {
-      filtered = filtered.where((promotion) => promotion['type'] == _selectedType).toList();
+      filtered = filtered
+          .where((promotion) => promotion['type'] == _selectedType)
+          .toList();
     }
-    
+
     // Sort
     filtered.sort((a, b) {
       dynamic aValue = a[_sortBy];
       dynamic bValue = b[_sortBy];
-      
+
       if (aValue is String && bValue is String) {
-        return _sortAscending ? aValue.compareTo(bValue) : bValue.compareTo(aValue);
+        return _sortAscending
+            ? aValue.compareTo(bValue)
+            : bValue.compareTo(aValue);
       } else if (aValue is num && bValue is num) {
-        return _sortAscending ? aValue.compareTo(bValue) : bValue.compareTo(aValue);
+        return _sortAscending
+            ? aValue.compareTo(bValue)
+            : bValue.compareTo(aValue);
       }
-      
+
       return 0;
     });
-    
+
     setState(() {
       _filteredPromotions = filtered;
     });
@@ -377,7 +405,8 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
             children: [
               // Search Bar
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
@@ -400,10 +429,11 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
                   ),
                 ),
               ),
-              
+
               // Filters
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   children: [
                     Expanded(
@@ -412,7 +442,8 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
                         decoration: const InputDecoration(
                           labelText: 'Status',
                           border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          contentPadding:
+                              EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         ),
                         dropdownColor: AppColors.surface,
                         items: _statusOptions.entries.map((entry) {
@@ -434,7 +465,8 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
                         decoration: const InputDecoration(
                           labelText: 'Type',
                           border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          contentPadding:
+                              EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         ),
                         dropdownColor: AppColors.surface,
                         items: _typeOptions.entries.map((entry) {
@@ -452,18 +484,23 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
                   ],
                 ),
               ),
-              
+
               // Tabs
               TabBar(
                 controller: _tabController,
                 indicatorColor: AppColors.onPrimary,
                 labelColor: AppColors.onPrimary,
-                unselectedLabelColor: AppColors.onPrimary.withOpacity(0.7),
+                unselectedLabelColor:
+                    AppColors.withAlphaFraction(AppColors.onPrimary, 0.7),
                 isScrollable: true,
                 tabs: const [
-                  Tab(text: 'Promoties', icon: Icon(Icons.local_offer, size: 16)),
+                  Tab(
+                      text: 'Promoties',
+                      icon: Icon(Icons.local_offer, size: 16)),
                   Tab(text: 'Campagnes', icon: Icon(Icons.campaign, size: 16)),
-                  Tab(text: 'Templates', icon: Icon(Icons.template_outlined, size: 16)),
+                  Tab(
+                      text: 'Templates',
+                      icon: Icon(Icons.template_outlined, size: 16)),
                   Tab(text: 'Analytics', icon: Icon(Icons.analytics, size: 16)),
                 ],
               ),
@@ -576,7 +613,7 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
             ],
           ),
         ),
-        
+
         // Promotions List
         Expanded(
           child: ListView.builder(
@@ -595,7 +632,7 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
   Widget _buildPromotionCard(Map<String, dynamic> promotion) {
     Color statusColor;
     IconData statusIcon;
-    
+
     switch (promotion['status']) {
       case 'active':
         statusColor = Colors.green;
@@ -626,7 +663,7 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
         statusIcon = Icons.help;
     }
 
-    String discountText = promotion['discount_type'] == 'percentage' 
+    String discountText = promotion['discount_type'] == 'percentage'
         ? '${promotion['discount_value']}%'
         : '€${promotion['discount_value']}';
 
@@ -661,7 +698,8 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: AppColors.primary,
                     borderRadius: BorderRadius.circular(16),
@@ -677,9 +715,10 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
+                    color: AppColors.withAlphaFraction(statusColor, 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -744,7 +783,8 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
                           contentPadding: EdgeInsets.zero,
                         ),
                       ),
-                    if (promotion['status'] == 'paused' || promotion['status'] == 'draft')
+                    if (promotion['status'] == 'paused' ||
+                        promotion['status'] == 'draft')
                       const PopupMenuItem(
                         value: 'activate',
                         child: ListTile(
@@ -757,7 +797,8 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
                       value: 'delete',
                       child: ListTile(
                         leading: Icon(Icons.delete, color: Colors.red),
-                        title: Text('Verwijderen', style: TextStyle(color: Colors.red)),
+                        title: Text('Verwijderen',
+                            style: TextStyle(color: Colors.red)),
                         contentPadding: EdgeInsets.zero,
                       ),
                     ),
@@ -765,16 +806,13 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
                 ),
               ],
             ),
-            
             const SizedBox(height: 12),
-            
             Text(
               promotion['description'],
               style: TextStyle(
                 color: AppColors.textSecondary,
               ),
             ),
-            
             if (promotion['conditions'] != null) ...[
               const SizedBox(height: 8),
               Text(
@@ -786,9 +824,7 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
                 ),
               ),
             ],
-            
             const SizedBox(height: 12),
-            
             Row(
               children: [
                 Expanded(
@@ -803,7 +839,7 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
                         ),
                       ),
                       Text(
-                        promotion['usage_limit'] != null 
+                        promotion['usage_limit'] != null
                             ? '${promotion['usage_count']}/${promotion['usage_limit']}'
                             : '${promotion['usage_count']}',
                         style: const TextStyle(
@@ -858,7 +894,6 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
                 ),
               ],
             ),
-            
             if (promotion['usage_limit'] != null) ...[
               const SizedBox(height: 8),
               LinearProgressIndicator(
@@ -885,8 +920,9 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
   }
 
   Widget _buildCampaignCard(Map<String, dynamic> campaign) {
-    final budgetUsed = (campaign['spent'] / campaign['budget'] * 100).toStringAsFixed(1);
-    
+    final budgetUsed =
+        (campaign['spent'] / campaign['budget'] * 100).toStringAsFixed(1);
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
@@ -918,9 +954,10 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.1),
+                    color: Colors.AppColors.withAlphaFraction(green, 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -941,9 +978,9 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Budget Progress
             Row(
               children: [
@@ -964,9 +1001,9 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
               backgroundColor: Colors.grey[300],
               valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Performance Metrics
             GridView.count(
               shrinkWrap: true,
@@ -976,20 +1013,26 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
               crossAxisSpacing: 8,
               mainAxisSpacing: 8,
               children: [
-                _buildMetricCard('Impressies', '${campaign['impressions']}', Icons.visibility),
-                _buildMetricCard('Clicks', '${campaign['clicks']}', Icons.mouse),
-                _buildMetricCard('Conversies', '${campaign['conversions']}', Icons.trending_up),
+                _buildMetricCard('Impressies', '${campaign['impressions']}',
+                    Icons.visibility),
+                _buildMetricCard(
+                    'Clicks', '${campaign['clicks']}', Icons.mouse),
+                _buildMetricCard('Conversies', '${campaign['conversions']}',
+                    Icons.trending_up),
                 _buildMetricCard('CTR', '${campaign['ctr']}%', Icons.ads_click),
-                _buildMetricCard('Conv. Rate', '${campaign['conversion_rate']}%', Icons.percent),
-                _buildMetricCard('ROI', '${campaign['roi']}%', Icons.attach_money),
+                _buildMetricCard('Conv. Rate',
+                    '${campaign['conversion_rate']}%', Icons.percent),
+                _buildMetricCard(
+                    'ROI', '${campaign['roi']}%', Icons.attach_money),
               ],
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             Row(
               children: [
-                Icon(Icons.calendar_today, size: 16, color: AppColors.textSecondary),
+                Icon(Icons.calendar_today,
+                    size: 16, color: AppColors.textSecondary),
                 const SizedBox(width: 4),
                 Text(
                   '${campaign['start_date']} - ${campaign['end_date']}',
@@ -1023,7 +1066,7 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
   }
 
   Widget _buildTemplateCard(Map<String, dynamic> template) {
-    String discountText = template['discount_type'] == 'percentage' 
+    String discountText = template['discount_type'] == 'percentage'
         ? '${template['discount_value']}%'
         : '€${template['discount_value']}';
 
@@ -1076,11 +1119,10 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
           Text(
             'Promotie Analytics',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 16),
-          
           GridView.count(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -1089,15 +1131,17 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
             crossAxisSpacing: 12,
             mainAxisSpacing: 12,
             children: [
-              _buildAnalyticsCard('Actieve Promoties', '3', Icons.local_offer, Colors.green),
-              _buildAnalyticsCard('Totaal Gebruikt', '679', Icons.redeem, Colors.blue),
-              _buildAnalyticsCard('Omzet Impact', '€9,800', Icons.euro, Colors.purple),
-              _buildAnalyticsCard('Gem. ROI', '215%', Icons.trending_up, Colors.orange),
+              _buildAnalyticsCard(
+                  'Actieve Promoties', '3', Icons.local_offer, Colors.green),
+              _buildAnalyticsCard(
+                  'Totaal Gebruikt', '679', Icons.redeem, Colors.blue),
+              _buildAnalyticsCard(
+                  'Omzet Impact', '€9,800', Icons.euro, Colors.purple),
+              _buildAnalyticsCard(
+                  'Gem. ROI', '215%', Icons.trending_up, Colors.orange),
             ],
           ),
-          
           const SizedBox(height: 24),
-          
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -1107,11 +1151,10 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
                   Text(
                     'Top Presterende Promoties',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                   const SizedBox(height: 16),
-                  
                   ..._promotions.take(3).map((promotion) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -1121,7 +1164,8 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
                             flex: 2,
                             child: Text(
                               promotion['name'],
-                              style: const TextStyle(fontWeight: FontWeight.w500),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w500),
                             ),
                           ),
                           Expanded(
@@ -1184,7 +1228,8 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
     );
   }
 
-  Widget _buildAnalyticsCard(String title, String value, IconData icon, Color color) {
+  Widget _buildAnalyticsCard(
+      String title, String value, IconData icon, Color color) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -1218,7 +1263,8 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Nieuwe Promotie'),
-        content: const Text('Promotie aanmaken functionaliteit wordt binnenkort toegevoegd.'),
+        content: const Text(
+            'Promotie aanmaken functionaliteit wordt binnenkort toegevoegd.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -1231,13 +1277,17 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
 
   void _editPromotion(Map<String, dynamic> promotion) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${promotion['name']} bewerken wordt binnenkort toegevoegd')),
+      SnackBar(
+          content: Text(
+              '${promotion['name']} bewerken wordt binnenkort toegevoegd')),
     );
   }
 
   void _duplicatePromotion(Map<String, dynamic> promotion) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${promotion['name']} dupliceren wordt binnenkort toegevoegd')),
+      SnackBar(
+          content: Text(
+              '${promotion['name']} dupliceren wordt binnenkort toegevoegd')),
     );
   }
 
@@ -1258,7 +1308,8 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Promotie Verwijderen'),
-        content: Text('Weet je zeker dat je ${promotion['name']} wilt verwijderen?'),
+        content:
+            Text('Weet je zeker dat je ${promotion['name']} wilt verwijderen?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -1271,7 +1322,8 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
                 SnackBar(content: Text('${promotion['name']} verwijderd')),
               );
             },
-            child: const Text('Verwijderen', style: TextStyle(color: Colors.red)),
+            child:
+                const Text('Verwijderen', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -1280,32 +1332,38 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
 
   void _viewCampaignDetails(Map<String, dynamic> campaign) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${campaign['name']} details wordt binnenkort toegevoegd')),
+      SnackBar(
+          content:
+              Text('${campaign['name']} details wordt binnenkort toegevoegd')),
     );
   }
 
   void _useTemplate(Map<String, dynamic> template) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Template ${template['name']} gebruiken wordt binnenkort toegevoegd')),
+      SnackBar(
+          content: Text(
+              'Template ${template['name']} gebruiken wordt binnenkort toegevoegd')),
     );
   }
 
   void _showAnalytics() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Uitgebreide analytics wordt binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('Uitgebreide analytics wordt binnenkort toegevoegd')),
     );
   }
 
   void _exportPromotions() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Promoties exporteren wordt binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('Promoties exporteren wordt binnenkort toegevoegd')),
     );
   }
 
   void _showPromotionSettings() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Promotie instellingen wordt binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('Promotie instellingen wordt binnenkort toegevoegd')),
     );
   }
 }
-
