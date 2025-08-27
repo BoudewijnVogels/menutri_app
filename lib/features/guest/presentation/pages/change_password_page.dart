@@ -15,7 +15,7 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
   final _currentPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  
+
   bool _obscureCurrentPassword = true;
   bool _obscureNewPassword = true;
   bool _obscureConfirmPassword = true;
@@ -40,12 +40,13 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.lightBrown.withOpacity(0.3),
+                  color: AppColors.withAlphaFraction(lightBrown, 0.3),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.info_outline, color: AppColors.mediumBrown),
+                    const Icon(Icons.info_outline,
+                        color: AppColors.mediumBrown),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -53,9 +54,12 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
                         children: [
                           Text(
                             'Wachtwoord vereisten',
-                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
                           ),
                           const SizedBox(height: 4),
                           const Text(
@@ -68,19 +72,19 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               // Current password
               Text(
                 'Huidig wachtwoord',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               TextFormField(
                 controller: _currentPasswordController,
                 obscureText: _obscureCurrentPassword,
@@ -89,7 +93,9 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
                   prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscureCurrentPassword ? Icons.visibility : Icons.visibility_off,
+                      _obscureCurrentPassword
+                          ? Icons.visibility
+                          : Icons.visibility_off,
                     ),
                     onPressed: () {
                       setState(() {
@@ -106,19 +112,19 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
                   return null;
                 },
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               // New password
               Text(
                 'Nieuw wachtwoord',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               TextFormField(
                 controller: _newPasswordController,
                 obscureText: _obscureNewPassword,
@@ -127,7 +133,9 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
                   prefixIcon: const Icon(Icons.lock),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscureNewPassword ? Icons.visibility : Icons.visibility_off,
+                      _obscureNewPassword
+                          ? Icons.visibility
+                          : Icons.visibility_off,
                     ),
                     onPressed: () {
                       setState(() {
@@ -150,18 +158,19 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
                   return null;
                 },
                 onChanged: (value) {
-                  setState(() {}); // Trigger rebuild for password strength indicator
+                  setState(
+                      () {}); // Trigger rebuild for password strength indicator
                 },
               ),
-              
+
               const SizedBox(height: 8),
-              
+
               // Password strength indicator
               if (_newPasswordController.text.isNotEmpty)
                 _buildPasswordStrengthIndicator(),
-              
+
               const SizedBox(height: 16),
-              
+
               // Confirm password
               TextFormField(
                 controller: _confirmPasswordController,
@@ -171,7 +180,9 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
                   prefixIcon: const Icon(Icons.lock),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
+                      _obscureConfirmPassword
+                          ? Icons.visibility
+                          : Icons.visibility_off,
                     ),
                     onPressed: () {
                       setState(() {
@@ -191,9 +202,9 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
                   return null;
                 },
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               // Change password button
               SizedBox(
                 width: double.infinity,
@@ -212,7 +223,8 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
                               height: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                    AppColors.white),
                               ),
                             ),
                             SizedBox(width: 12),
@@ -222,9 +234,9 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
                       : const Text('Wachtwoord wijzigen'),
                 ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Security tips
               Container(
                 padding: const EdgeInsets.all(16),
@@ -237,21 +249,25 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.security, color: AppColors.mediumBrown),
+                        const Icon(Icons.security,
+                            color: AppColors.mediumBrown),
                         const SizedBox(width: 8),
                         Text(
                           'Beveiligingstips',
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 12),
-                    _buildSecurityTip('Gebruik een uniek wachtwoord voor Menutri'),
+                    _buildSecurityTip(
+                        'Gebruik een uniek wachtwoord voor Menutri'),
                     _buildSecurityTip('Deel je wachtwoord nooit met anderen'),
                     _buildSecurityTip('Wijzig je wachtwoord regelmatig'),
-                    _buildSecurityTip('Gebruik een wachtwoordmanager voor extra beveiliging'),
+                    _buildSecurityTip(
+                        'Gebruik een wachtwoordmanager voor extra beveiliging'),
                   ],
                 ),
               ),
@@ -265,10 +281,10 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
   Widget _buildPasswordStrengthIndicator() {
     final password = _newPasswordController.text;
     final strength = _calculatePasswordStrength(password);
-    
+
     Color strengthColor;
     String strengthText;
-    
+
     if (strength < 0.3) {
       strengthColor = AppColors.error;
       strengthText = 'Zwak';
@@ -279,7 +295,7 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
       strengthColor = AppColors.success;
       strengthText = 'Sterk';
     }
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -292,9 +308,9 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
             Text(
               strengthText,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: strengthColor,
-                fontWeight: FontWeight.w600,
-              ),
+                    color: strengthColor,
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
           ],
         ),
@@ -331,28 +347,28 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
     final hasLetter = RegExp(r'[a-zA-Z]').hasMatch(password);
     final hasNumber = RegExp(r'[0-9]').hasMatch(password);
     final hasSpecialChar = RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password);
-    
+
     return hasLetter && hasNumber && hasSpecialChar;
   }
 
   double _calculatePasswordStrength(String password) {
     if (password.isEmpty) return 0.0;
-    
+
     double strength = 0.0;
-    
+
     // Length check
     if (password.length >= 8) strength += 0.2;
     if (password.length >= 12) strength += 0.1;
-    
+
     // Character variety checks
     if (RegExp(r'[a-z]').hasMatch(password)) strength += 0.2;
     if (RegExp(r'[A-Z]').hasMatch(password)) strength += 0.2;
     if (RegExp(r'[0-9]').hasMatch(password)) strength += 0.2;
     if (RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password)) strength += 0.2;
-    
+
     // Bonus for no repeated characters
     if (!RegExp(r'(.)\1{2,}').hasMatch(password)) strength += 0.1;
-    
+
     return strength.clamp(0.0, 1.0);
   }
 
@@ -379,14 +395,14 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
             backgroundColor: AppColors.success,
           ),
         );
-        
+
         // Go back to previous screen
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
         String errorMessage = 'Kon wachtwoord niet wijzigen';
-        
+
         // Handle specific error cases
         if (e.toString().contains('current_password')) {
           errorMessage = 'Huidig wachtwoord is onjuist';
@@ -395,7 +411,7 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
         } else if (e.toString().contains('same_password')) {
           errorMessage = 'Nieuw wachtwoord moet anders zijn dan het huidige';
         }
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
@@ -418,4 +434,3 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
     super.dispose();
   }
 }
-
