@@ -35,11 +35,10 @@ class _HomePageState extends ConsumerState<HomePage> {
       // Load nearby restaurants (mock data for now)
       final response = await ApiService().getRestaurants(perPage: 10);
       final restaurantList = response['restaurants'] as List;
-      
+
       setState(() {
-        _nearbyRestaurants = restaurantList
-            .map((json) => Restaurant.fromJson(json))
-            .toList();
+        _nearbyRestaurants =
+            restaurantList.map((json) => Restaurant.fromJson(json)).toList();
         _recommendedRestaurants = _nearbyRestaurants.take(5).toList();
         _isLoading = false;
       });
@@ -69,30 +68,34 @@ class _HomePageState extends ConsumerState<HomePage> {
                   children: [
                     Text(
                       'Goedemorgen! 👋',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: AppColors.darkBrown,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                color: AppColors.darkBrown,
+                                fontWeight: FontWeight.bold,
+                              ),
                     ),
                     Text(
                       'Wat ga je vandaag eten?',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.grey,
-                      ),
+                            color: AppColors.grey,
+                          ),
                     ),
                   ],
                 ),
                 actions: [
                   IconButton(
-                    icon: const Icon(Icons.qr_code_scanner, color: AppColors.mediumBrown),
+                    icon: const Icon(Icons.qr_code_scanner,
+                        color: AppColors.mediumBrown),
                     onPressed: () => context.push(AppRoutes.qrScanner),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.notifications_outlined, color: AppColors.mediumBrown),
+                    icon: const Icon(Icons.notifications_outlined,
+                        color: AppColors.mediumBrown),
                     onPressed: () {
                       // TODO: Navigate to notifications
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Notificaties komen binnenkort')),
+                        const SnackBar(
+                            content: Text('Notificaties komen binnenkort')),
                       );
                     },
                   ),
@@ -106,7 +109,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                   child: GestureDetector(
                     onTap: () => context.go(AppRoutes.guestSearch),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
                         color: AppColors.lightGrey,
                         borderRadius: BorderRadius.circular(12),
@@ -118,9 +122,12 @@ class _HomePageState extends ConsumerState<HomePage> {
                           const SizedBox(width: 12),
                           Text(
                             'Zoek restaurants, gerechten...',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppColors.grey,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: AppColors.grey,
+                                ),
                           ),
                         ],
                       ),
@@ -174,9 +181,10 @@ class _HomePageState extends ConsumerState<HomePage> {
                     children: [
                       Text(
                         'Voor jou aanbevolen',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                       TextButton(
                         onPressed: () => context.push(AppRoutes.healthProfile),
@@ -204,7 +212,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                       padding: const EdgeInsets.all(32),
                       child: Column(
                         children: [
-                          const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+                          const Icon(Icons.error_outline,
+                              size: 48, color: AppColors.error),
                           const SizedBox(height: 16),
                           Text(_errorMessage!),
                           const SizedBox(height: 16),
@@ -244,9 +253,10 @@ class _HomePageState extends ConsumerState<HomePage> {
                     children: [
                       Text(
                         'In de buurt',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                       TextButton(
                         onPressed: () => context.go(AppRoutes.guestSearch),
@@ -292,7 +302,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.mediumBrown.withOpacity(0.1),
+                  color: AppColors.withAlphaFraction(mediumBrown, 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -347,7 +357,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       )
                     : null,
               ),
-              
+
               // Content
               Padding(
                 padding: const EdgeInsets.all(12),
@@ -357,8 +367,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                     Text(
                       restaurant.naam,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                            fontWeight: FontWeight.w600,
+                          ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -376,9 +386,10 @@ class _HomePageState extends ConsumerState<HomePage> {
                         ],
                         Text(
                           restaurant.priceRangeDisplay,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.grey,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.grey,
+                                  ),
                         ),
                       ],
                     ),
@@ -423,9 +434,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                       )
                     : null,
               ),
-              
+
               const SizedBox(width: 12),
-              
+
               // Content
               Expanded(
                 child: Column(
@@ -434,8 +445,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                     Text(
                       restaurant.naam,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                            fontWeight: FontWeight.w600,
+                          ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -444,8 +455,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                       Text(
                         restaurant.beschrijving!,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.grey,
-                        ),
+                              color: AppColors.grey,
+                            ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -463,22 +474,29 @@ class _HomePageState extends ConsumerState<HomePage> {
                         ],
                         Text(
                           restaurant.priceRangeDisplay,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.grey,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.grey,
+                                  ),
                         ),
                         const Spacer(),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            color: restaurant.isOpen ? AppColors.success : AppColors.error,
+                            color: restaurant.isOpen
+                                ? AppColors.success
+                                : AppColors.error,
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
                             restaurant.statusText,
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: AppColors.white,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  color: AppColors.white,
+                                ),
                           ),
                         ),
                       ],
@@ -493,4 +511,3 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 }
-
