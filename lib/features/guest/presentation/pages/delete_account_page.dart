@@ -15,11 +15,11 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
   final _formKey = GlobalKey<FormState>();
   final _passwordController = TextEditingController();
   final _confirmationController = TextEditingController();
-  
+
   bool _obscurePassword = true;
   bool _isDeleting = false;
   bool _hasReadWarning = false;
-  
+
   final List<String> _deletionReasons = [
     'Ik gebruik de app niet meer',
     'Ik heb een ander account',
@@ -28,7 +28,7 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
     'App werkt niet goed',
     'Andere reden',
   ];
-  
+
   String? _selectedReason;
   final _otherReasonController = TextEditingController();
 
@@ -51,7 +51,7 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.error.withOpacity(0.1),
+                  color: AppColors.withAlphaFraction(AppColors.error, 0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: AppColors.error),
                 ),
@@ -65,10 +65,13 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
                         children: [
                           Text(
                             'Waarschuwing',
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.error,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.error,
+                                ),
                           ),
                           const SizedBox(height: 4),
                           const Text(
@@ -81,38 +84,38 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // What will be deleted
               Text(
                 'Wat wordt er verwijderd?',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               _buildDeletionItem('Je profiel en persoonlijke gegevens'),
               _buildDeletionItem('Al je favoriete restaurants en gerechten'),
               _buildDeletionItem('Je voedingslogboek en geschiedenis'),
               _buildDeletionItem('Je gezondheidsprofiel en doelen'),
               _buildDeletionItem('Alle app instellingen en voorkeuren'),
               _buildDeletionItem('Toegang tot je account en alle data'),
-              
+
               const SizedBox(height: 24),
-              
+
               // Deletion reason
               Text(
                 'Waarom verwijder je je account? (optioneel)',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               DropdownButtonFormField<String>(
                 value: _selectedReason,
                 decoration: const InputDecoration(
@@ -128,7 +131,7 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
                   });
                 },
               ),
-              
+
               if (_selectedReason == 'Andere reden') ...[
                 const SizedBox(height: 16),
                 TextFormField(
@@ -140,14 +143,14 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
                   maxLines: 3,
                 ),
               ],
-              
+
               const SizedBox(height: 24),
-              
+
               // Alternatives section
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.lightBrown.withOpacity(0.3),
+                  color: AppColors.withAlphaFraction(lightBrown, 0.3),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(
@@ -155,13 +158,15 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.lightbulb_outline, color: AppColors.mediumBrown),
+                        const Icon(Icons.lightbulb_outline,
+                            color: AppColors.mediumBrown),
                         const SizedBox(width: 8),
                         Text(
                           'Alternatieven overwegen?',
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
                       ],
                     ),
@@ -184,19 +189,19 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Confirmation section
               Text(
                 'Bevestiging',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Password confirmation
               TextFormField(
                 controller: _passwordController,
@@ -206,7 +211,9 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
                   prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                      _obscurePassword
+                          ? Icons.visibility
+                          : Icons.visibility_off,
                     ),
                     onPressed: () {
                       setState(() {
@@ -223,9 +230,9 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
                   return null;
                 },
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Type confirmation
               TextFormField(
                 controller: _confirmationController,
@@ -240,9 +247,9 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
                   return null;
                 },
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Warning acknowledgment
               CheckboxListTile(
                 value: _hasReadWarning,
@@ -257,9 +264,9 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
                 controlAffinity: ListTileControlAffinity.leading,
                 activeColor: AppColors.error,
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               // Action buttons
               Row(
                 children: [
@@ -272,9 +279,7 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
                       child: const Text('Annuleren'),
                     ),
                   ),
-                  
                   const SizedBox(width: 16),
-                  
                   Expanded(
                     child: ElevatedButton(
                       onPressed: _canDeleteAccount() ? _deleteAccount : null,
@@ -291,7 +296,8 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
                                   height: 20,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        AppColors.white),
                                   ),
                                 ),
                                 SizedBox(width: 8),
@@ -303,9 +309,9 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Contact support
               Center(
                 child: TextButton(
@@ -347,14 +353,14 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
                 Text(
                   title,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
                 Text(
                   description,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.grey,
-                  ),
+                        color: AppColors.grey,
+                      ),
                 ),
               ],
             ),
@@ -365,10 +371,10 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
   }
 
   bool _canDeleteAccount() {
-    return _hasReadWarning && 
-           _passwordController.text.isNotEmpty && 
-           _confirmationController.text.toUpperCase() == 'VERWIJDER' &&
-           !_isDeleting;
+    return _hasReadWarning &&
+        _passwordController.text.isNotEmpty &&
+        _confirmationController.text.toUpperCase() == 'VERWIJDER' &&
+        !_isDeleting;
   }
 
   Future<void> _deleteAccount() async {
@@ -409,7 +415,9 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
       final deletionData = {
         'password': _passwordController.text,
         'reason': _selectedReason,
-        'other_reason': _selectedReason == 'Andere reden' ? _otherReasonController.text : null,
+        'other_reason': _selectedReason == 'Andere reden'
+            ? _otherReasonController.text
+            : null,
       };
 
       await ApiService().deleteAccount(deletionData);
@@ -422,21 +430,21 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
             backgroundColor: AppColors.success,
           ),
         );
-        
+
         // Clear all navigation stack and go to login
         context.go('/login');
       }
     } catch (e) {
       if (mounted) {
         String errorMessage = 'Kon account niet verwijderen';
-        
+
         // Handle specific error cases
         if (e.toString().contains('invalid_password')) {
           errorMessage = 'Wachtwoord is onjuist';
         } else if (e.toString().contains('account_not_found')) {
           errorMessage = 'Account niet gevonden';
         }
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
@@ -497,4 +505,3 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
     super.dispose();
   }
 }
-
