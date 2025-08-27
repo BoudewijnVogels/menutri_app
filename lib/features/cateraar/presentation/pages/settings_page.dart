@@ -8,19 +8,20 @@ class CateraarSettingsPage extends ConsumerStatefulWidget {
   const CateraarSettingsPage({super.key});
 
   @override
-  ConsumerState<CateraarSettingsPage> createState() => _CateraarSettingsPageState();
+  ConsumerState<CateraarSettingsPage> createState() =>
+      _CateraarSettingsPageState();
 }
 
 class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
     with TickerProviderStateMixin {
   final ApiService _apiService = ApiService();
-  
+
   late TabController _tabController;
-  
+
   bool _isLoading = true;
   bool _isSaving = false;
   Map<String, dynamic> _settings = {};
-  
+
   // App Settings
   bool _darkMode = false;
   bool _pushNotifications = true;
@@ -33,7 +34,7 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
   String _dateFormat = 'dd/MM/yyyy';
   String _timeFormat = '24h';
   String _theme = 'system';
-  
+
   // Business Settings
   bool _autoApproveReviews = false;
   bool _allowGuestReviews = true;
@@ -47,7 +48,7 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
   String _businessHours = 'custom';
   int _maxReservationDays = 30;
   int _minReservationHours = 2;
-  
+
   // Notification Settings
   bool _emailNotifications = true;
   bool _smsNotifications = false;
@@ -62,7 +63,7 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
   String _quietHoursStart = '22:00';
   String _quietHoursEnd = '08:00';
   bool _quietHoursEnabled = false;
-  
+
   // Privacy & Security Settings
   bool _twoFactorAuth = false;
   bool _loginNotifications = true;
@@ -72,7 +73,7 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
   bool _shareData = false;
   String _dataRetention = '2_years';
   String _sessionTimeout = '30_minutes';
-  
+
   // Integration Settings
   bool _googleMapsEnabled = true;
   bool _myFitnessPalEnabled = true;
@@ -81,7 +82,7 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
   String _paymentProvider = 'stripe';
   String _emailProvider = 'sendgrid';
   String _smsProvider = 'twilio';
-  
+
   final Map<String, String> _languageOptions = {
     'nl': 'Nederlands',
     'en': 'English',
@@ -89,27 +90,27 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
     'fr': 'Français',
     'es': 'Español',
   };
-  
+
   final Map<String, String> _currencyOptions = {
     'EUR': '€ Euro',
     'USD': '\$ US Dollar',
     'GBP': '£ British Pound',
     'CHF': 'CHF Swiss Franc',
   };
-  
+
   final Map<String, String> _themeOptions = {
     'system': 'Systeem',
     'light': 'Licht',
     'dark': 'Donker',
   };
-  
+
   final Map<String, String> _dateFormatOptions = {
     'dd/MM/yyyy': '31/12/2023',
     'MM/dd/yyyy': '12/31/2023',
     'yyyy-MM-dd': '2023-12-31',
     'dd-MM-yyyy': '31-12-2023',
   };
-  
+
   final Map<String, String> _timeFormatOptions = {
     '24h': '24 uur (13:30)',
     '12h': '12 uur (1:30 PM)',
@@ -130,16 +131,16 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
 
   Future<void> _loadSettings() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final response = await _apiService.getSettings();
       final settings = response['settings'] ?? {};
-      
+
       setState(() {
         _settings = settings;
         _isLoading = false;
       });
-      
+
       _populateSettings();
     } catch (e) {
       setState(() => _isLoading = false);
@@ -164,7 +165,7 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
     _dateFormat = _settings['date_format'] ?? 'dd/MM/yyyy';
     _timeFormat = _settings['time_format'] ?? '24h';
     _theme = _settings['theme'] ?? 'system';
-    
+
     // Business Settings
     _autoApproveReviews = _settings['auto_approve_reviews'] ?? false;
     _allowGuestReviews = _settings['allow_guest_reviews'] ?? true;
@@ -178,7 +179,7 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
     _businessHours = _settings['business_hours'] ?? 'custom';
     _maxReservationDays = _settings['max_reservation_days'] ?? 30;
     _minReservationHours = _settings['min_reservation_hours'] ?? 2;
-    
+
     // Notification Settings
     _emailNotifications = _settings['email_notifications'] ?? true;
     _smsNotifications = _settings['sms_notifications'] ?? false;
@@ -193,7 +194,7 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
     _quietHoursStart = _settings['quiet_hours_start'] ?? '22:00';
     _quietHoursEnd = _settings['quiet_hours_end'] ?? '08:00';
     _quietHoursEnabled = _settings['quiet_hours_enabled'] ?? false;
-    
+
     // Privacy & Security Settings
     _twoFactorAuth = _settings['two_factor_auth'] ?? false;
     _loginNotifications = _settings['login_notifications'] ?? true;
@@ -203,7 +204,7 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
     _shareData = _settings['share_data'] ?? false;
     _dataRetention = _settings['data_retention'] ?? '2_years';
     _sessionTimeout = _settings['session_timeout'] ?? '30_minutes';
-    
+
     // Integration Settings
     _googleMapsEnabled = _settings['google_maps_enabled'] ?? true;
     _myFitnessPalEnabled = _settings['myfitnesspal_enabled'] ?? true;
@@ -289,7 +290,8 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
             controller: _tabController,
             indicatorColor: AppColors.onPrimary,
             labelColor: AppColors.onPrimary,
-            unselectedLabelColor: AppColors.onPrimary.withOpacity(0.7),
+            unselectedLabelColor:
+                AppColors.withAlphaFraction(AppColors.onPrimary, 0.7),
             isScrollable: true,
             tabs: const [
               Tab(text: 'App'),
@@ -325,7 +327,7 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
           // Appearance
           _buildSectionTitle('Uiterlijk'),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Column(
               children: [
@@ -348,13 +350,13 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Language & Region
           _buildSectionTitle('Taal & Regio'),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Column(
               children: [
@@ -396,13 +398,13 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Notifications
           _buildSectionTitle('App Notificaties'),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Column(
               children: [
@@ -434,13 +436,13 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Data & Sync
           _buildSectionTitle('Data & Synchronisatie'),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Column(
               children: [
@@ -463,20 +465,21 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
                 ListTile(
                   leading: const Icon(Icons.storage),
                   title: const Text('Cache Beheer'),
-                  subtitle: const Text('Beheer app cache en tijdelijke bestanden'),
+                  subtitle:
+                      const Text('Beheer app cache en tijdelijke bestanden'),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () => _manageCacheSettings(),
                 ),
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Performance
           _buildSectionTitle('Prestaties'),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Column(
               children: [
@@ -520,7 +523,7 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
           // Restaurant Operations
           _buildSectionTitle('Restaurant Operaties'),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Column(
               children: [
@@ -550,13 +553,13 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Menu Display
           _buildSectionTitle('Menu Weergave'),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Column(
               children: [
@@ -599,13 +602,13 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Reviews & Ratings
           _buildSectionTitle('Reviews & Beoordelingen'),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Column(
               children: [
@@ -635,20 +638,21 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Reservations
           _buildSectionTitle('Reserveringen'),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Column(
               children: [
                 ListTile(
                   leading: const Icon(Icons.schedule),
                   title: const Text('Openingstijden'),
-                  subtitle: Text(_businessHours == 'custom' ? 'Aangepast' : 'Standaard'),
+                  subtitle: Text(
+                      _businessHours == 'custom' ? 'Aangepast' : 'Standaard'),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () => _configureBusinessHours(),
                 ),
@@ -671,13 +675,13 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Advanced Business Settings
           _buildSectionTitle('Geavanceerde Instellingen'),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Column(
               children: [
@@ -721,7 +725,7 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
           // Email Notifications
           _buildSectionTitle('Email Notificaties'),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Column(
               children: [
@@ -762,13 +766,13 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // SMS Notifications
           _buildSectionTitle('SMS Notificaties'),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Column(
               children: [
@@ -791,13 +795,13 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Push Notification Types
           _buildSectionTitle('Push Notificatie Types'),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Column(
               children: [
@@ -848,13 +852,13 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Quiet Hours
           _buildSectionTitle('Stille Uren'),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Column(
               children: [
@@ -886,13 +890,13 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Advanced Notification Settings
           _buildSectionTitle('Geavanceerde Instellingen'),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Column(
               children: [
@@ -936,7 +940,7 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
           // Account Security
           _buildSectionTitle('Account Beveiliging'),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Column(
               children: [
@@ -982,13 +986,13 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Data Privacy
           _buildSectionTitle('Data Privacy'),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Column(
               children: [
@@ -1040,13 +1044,13 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Privacy Controls
           _buildSectionTitle('Privacy Controles'),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Column(
               children: [
@@ -1084,13 +1088,13 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // GDPR Compliance
           _buildSectionTitle('GDPR Compliance'),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Column(
               children: [
@@ -1134,7 +1138,7 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
           // External Services
           _buildSectionTitle('Externe Services'),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Column(
               children: [
@@ -1164,13 +1168,13 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Analytics & Tracking
           _buildSectionTitle('Analytics & Tracking'),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Column(
               children: [
@@ -1200,13 +1204,13 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Payment & Communication
           _buildSectionTitle('Betalingen & Communicatie'),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Column(
               children: [
@@ -1254,13 +1258,13 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Webhooks & API
           _buildSectionTitle('Webhooks & API'),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Column(
               children: [
@@ -1290,13 +1294,13 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Third-party Integrations
           _buildSectionTitle('Derde Partij Integraties'),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Column(
               children: [
@@ -1335,8 +1339,8 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
     return Text(
       title,
       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-        fontWeight: FontWeight.bold,
-      ),
+            fontWeight: FontWeight.bold,
+          ),
     );
   }
 
@@ -1416,7 +1420,7 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
 
   Future<void> _saveSettings() async {
     setState(() => _isSaving = true);
-    
+
     try {
       final settingsData = {
         // App Settings
@@ -1431,7 +1435,7 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
         'date_format': _dateFormat,
         'time_format': _timeFormat,
         'theme': _theme,
-        
+
         // Business Settings
         'auto_approve_reviews': _autoApproveReviews,
         'allow_guest_reviews': _allowGuestReviews,
@@ -1445,7 +1449,7 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
         'business_hours': _businessHours,
         'max_reservation_days': _maxReservationDays,
         'min_reservation_hours': _minReservationHours,
-        
+
         // Notification Settings
         'email_notifications': _emailNotifications,
         'sms_notifications': _smsNotifications,
@@ -1460,7 +1464,7 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
         'quiet_hours_start': _quietHoursStart,
         'quiet_hours_end': _quietHoursEnd,
         'quiet_hours_enabled': _quietHoursEnabled,
-        
+
         // Privacy & Security Settings
         'two_factor_auth': _twoFactorAuth,
         'login_notifications': _loginNotifications,
@@ -1470,7 +1474,7 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
         'share_data': _shareData,
         'data_retention': _dataRetention,
         'session_timeout': _sessionTimeout,
-        
+
         // Integration Settings
         'google_maps_enabled': _googleMapsEnabled,
         'myfitnesspal_enabled': _myFitnessPalEnabled,
@@ -1480,11 +1484,11 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
         'email_provider': _emailProvider,
         'sms_provider': _smsProvider,
       };
-      
+
       await _apiService.updateSettings(settingsData);
-      
+
       setState(() => _isSaving = false);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -1511,7 +1515,8 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Standaard Instellingen'),
-        content: const Text('Weet je zeker dat je alle instellingen wilt terugzetten naar de standaardwaarden? Deze actie kan niet ongedaan worden gemaakt.'),
+        content: const Text(
+            'Weet je zeker dat je alle instellingen wilt terugzetten naar de standaardwaarden? Deze actie kan niet ongedaan worden gemaakt.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -1544,7 +1549,7 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
       _dateFormat = 'dd/MM/yyyy';
       _timeFormat = '24h';
       _theme = 'system';
-      
+
       _autoApproveReviews = false;
       _allowGuestReviews = true;
       _requireReservation = false;
@@ -1557,7 +1562,7 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
       _businessHours = 'custom';
       _maxReservationDays = 30;
       _minReservationHours = 2;
-      
+
       _emailNotifications = true;
       _smsNotifications = false;
       _pushReviews = true;
@@ -1571,7 +1576,7 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
       _quietHoursStart = '22:00';
       _quietHoursEnd = '08:00';
       _quietHoursEnabled = false;
-      
+
       _twoFactorAuth = false;
       _loginNotifications = true;
       _dataCollection = true;
@@ -1580,7 +1585,7 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
       _shareData = false;
       _dataRetention = '2_years';
       _sessionTimeout = '30_minutes';
-      
+
       _googleMapsEnabled = true;
       _myFitnessPalEnabled = true;
       _googleAnalyticsEnabled = false;
@@ -1589,7 +1594,7 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
       _emailProvider = 'sendgrid';
       _smsProvider = 'twilio';
     });
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Instellingen teruggezet naar standaardwaarden'),
@@ -1601,13 +1606,15 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
   // Placeholder methods for various settings actions
   void _exportSettings() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Export functionaliteit wordt binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('Export functionaliteit wordt binnenkort toegevoegd')),
     );
   }
 
   void _importSettings() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Import functionaliteit wordt binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('Import functionaliteit wordt binnenkort toegevoegd')),
     );
   }
 
@@ -1625,61 +1632,72 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
 
   void _showPerformanceSettings() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Prestatie instellingen worden binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('Prestatie instellingen worden binnenkort toegevoegd')),
     );
   }
 
   void _showMemoryUsage() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Geheugen statistieken worden binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('Geheugen statistieken worden binnenkort toegevoegd')),
     );
   }
 
   void _showDebugOptions() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Debug opties worden binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('Debug opties worden binnenkort toegevoegd')),
     );
   }
 
   void _configureBusinessHours() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Openingstijden configuratie wordt binnenkort toegevoegd')),
+      const SnackBar(
+          content:
+              Text('Openingstijden configuratie wordt binnenkort toegevoegd')),
     );
   }
 
   void _configureReservationLimits() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Reservering limieten worden binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('Reservering limieten worden binnenkort toegevoegd')),
     );
   }
 
   void _configureReviewFilters() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Review filters worden binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('Review filters worden binnenkort toegevoegd')),
     );
   }
 
   void _configureAnalytics() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Analytics configuratie wordt binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('Analytics configuratie wordt binnenkort toegevoegd')),
     );
   }
 
   void _configureInventory() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Voorraad configuratie wordt binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('Voorraad configuratie wordt binnenkort toegevoegd')),
     );
   }
 
   void _configurePromotions() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Promotie configuratie wordt binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('Promotie configuratie wordt binnenkort toegevoegd')),
     );
   }
 
   void _configureSmsNumber() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('SMS nummer configuratie wordt binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('SMS nummer configuratie wordt binnenkort toegevoegd')),
     );
   }
 
@@ -1691,10 +1709,11 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
         minute: int.parse(_quietHoursStart.split(':')[1]),
       ),
     );
-    
+
     if (time != null) {
       setState(() {
-        _quietHoursStart = '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+        _quietHoursStart =
+            '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
       });
     }
   }
@@ -1707,35 +1726,42 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
         minute: int.parse(_quietHoursEnd.split(':')[1]),
       ),
     );
-    
+
     if (time != null) {
       setState(() {
-        _quietHoursEnd = '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+        _quietHoursEnd =
+            '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
       });
     }
   }
 
   void _configureNotificationPriorities() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Notificatie prioriteiten worden binnenkort toegevoegd')),
+      const SnackBar(
+          content:
+              Text('Notificatie prioriteiten worden binnenkort toegevoegd')),
     );
   }
 
   void _configureNotificationGrouping() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Notificatie groepering wordt binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('Notificatie groepering wordt binnenkort toegevoegd')),
     );
   }
 
   void _configureNotificationHistory() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Notificatie geschiedenis wordt binnenkort toegevoegd')),
+      const SnackBar(
+          content:
+              Text('Notificatie geschiedenis wordt binnenkort toegevoegd')),
     );
   }
 
   void _changePassword() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Wachtwoord wijzigen wordt binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('Wachtwoord wijzigen wordt binnenkort toegevoegd')),
     );
   }
 
@@ -1747,25 +1773,29 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
 
   void _showPrivacyDashboard() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Privacy dashboard wordt binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('Privacy dashboard wordt binnenkort toegevoegd')),
     );
   }
 
   void _manageDataDeletion() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Data verwijdering wordt binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('Data verwijdering wordt binnenkort toegevoegd')),
     );
   }
 
   void _showPrivacyPolicy() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Privacy beleid wordt binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('Privacy beleid wordt binnenkort toegevoegd')),
     );
   }
 
   void _showGdprRights() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('GDPR rechten worden binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('GDPR rechten worden binnenkort toegevoegd')),
     );
   }
 
@@ -1777,56 +1807,64 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
 
   void _filePrivacyComplaint() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Privacy klacht indienen wordt binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('Privacy klacht indienen wordt binnenkort toegevoegd')),
     );
   }
 
   void _configureApiSettings() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('API instellingen worden binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('API instellingen worden binnenkort toegevoegd')),
     );
   }
 
   void _configureCustomTracking() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Custom tracking wordt binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('Custom tracking wordt binnenkort toegevoegd')),
     );
   }
 
   void _configureWebhooks() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Webhook configuratie wordt binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('Webhook configuratie wordt binnenkort toegevoegd')),
     );
   }
 
   void _manageApiKeys() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('API key beheer wordt binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('API key beheer wordt binnenkort toegevoegd')),
     );
   }
 
   void _configureRateLimiting() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Rate limiting wordt binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('Rate limiting wordt binnenkort toegevoegd')),
     );
   }
 
   void _configurePosIntegrations() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('POS integraties worden binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('POS integraties worden binnenkort toegevoegd')),
     );
   }
 
   void _configureInventoryIntegrations() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Voorraad integraties worden binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('Voorraad integraties worden binnenkort toegevoegd')),
     );
   }
 
   void _configureAccountingIntegrations() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Boekhoud integraties worden binnenkort toegevoegd')),
+      const SnackBar(
+          content: Text('Boekhoud integraties worden binnenkort toegevoegd')),
     );
   }
 }
-
