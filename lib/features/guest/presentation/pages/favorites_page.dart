@@ -33,7 +33,7 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
       });
 
       final favorites = await ApiService().getFavorites();
-      
+
       setState(() {
         _favorites = favorites;
         _isLoading = false;
@@ -92,15 +92,15 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
       return _buildErrorState();
     }
 
-    final restaurantFavorites = _favorites
-        .where((fav) => fav['restaurant_id'] != null)
-        .toList();
+    final restaurantFavorites =
+        _favorites.where((fav) => fav['restaurant_id'] != null).toList();
 
     if (restaurantFavorites.isEmpty) {
       return _buildEmptyState(
         icon: Icons.restaurant_outlined,
         title: 'Geen favoriete restaurants',
-        subtitle: 'Voeg restaurants toe aan je favorieten door op het hartje te tikken',
+        subtitle:
+            'Voeg restaurants toe aan je favorieten door op het hartje te tikken',
       );
     }
 
@@ -126,9 +126,8 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
       return _buildErrorState();
     }
 
-    final dishFavorites = _favorites
-        .where((fav) => fav['menu_item_id'] != null)
-        .toList();
+    final dishFavorites =
+        _favorites.where((fav) => fav['menu_item_id'] != null).toList();
 
     if (dishFavorites.isEmpty) {
       return _buildEmptyState(
@@ -209,9 +208,9 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
                   color: AppColors.mediumBrown,
                 ),
               ),
-              
+
               const SizedBox(width: 16),
-              
+
               // Content
               Expanded(
                 child: Column(
@@ -220,16 +219,16 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
                     Text(
                       favorite['restaurant_name'] ?? 'Restaurant',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                     const SizedBox(height: 4),
                     if (favorite['notes'] != null)
                       Text(
                         favorite['notes'],
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.grey,
-                        ),
+                              color: AppColors.grey,
+                            ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -237,13 +236,13 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
                     Text(
                       'Toegevoegd op ${_formatDate(favorite['created_at'])}',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: AppColors.grey,
-                      ),
+                            color: AppColors.grey,
+                          ),
                     ),
                   ],
                 ),
               ),
-              
+
               // Actions
               PopupMenuButton(
                 itemBuilder: (context) => [
@@ -306,9 +305,9 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
                 color: AppColors.mediumBrown,
               ),
             ),
-            
+
             const SizedBox(width: 16),
-            
+
             // Content
             Expanded(
               child: Column(
@@ -317,23 +316,23 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
                   Text(
                     favorite['menu_item_name'] ?? 'Gerecht',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     favorite['restaurant_name'] ?? 'Restaurant',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.grey,
-                    ),
+                          color: AppColors.grey,
+                        ),
                   ),
                   if (favorite['notes'] != null) ...[
                     const SizedBox(height: 4),
                     Text(
                       favorite['notes'],
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.grey,
-                      ),
+                            color: AppColors.grey,
+                          ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -342,13 +341,13 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
                   Text(
                     'Toegevoegd op ${_formatDate(favorite['created_at'])}',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: AppColors.grey,
-                    ),
+                          color: AppColors.grey,
+                        ),
                   ),
                 ],
               ),
             ),
-            
+
             // Actions
             PopupMenuButton(
               itemBuilder: (context) => [
@@ -407,7 +406,7 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: AppColors.mediumBrown.withOpacity(0.1),
+                  color: AppColors.withAlphaFraction(mediumBrown, 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
@@ -416,9 +415,9 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
                   size: 32,
                 ),
               ),
-              
+
               const SizedBox(width: 16),
-              
+
               // Content
               Expanded(
                 child: Column(
@@ -427,20 +426,20 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
                     Text(
                       collectionName,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       '${items.length} item${items.length != 1 ? 's' : ''}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.grey,
-                      ),
+                            color: AppColors.grey,
+                          ),
                     ),
                   ],
                 ),
               ),
-              
+
               const Icon(
                 Icons.arrow_forward_ios,
                 size: 16,
@@ -472,8 +471,8 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
           Text(
             subtitle,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.grey,
-            ),
+                  color: AppColors.grey,
+                ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
@@ -512,7 +511,7 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
     try {
       await ApiService().removeFavorite(favoriteId);
       await _loadFavorites();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -535,7 +534,7 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
 
   void _showCreateCollectionDialog() {
     final controller = TextEditingController();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -559,7 +558,8 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
                 // TODO: Create collection
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Collectie aanmaken komt binnenkort')),
+                  const SnackBar(
+                      content: Text('Collectie aanmaken komt binnenkort')),
                 );
               }
             },
@@ -572,7 +572,7 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
 
   String _formatDate(String? dateString) {
     if (dateString == null) return 'Onbekend';
-    
+
     try {
       final date = DateTime.parse(dateString);
       return '${date.day}/${date.month}/${date.year}';
@@ -587,4 +587,3 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
     super.dispose();
   }
 }
-
