@@ -15,9 +15,9 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
     with TickerProviderStateMixin {
   final ApiService _apiService = ApiService();
   final TextEditingController _searchController = TextEditingController();
-  
+
   late TabController _tabController;
-  
+
   bool _isLoading = true;
   List<Map<String, dynamic>> _recipes = [];
   List<Map<String, dynamic>> _filteredRecipes = [];
@@ -62,24 +62,22 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
 
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final recipesResponse = await _apiService.getRecipes();
       final categoriesResponse = await _apiService.getCategories();
-      
-      final recipes = List<Map<String, dynamic>>.from(
-        recipesResponse['recipes'] ?? []
-      );
+
+      final recipes =
+          List<Map<String, dynamic>>.from(recipesResponse['recipes'] ?? []);
       final categories = List<Map<String, dynamic>>.from(
-        categoriesResponse['categories'] ?? []
-      );
-      
+          categoriesResponse['categories'] ?? []);
+
       setState(() {
         _recipes = recipes;
         _categories = categories;
         _isLoading = false;
       });
-      
+
       _filterRecipes();
     } catch (e) {
       setState(() => _isLoading = false);
@@ -93,7 +91,7 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
 
   void _filterRecipes() {
     List<Map<String, dynamic>> filtered = List.from(_recipes);
-    
+
     // Apply search filter
     if (_searchQuery.isNotEmpty) {
       filtered = filtered.where((recipe) {
@@ -103,19 +101,19 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
         return name.contains(query) || description.contains(query);
       }).toList();
     }
-    
+
     // Apply category filter
     if (_selectedCategory != null) {
       filtered = filtered.where((recipe) {
         return recipe['category_id'] == _selectedCategory;
       }).toList();
     }
-    
+
     // Apply sorting
     filtered.sort((a, b) {
       dynamic aValue = a[_sortBy];
       dynamic bValue = b[_sortBy];
-      
+
       if (_sortBy == 'prep_time') {
         aValue = aValue ?? 0;
         bValue = bValue ?? 0;
@@ -126,11 +124,11 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
         aValue = (aValue ?? '').toString().toLowerCase();
         bValue = (bValue ?? '').toString().toLowerCase();
       }
-      
+
       int comparison = Comparable.compare(aValue, bValue);
       return _sortAscending ? comparison : -comparison;
     });
-    
+
     setState(() {
       _filteredRecipes = filtered;
     });
@@ -199,7 +197,8 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
             controller: _tabController,
             indicatorColor: AppColors.onPrimary,
             labelColor: AppColors.onPrimary,
-            unselectedLabelColor: AppColors.onPrimary.withOpacity(0.7),
+            unselectedLabelColor:
+                AppColors.withAlphaFraction(AppColors.onPrimary, 0.7),
             tabs: const [
               Tab(text: 'Alle Recepten'),
               Tab(text: 'Categorieën'),
@@ -233,7 +232,7 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
       children: [
         // Search and filter bar
         _buildSearchAndFilter(),
-        
+
         // Recipes list
         Expanded(
           child: _filteredRecipes.isEmpty
@@ -261,7 +260,7 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
         color: AppColors.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: AppColors.withAlphaFraction(AppColors.black, 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -288,7 +287,8 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
                     )
                   : null,
               border: const OutlineInputBorder(),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
             onChanged: (value) {
               setState(() {
@@ -297,9 +297,9 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
               _filterRecipes();
             },
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           // Category filter
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -315,7 +315,8 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
                     _filterRecipes();
                   },
                   backgroundColor: AppColors.background,
-                  selectedColor: AppColors.primary.withOpacity(0.2),
+                  selectedColor:
+                      AppColors.withAlphaFraction(AppColors.primary, 0.2),
                   checkmarkColor: AppColors.primary,
                 ),
                 const SizedBox(width: 8),
@@ -333,7 +334,8 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
                         _filterRecipes();
                       },
                       backgroundColor: AppColors.background,
-                      selectedColor: AppColors.primary.withOpacity(0.2),
+                      selectedColor:
+                          AppColors.withAlphaFraction(AppColors.primary, 0.2),
                       checkmarkColor: AppColors.primary,
                     ),
                   );
@@ -351,7 +353,7 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
     final prepTime = recipe['prep_time'] ?? 0;
     final servings = recipe['servings'] ?? 1;
     final calories = recipe['calories_per_serving'] ?? 0;
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 2,
@@ -368,12 +370,14 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
             Container(
               height: 160,
               decoration: BoxDecoration(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                color: AppColors.primary.withOpacity(0.1),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(12)),
+                color: AppColors.withAlphaFraction(AppColors.primary, 0.1),
               ),
               child: recipe['image_url'] != null
                   ? ClipRRect(
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                      borderRadius:
+                          const BorderRadius.vertical(top: Radius.circular(12)),
                       child: Image.network(
                         recipe['image_url'],
                         width: double.infinity,
@@ -386,7 +390,7 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
                     )
                   : _buildRecipeImagePlaceholder(),
             ),
-            
+
             // Recipe info
             Padding(
               padding: const EdgeInsets.all(16),
@@ -399,43 +403,47 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
                       Expanded(
                         child: Text(
                           recipe['name'] ?? '',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: _difficultyColors[difficulty]?.withOpacity(0.1),
+                          color:
+                              _difficultyColors[difficulty]?.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
                           _difficultyLabels[difficulty] ?? difficulty,
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: _difficultyColors[difficulty],
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: _difficultyColors[difficulty],
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   // Description
                   if (recipe['description'] != null) ...[
                     Text(
                       recipe['description'],
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                            color: AppColors.textSecondary,
+                          ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 12),
                   ],
-                  
+
                   // Stats
                   Row(
                     children: [
@@ -458,7 +466,8 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
                       ),
                       const Spacer(),
                       PopupMenuButton<String>(
-                        onSelected: (value) => _handleRecipeAction(value, recipe),
+                        onSelected: (value) =>
+                            _handleRecipeAction(value, recipe),
                         itemBuilder: (context) => [
                           const PopupMenuItem(
                             value: 'edit',
@@ -488,7 +497,8 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
                             value: 'delete',
                             child: ListTile(
                               leading: Icon(Icons.delete, color: Colors.red),
-                              title: Text('Verwijderen', style: TextStyle(color: Colors.red)),
+                              title: Text('Verwijderen',
+                                  style: TextStyle(color: Colors.red)),
                               contentPadding: EdgeInsets.zero,
                             ),
                           ),
@@ -510,7 +520,7 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
       width: double.infinity,
       height: 160,
       decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.1),
+        color: AppColors.withAlphaFraction(AppColors.primary, 0.1),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
       ),
       child: Column(
@@ -519,14 +529,14 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
           Icon(
             Icons.restaurant,
             size: 48,
-            color: AppColors.primary.withOpacity(0.5),
+            color: AppColors.withAlphaFraction(AppColors.primary, 0.5),
           ),
           const SizedBox(height: 8),
           Text(
             'Geen afbeelding',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSecondary,
-            ),
+                  color: AppColors.textSecondary,
+                ),
           ),
         ],
       ),
@@ -541,7 +551,7 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: AppColors.withAlphaFraction(color, 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -552,9 +562,9 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
           Text(
             label,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
+                  color: color,
+                  fontWeight: FontWeight.w600,
+                ),
           ),
         ],
       ),
@@ -579,8 +589,8 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
                   ? 'Geen recepten gevonden'
                   : 'Nog geen recepten',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
@@ -588,8 +598,8 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
                   ? 'Probeer een andere zoekopdracht of filter'
                   : 'Voeg je eerste recept toe om te beginnen',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
             if (_searchQuery.isEmpty && _selectedCategory == null) ...[
@@ -626,15 +636,15 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
             Text(
               'Recept Categorieën',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               'Categorie beheer wordt binnenkort toegevoegd',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -659,15 +669,15 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
             Text(
               'Ingrediënten Overzicht',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               'Ingrediënten overzicht wordt binnenkort toegevoegd',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -701,7 +711,8 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
             const Divider(),
             SwitchListTile(
               title: const Text('Oplopend'),
-              subtitle: Text(_sortAscending ? 'A-Z, Laag-Hoog' : 'Z-A, Hoog-Laag'),
+              subtitle:
+                  Text(_sortAscending ? 'A-Z, Laag-Hoog' : 'Z-A, Hoog-Laag'),
               value: _sortAscending,
               onChanged: (value) {
                 setState(() {
@@ -729,7 +740,8 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Nieuw Recept'),
-        content: const Text('Recept toevoegen functionaliteit wordt binnenkort toegevoegd'),
+        content: const Text(
+            'Recept toevoegen functionaliteit wordt binnenkort toegevoegd'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -780,7 +792,8 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Recept Bewerken'),
-        content: Text('Bewerken van "${recipe['name']}" wordt binnenkort toegevoegd'),
+        content: Text(
+            'Bewerken van "${recipe['name']}" wordt binnenkort toegevoegd'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -795,7 +808,7 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
     try {
       await _apiService.duplicateRecipe(recipe['id']);
       await _loadData();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -820,7 +833,8 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
     // Share recipe functionality
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Delen van "${recipe['name']}" wordt binnenkort toegevoegd'),
+        content:
+            Text('Delen van "${recipe['name']}" wordt binnenkort toegevoegd'),
       ),
     );
   }
@@ -830,7 +844,8 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Recept Verwijderen'),
-        content: Text('Weet je zeker dat je "${recipe['name']}" wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.'),
+        content: Text(
+            'Weet je zeker dat je "${recipe['name']}" wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -842,7 +857,7 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
               try {
                 await _apiService.deleteRecipe(recipe['id']);
                 await _loadData();
-                
+
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -875,7 +890,8 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Recepten Importeren'),
-        content: const Text('Import functionaliteit wordt binnenkort toegevoegd'),
+        content:
+            const Text('Import functionaliteit wordt binnenkort toegevoegd'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -899,7 +915,8 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Bulk Bewerken'),
-        content: const Text('Bulk bewerken functionaliteit wordt binnenkort toegevoegd'),
+        content: const Text(
+            'Bulk bewerken functionaliteit wordt binnenkort toegevoegd'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -910,4 +927,3 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
     );
   }
 }
-
