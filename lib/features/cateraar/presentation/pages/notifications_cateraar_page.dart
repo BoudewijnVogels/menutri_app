@@ -8,16 +8,18 @@ class CateraarNotificationsPage extends ConsumerStatefulWidget {
   const CateraarNotificationsPage({super.key});
 
   @override
-  ConsumerState<CateraarNotificationsPage> createState() => _CateraarNotificationsPageState();
+  ConsumerState<CateraarNotificationsPage> createState() =>
+      _CateraarNotificationsPageState();
 }
 
-class _CateraarNotificationsPageState extends ConsumerState<CateraarNotificationsPage>
+class _CateraarNotificationsPageState
+    extends ConsumerState<CateraarNotificationsPage>
     with TickerProviderStateMixin {
   final ApiService _apiService = ApiService();
   final TextEditingController _searchController = TextEditingController();
-  
+
   late TabController _tabController;
-  
+
   bool _isLoading = true;
   List<Map<String, dynamic>> _notifications = [];
   List<Map<String, dynamic>> _filteredNotifications = [];
@@ -90,24 +92,22 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
 
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final notificationsResponse = await _apiService.getNotifications();
-      final settingsResponse = await _apiService.getNotificationSettings();
-      
+      final settingsResponse = await _apiService.getNotificationPreferences();
+
       final notifications = List<Map<String, dynamic>>.from(
-        notificationsResponse['notifications'] ?? []
-      );
-      final settings = Map<String, bool>.from(
-        settingsResponse['settings'] ?? {}
-      );
-      
+          notificationsResponse['notifications'] ?? []);
+      final settings =
+          Map<String, bool>.from(settingsResponse['settings'] ?? {});
+
       setState(() {
         _notifications = notifications;
         _notificationSettings = settings;
         _isLoading = false;
       });
-      
+
       _filterNotifications();
     } catch (e) {
       setState(() => _isLoading = false);
@@ -121,7 +121,7 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
 
   void _filterNotifications() {
     List<Map<String, dynamic>> filtered = List.from(_notifications);
-    
+
     // Apply search filter
     if (_searchQuery.isNotEmpty) {
       filtered = filtered.where((notification) {
@@ -131,35 +131,37 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
         return title.contains(query) || message.contains(query);
       }).toList();
     }
-    
+
     // Apply type filter
     if (_filterType != 'all') {
       filtered = filtered.where((notification) {
         return notification['type'] == _filterType;
       }).toList();
     }
-    
+
     // Apply status filter
     if (_filterStatus != 'all') {
       filtered = filtered.where((notification) {
-        return notification['status'] == _filterStatus;
+        return (notification['status'] ??
+                (notification['is_read'] == true ? 'read' : 'unread')) ==
+            _filterStatus;
       }).toList();
     }
-    
-    // Apply unread filter
+
+    // Apply unread filter toggle
     if (_showOnlyUnread) {
       filtered = filtered.where((notification) {
         return notification['is_read'] != true;
       }).toList();
     }
-    
+
     // Sort by date (newest first)
     filtered.sort((a, b) {
       final aDate = DateTime.tryParse(a['created_at'] ?? '') ?? DateTime.now();
       final bDate = DateTime.tryParse(b['created_at'] ?? '') ?? DateTime.now();
       return bDate.compareTo(aDate);
     });
-    
+
     setState(() {
       _filteredNotifications = filtered;
     });
@@ -193,13 +195,10 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
                 case 'export':
                   _exportNotifications();
                   break;
-                case 'test_notification':
-                  _sendTestNotification();
-                  break;
               }
             },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
+            itemBuilder: (context) => const [
+              PopupMenuItem(
                 value: 'mark_all_read',
                 child: ListTile(
                   leading: Icon(Icons.mark_email_read),
@@ -207,7 +206,7 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'clear_all',
                 child: ListTile(
                   leading: Icon(Icons.clear_all),
@@ -215,7 +214,7 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'export',
                 child: ListTile(
                   leading: Icon(Icons.download),
@@ -223,7 +222,7 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'test_notification',
                 child: ListTile(
                   leading: Icon(Icons.notifications_active),
@@ -240,10 +239,13 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
             controller: _tabController,
             indicatorColor: AppColors.onPrimary,
             labelColor: AppColors.onPrimary,
-            unselectedLabelColor: AppColors.onPrimary.withOpacity(0.7),
+            unselectedLabelColor:
+                AppColors.withAlphaFraction(AppColors.onPrimary, 0.7),
             tabs: [
               Tab(text: 'Alle (${_notifications.length})'),
-              Tab(text: 'Ongelezen (${_notifications.where((n) => n['is_read'] != true).length})'),
+              Tab(
+                  text:
+                      'Ongelezen (${_notifications.where((n) => n['is_read'] != true).length})'),
               const Tab(text: 'Instellingen'),
             ],
           ),
@@ -267,7 +269,7 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
       children: [
         // Search and filter bar
         _buildSearchAndFilter(),
-        
+
         // Notifications list
         Expanded(
           child: _filteredNotifications.isEmpty
@@ -289,8 +291,9 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
   }
 
   Widget _buildUnreadNotificationsTab() {
-    final unreadNotifications = _notifications.where((n) => n['is_read'] != true).toList();
-    
+    final unreadNotifications =
+        _notifications.where((n) => n['is_read'] != true).toList();
+
     return unreadNotifications.isEmpty
         ? _buildEmptyUnreadState()
         : RefreshIndicator(
@@ -300,7 +303,8 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
               itemCount: unreadNotifications.length,
               itemBuilder: (context, index) {
                 final notification = unreadNotifications[index];
-                return _buildNotificationCard(notification, showQuickActions: true);
+                return _buildNotificationCard(notification,
+                    showQuickActions: true);
               },
             ),
           );
@@ -315,19 +319,19 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
           Text(
             'Notificatie Instellingen',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 8),
           Text(
             'Beheer welke notificaties je wilt ontvangen',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSecondary,
-            ),
+                  color: AppColors.textSecondary,
+                ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Push notifications
           _buildSettingsSection(
             'Push Notificaties',
@@ -353,9 +357,9 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
               ),
             ],
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Email notifications
           _buildSettingsSection(
             'Email Notificaties',
@@ -381,14 +385,16 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
               ),
             ],
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Notification types
           _buildSettingsSection(
             'Notificatie Types',
             'Kies welke types notificaties je wilt ontvangen',
-            _typeLabels.entries.where((entry) => entry.key != 'all').map((entry) {
+            _typeLabels.entries
+                .where((entry) => entry.key != 'all')
+                .map((entry) {
               return _buildSettingTile(
                 'type_${entry.key}',
                 entry.value,
@@ -397,9 +403,9 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
               );
             }).toList(),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Advanced settings
           _buildSettingsSection(
             'Geavanceerde Instellingen',
@@ -425,9 +431,9 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
               ),
             ],
           ),
-          
+
           const SizedBox(height: 32),
-          
+
           // Action buttons
           Row(
             children: [
@@ -468,7 +474,7 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
         color: AppColors.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: AppColors.withAlphaFraction(Colors.black, 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -498,7 +504,9 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
                     ),
                   IconButton(
                     icon: Icon(
-                      _showOnlyUnread ? Icons.mark_email_unread : Icons.mark_email_read,
+                      _showOnlyUnread
+                          ? Icons.mark_email_unread
+                          : Icons.mark_email_read,
                       color: _showOnlyUnread ? AppColors.primary : null,
                     ),
                     onPressed: () {
@@ -512,7 +520,8 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
                 ],
               ),
               border: const OutlineInputBorder(),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
             onChanged: (value) {
               setState(() {
@@ -521,15 +530,14 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
               _filterNotifications();
             },
           ),
-          
+
           const SizedBox(height: 12),
-          
-          // Filter chips
+
+          // Type filters
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                // Type filters
                 ..._typeLabels.entries.map((entry) {
                   final isSelected = _filterType == entry.key;
                   return Padding(
@@ -544,9 +552,45 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
                         _filterNotifications();
                       },
                       backgroundColor: AppColors.background,
-                      selectedColor: _typeColors[entry.key]?.withOpacity(0.2) ?? 
-                                   AppColors.primary.withOpacity(0.2),
-                      checkmarkColor: _typeColors[entry.key] ?? AppColors.primary,
+                      selectedColor: AppColors.withAlphaFraction(
+                        _typeColors[entry.key] ?? AppColors.primary,
+                        0.2,
+                      ),
+                      checkmarkColor:
+                          _typeColors[entry.key] ?? AppColors.primary,
+                    ),
+                  );
+                }).toList(),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          // Status filters (gebruikt _statusLabels)
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                ..._statusLabels.entries.map((entry) {
+                  final isSelected = _filterStatus == entry.key;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: FilterChip(
+                      label: Text(entry.value),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        setState(() {
+                          _filterStatus = selected ? entry.key : 'all';
+                        });
+                        _filterNotifications();
+                      },
+                      backgroundColor: AppColors.background,
+                      selectedColor: AppColors.withAlphaFraction(
+                        AppColors.primary,
+                        0.15,
+                      ),
+                      checkmarkColor: AppColors.primary,
                     ),
                   );
                 }).toList(),
@@ -558,19 +602,26 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
     );
   }
 
-  Widget _buildNotificationCard(Map<String, dynamic> notification, {bool showQuickActions = false}) {
+  Widget _buildNotificationCard(Map<String, dynamic> notification,
+      {bool showQuickActions = false}) {
     final type = notification['type'] ?? 'system';
     final isRead = notification['is_read'] == true;
     final isImportant = notification['priority'] == 'high';
     final hasAction = notification['action_url'] != null;
-    
+
+    // Bepaal statuslabel (fallback op is_read)
+    final statusKey =
+        (notification['status'] ?? (isRead ? 'read' : 'unread')).toString();
+    final statusLabel = _statusLabels[statusKey] ?? statusKey;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: isRead ? 1 : 3,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: isImportant && !isRead 
-            ? BorderSide(color: Colors.red.withOpacity(0.3), width: 2) 
+        side: isImportant && !isRead
+            ? BorderSide(
+                color: AppColors.withAlphaFraction(Colors.red, 0.3), width: 2)
             : BorderSide.none,
       ),
       child: InkWell(
@@ -583,23 +634,27 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
             children: [
               // Header
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Type icon
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: _typeColors[type]?.withOpacity(0.1),
+                      color: AppColors.withAlphaFraction(
+                        _typeColors[type] ?? AppColors.primary,
+                        0.10,
+                      ),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
                       _typeIcons[type] ?? Icons.notifications,
-                      color: _typeColors[type],
+                      color: _typeColors[type] ?? AppColors.primary,
                       size: 20,
                     ),
                   ),
-                  
+
                   const SizedBox(width: 12),
-                  
+
                   // Title and timestamp
                   Expanded(
                     child: Column(
@@ -610,24 +665,34 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
                             Expanded(
                               child: Text(
                                 notification['title'] ?? '',
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: isRead ? FontWeight.normal : FontWeight.bold,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                      fontWeight: isRead
+                                          ? FontWeight.normal
+                                          : FontWeight.bold,
+                                    ),
                               ),
                             ),
                             if (isImportant)
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: Colors.red.withOpacity(0.1),
+                                  color: AppColors.withAlphaFraction(
+                                      Colors.red, 0.10),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
                                   'Belangrijk',
-                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: Colors.red,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelSmall
+                                      ?.copyWith(
+                                        color: Colors.red,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                 ),
                               ),
                           ],
@@ -635,14 +700,15 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
                         const SizedBox(height: 4),
                         Text(
                           _formatDateTime(notification['created_at']),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
                         ),
                       ],
                     ),
                   ),
-                  
+
                   // Read status indicator
                   if (!isRead)
                     Container(
@@ -653,16 +719,21 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
                         shape: BoxShape.circle,
                       ),
                     ),
-                  
+
                   // Actions menu
                   PopupMenuButton<String>(
-                    onSelected: (value) => _handleNotificationAction(value, notification),
+                    onSelected: (value) =>
+                        _handleNotificationAction(value, notification),
                     itemBuilder: (context) => [
                       PopupMenuItem(
                         value: isRead ? 'mark_unread' : 'mark_read',
                         child: ListTile(
-                          leading: Icon(isRead ? Icons.mark_email_unread : Icons.mark_email_read),
-                          title: Text(isRead ? 'Als ongelezen markeren' : 'Als gelezen markeren'),
+                          leading: Icon(isRead
+                              ? Icons.mark_email_unread
+                              : Icons.mark_email_read),
+                          title: Text(isRead
+                              ? 'Als ongelezen markeren'
+                              : 'Als gelezen markeren'),
                           contentPadding: EdgeInsets.zero,
                         ),
                       ),
@@ -687,7 +758,10 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
                         value: 'delete',
                         child: ListTile(
                           leading: Icon(Icons.delete, color: Colors.red),
-                          title: Text('Verwijderen', style: TextStyle(color: Colors.red)),
+                          title: Text(
+                            'Verwijderen',
+                            style: TextStyle(color: Colors.red),
+                          ),
                           contentPadding: EdgeInsets.zero,
                         ),
                       ),
@@ -695,17 +769,66 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Message
               Text(
                 notification['message'] ?? '',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: isRead ? AppColors.textSecondary : AppColors.textPrimary,
-                ),
+                      color: isRead
+                          ? AppColors.textSecondary
+                          : AppColors.textPrimary,
+                    ),
               ),
-              
+
+              const SizedBox(height: 12),
+
+              // Status badge (gebruikt _statusLabels)
+              Row(
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.withAlphaFraction(
+                          statusKey == 'unread'
+                              ? AppColors.primary
+                              : Colors.grey,
+                          0.12),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      statusLabel,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: statusKey == 'unread'
+                                ? AppColors.primary
+                                : Colors.grey[800],
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  if (type != 'system')
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.withAlphaFraction(
+                            _typeColors[type] ?? AppColors.primary, 0.12),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        _typeLabels[type] ?? type,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: _typeColors[type] ?? AppColors.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                    ),
+                ],
+              ),
+
               // Action button
               if (hasAction) ...[
                 const SizedBox(height: 12),
@@ -714,12 +837,12 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
                   icon: const Icon(Icons.open_in_new),
                   label: Text(notification['action_text'] ?? 'Bekijken'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _typeColors[type],
+                    backgroundColor: _typeColors[type] ?? AppColors.primary,
                     foregroundColor: Colors.white,
                   ),
                 ),
               ],
-              
+
               // Quick actions for unread notifications
               if (showQuickActions && !isRead) ...[
                 const SizedBox(height: 12),
@@ -737,17 +860,6 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () => _archiveNotification(notification),
-                        icon: const Icon(Icons.archive),
-                        label: const Text('Archiveren'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey,
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ],
@@ -758,22 +870,23 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
     );
   }
 
-  Widget _buildSettingsSection(String title, String subtitle, List<Widget> children) {
+  Widget _buildSettingsSection(
+      String title, String subtitle, List<Widget> children) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 4),
         Text(
           subtitle,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: AppColors.textSecondary,
-          ),
+                color: AppColors.textSecondary,
+              ),
         ),
         const SizedBox(height: 16),
         Card(
@@ -789,9 +902,10 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
     );
   }
 
-  Widget _buildSettingTile(String key, String title, String subtitle, IconData icon) {
+  Widget _buildSettingTile(
+      String key, String title, String subtitle, IconData icon) {
     final isEnabled = _notificationSettings[key] ?? true;
-    
+
     return ListTile(
       leading: Icon(icon, color: isEnabled ? AppColors.primary : Colors.grey),
       title: Text(title),
@@ -814,6 +928,10 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
   }
 
   Widget _buildEmptyState() {
+    final isFiltered = _searchQuery.isNotEmpty ||
+        _filterType != 'all' ||
+        _showOnlyUnread ||
+        _filterStatus != 'all';
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -827,21 +945,19 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
             ),
             const SizedBox(height: 16),
             Text(
-              _searchQuery.isNotEmpty || _filterType != 'all' || _showOnlyUnread
-                  ? 'Geen notificaties gevonden'
-                  : 'Geen notificaties',
+              isFiltered ? 'Geen notificaties gevonden' : 'Geen notificaties',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
-              _searchQuery.isNotEmpty || _filterType != 'all' || _showOnlyUnread
+              isFiltered
                   ? 'Probeer een andere zoekopdracht of filter'
                   : 'Je ontvangt hier notificaties over je restaurants',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -866,15 +982,15 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
             Text(
               'Geen Ongelezen Notificaties',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               'Alle notificaties zijn gelezen! 🎉',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -887,22 +1003,17 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
     if (notification['is_read'] != true) {
       _markAsRead(notification);
     }
-    
+
     if (notification['action_url'] != null) {
       _openNotificationAction(notification);
     }
   }
 
-  void _handleNotificationAction(String action, Map<String, dynamic> notification) {
+  void _handleNotificationAction(
+      String action, Map<String, dynamic> notification) {
     switch (action) {
       case 'mark_read':
         _markAsRead(notification);
-        break;
-      case 'mark_unread':
-        _markAsUnread(notification);
-        break;
-      case 'archive':
-        _archiveNotification(notification);
         break;
       case 'open_action':
         _openNotificationAction(notification);
@@ -915,9 +1026,9 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
 
   Future<void> _markAsRead(Map<String, dynamic> notification) async {
     try {
-      await _apiService.markNotificationAsRead(notification['id']);
+      await _apiService.markNotificationRead(notification['id']);
       await _loadData();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -938,62 +1049,13 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
     }
   }
 
-  Future<void> _markAsUnread(Map<String, dynamic> notification) async {
-    try {
-      await _apiService.markNotificationAsUnread(notification['id']);
-      await _loadData();
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Notificatie als ongelezen gemarkeerd'),
-            backgroundColor: Colors.orange,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Fout bij markeren als ongelezen: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _archiveNotification(Map<String, dynamic> notification) async {
-    try {
-      await _apiService.archiveNotification(notification['id']);
-      await _loadData();
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Notificatie gearchiveerd'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Fout bij archiveren: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
   void _deleteNotification(Map<String, dynamic> notification) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Notificatie Verwijderen'),
-        content: const Text('Weet je zeker dat je deze notificatie wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.'),
+        content: const Text(
+            'Weet je zeker dat je deze notificatie wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -1005,7 +1067,7 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
               try {
                 await _apiService.deleteNotification(notification['id']);
                 await _loadData();
-                
+
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -1036,21 +1098,20 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
   void _openNotificationAction(Map<String, dynamic> notification) {
     final actionUrl = notification['action_url'];
     if (actionUrl != null) {
-      // Navigate to the appropriate page based on action URL
-      // This would typically use your app's routing system
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Navigeren naar: $actionUrl'),
         ),
       );
+      // TODO: vervang bovenstaande met daadwerkelijke navigatie (GoRouter, etc.)
     }
   }
 
   Future<void> _markAllAsRead() async {
     try {
-      await _apiService.markAllNotificationsAsRead();
+      await _apiService.markAllNotificationsRead();
       await _loadData();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -1076,7 +1137,8 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Alle Notificaties Wissen'),
-        content: const Text('Weet je zeker dat je alle notificaties wilt wissen? Deze actie kan niet ongedaan worden gemaakt.'),
+        content: const Text(
+            'Weet je zeker dat je alle notificaties wilt wissen? Deze actie kan niet ongedaan worden gemaakt.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -1088,7 +1150,7 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
               try {
                 await _apiService.clearAllNotifications();
                 await _loadData();
-                
+
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -1124,34 +1186,10 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
     );
   }
 
-  Future<void> _sendTestNotification() async {
-    try {
-      await _apiService.sendTestNotification();
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Test notificatie verstuurd'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Fout bij versturen test notificatie: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
   Future<void> _saveSettings() async {
     try {
-      await _apiService.updateNotificationSettings(_notificationSettings);
-      
+      await _apiService.updateNotificationPreferences(_notificationSettings);
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -1177,7 +1215,8 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Standaard Instellingen'),
-        content: const Text('Weet je zeker dat je alle instellingen wilt terugzetten naar de standaardwaarden?'),
+        content: const Text(
+            'Weet je zeker dat je alle instellingen wilt terugzetten naar de standaardwaarden?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -1209,10 +1248,11 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
                   'group_notifications': true,
                 };
               });
-              
+
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Instellingen teruggezet naar standaardwaarden'),
+                  content:
+                      Text('Instellingen teruggezet naar standaardwaarden'),
                   backgroundColor: Colors.green,
                 ),
               );
@@ -1253,12 +1293,12 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
 
   String _formatDateTime(String? dateTime) {
     if (dateTime == null) return '';
-    
+
     try {
       final date = DateTime.parse(dateTime);
       final now = DateTime.now();
       final difference = now.difference(date);
-      
+
       if (difference.inDays > 0) {
         return '${difference.inDays} dagen geleden';
       } else if (difference.inHours > 0) {
@@ -1273,4 +1313,3 @@ class _CateraarNotificationsPageState extends ConsumerState<CateraarNotification
     }
   }
 }
-
