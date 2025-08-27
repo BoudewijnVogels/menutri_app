@@ -10,7 +10,8 @@ class HelpPage extends ConsumerStatefulWidget {
   ConsumerState<HelpPage> createState() => _HelpPageState();
 }
 
-class _HelpPageState extends ConsumerState<HelpPage> with TickerProviderStateMixin {
+class _HelpPageState extends ConsumerState<HelpPage>
+    with TickerProviderStateMixin {
   late TabController _tabController;
   final _searchController = TextEditingController();
   String _searchQuery = '';
@@ -19,67 +20,80 @@ class _HelpPageState extends ConsumerState<HelpPage> with TickerProviderStateMix
     FAQItem(
       category: 'Account',
       question: 'Hoe maak ik een account aan?',
-      answer: 'Je kunt een account aanmaken door op "Registreren" te tikken op het inlogscherm. Vul je e-mailadres, naam en wachtwoord in. Je ontvangt een bevestigingsmail om je account te activeren.',
+      answer:
+          'Je kunt een account aanmaken door op "Registreren" te tikken op het inlogscherm. Vul je e-mailadres, naam en wachtwoord in. Je ontvangt een bevestigingsmail om je account te activeren.',
     ),
     FAQItem(
       category: 'Account',
       question: 'Ik ben mijn wachtwoord vergeten',
-      answer: 'Tik op "Wachtwoord vergeten?" op het inlogscherm. Voer je e-mailadres in en je ontvangt een link om je wachtwoord opnieuw in te stellen.',
+      answer:
+          'Tik op "Wachtwoord vergeten?" op het inlogscherm. Voer je e-mailadres in en je ontvangt een link om je wachtwoord opnieuw in te stellen.',
     ),
     FAQItem(
       category: 'Account',
       question: 'Hoe wijzig ik mijn profiel?',
-      answer: 'Ga naar je profiel en tik op "Profiel bewerken". Hier kun je je naam, foto en taalvoorkeur wijzigen.',
+      answer:
+          'Ga naar je profiel en tik op "Profiel bewerken". Hier kun je je naam, foto en taalvoorkeur wijzigen.',
     ),
     FAQItem(
       category: 'Restaurants',
       question: 'Hoe vind ik restaurants in de buurt?',
-      answer: 'Gebruik de zoekfunctie of kaart om restaurants in je omgeving te vinden. Je kunt filteren op keuken, prijs en dieetvoorkeuren.',
+      answer:
+          'Gebruik de zoekfunctie of kaart om restaurants in je omgeving te vinden. Je kunt filteren op keuken, prijs en dieetvoorkeuren.',
     ),
     FAQItem(
       category: 'Restaurants',
       question: 'Hoe scan ik een QR-code?',
-      answer: 'Tik op de QR-scanner in de app. Richt je camera op de QR-code van het restaurant om direct het menu te bekijken.',
+      answer:
+          'Tik op de QR-scanner in de app. Richt je camera op de QR-code van het restaurant om direct het menu te bekijken.',
     ),
     FAQItem(
       category: 'Restaurants',
       question: 'Hoe voeg ik restaurants toe aan mijn favorieten?',
-      answer: 'Tik op het hartje bij een restaurant of gerecht om het toe te voegen aan je favorieten. Je kunt ook collecties maken om je favorieten te organiseren.',
+      answer:
+          'Tik op het hartje bij een restaurant of gerecht om het toe te voegen aan je favorieten. Je kunt ook collecties maken om je favorieten te organiseren.',
     ),
     FAQItem(
       category: 'Voeding',
       question: 'Hoe log ik mijn maaltijden?',
-      answer: 'Ga naar het voedingslogboek en tik op de + knop. Selecteer het maaltijdtype en voer de voedingsinformatie in.',
+      answer:
+          'Ga naar het voedingslogboek en tik op de + knop. Selecteer het maaltijdtype en voer de voedingsinformatie in.',
     ),
     FAQItem(
       category: 'Voeding',
       question: 'Hoe stel ik mijn voedingsdoelen in?',
-      answer: 'Ga naar je gezondheidsprofiel en vul je lengte, gewicht en activiteitsniveau in. De app berekent automatisch je dagelijkse calorie- en macronutriëntendoelen.',
+      answer:
+          'Ga naar je gezondheidsprofiel en vul je lengte, gewicht en activiteitsniveau in. De app berekent automatisch je dagelijkse calorie- en macronutriëntendoelen.',
     ),
     FAQItem(
       category: 'Voeding',
       question: 'Wat betekenen de calorie-marges?',
-      answer: 'Calorie-marges geven aan hoe goed een gerecht past bij je dagelijkse doelen:\n• Grijs (≤5%): Uitstekend\n• Geel (5-10%): Goed\n• Oranje (10-15%): Matig\n• Rood (>15%): Hoog',
+      answer:
+          'Calorie-marges geven aan hoe goed een gerecht past bij je dagelijkse doelen:\n• Grijs (≤5%): Uitstekend\n• Geel (5-10%): Goed\n• Oranje (10-15%): Matig\n• Rood (>15%): Hoog',
     ),
     FAQItem(
       category: 'Technisch',
       question: 'De app werkt traag of crasht',
-      answer: 'Probeer de app opnieuw te starten. Als het probleem aanhoudt, controleer of je de nieuwste versie hebt geïnstalleerd. Herstart je telefoon indien nodig.',
+      answer:
+          'Probeer de app opnieuw te starten. Als het probleem aanhoudt, controleer of je de nieuwste versie hebt geïnstalleerd. Herstart je telefoon indien nodig.',
     ),
     FAQItem(
       category: 'Technisch',
       question: 'Ik krijg geen notificaties',
-      answer: 'Controleer of notificaties zijn ingeschakeld in je telefooninstellingen en in de app. Ga naar Profiel > Instellingen > Notificaties.',
+      answer:
+          'Controleer of notificaties zijn ingeschakeld in je telefooninstellingen en in de app. Ga naar Profiel > Instellingen > Notificaties.',
     ),
     FAQItem(
       category: 'Privacy',
       question: 'Hoe wordt mijn data gebruikt?',
-      answer: 'We gebruiken je gegevens alleen om de app te verbeteren en gepersonaliseerde aanbevelingen te doen. Lees ons privacybeleid voor meer details.',
+      answer:
+          'We gebruiken je gegevens alleen om de app te verbeteren en gepersonaliseerde aanbevelingen te doen. Lees ons privacybeleid voor meer details.',
     ),
     FAQItem(
       category: 'Privacy',
       question: 'Kan ik mijn data exporteren?',
-      answer: 'Ja, je kunt je gegevens exporteren door contact op te nemen met ons support team. We sturen je binnen 30 dagen een kopie van al je data.',
+      answer:
+          'Ja, je kunt je gegevens exporteren door contact op te nemen met ons support team. We sturen je binnen 30 dagen een kopie van al je data.',
     ),
   ];
 
@@ -123,8 +137,8 @@ class _HelpPageState extends ConsumerState<HelpPage> with TickerProviderStateMix
     final filteredFAQs = _faqItems.where((faq) {
       if (_searchQuery.isEmpty) return true;
       return faq.question.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-             faq.answer.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-             faq.category.toLowerCase().contains(_searchQuery.toLowerCase());
+          faq.answer.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          faq.category.toLowerCase().contains(_searchQuery.toLowerCase());
     }).toList();
 
     final categories = _faqItems.map((faq) => faq.category).toSet().toList();
@@ -213,14 +227,14 @@ class _HelpPageState extends ConsumerState<HelpPage> with TickerProviderStateMix
         title: Text(
           faq.question,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+                fontWeight: FontWeight.w600,
+              ),
         ),
         subtitle: Text(
           faq.category,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: AppColors.mediumBrown,
-          ),
+                color: AppColors.mediumBrown,
+              ),
         ),
         children: [
           Padding(
@@ -250,8 +264,8 @@ class _HelpPageState extends ConsumerState<HelpPage> with TickerProviderStateMix
           Text(
             'Probeer een andere zoekterm',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.grey,
-            ),
+                  color: AppColors.grey,
+                ),
           ),
         ],
       ),
@@ -268,21 +282,21 @@ class _HelpPageState extends ConsumerState<HelpPage> with TickerProviderStateMix
           Text(
             'Neem contact met ons op',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           Text(
             'We helpen je graag verder! Kies de manier die het beste bij je past.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.grey,
-            ),
+                  color: AppColors.grey,
+                ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Contact methods
           _buildContactMethod(
             icon: Icons.email,
@@ -291,9 +305,9 @@ class _HelpPageState extends ConsumerState<HelpPage> with TickerProviderStateMix
             description: 'Stuur ons een e-mail voor uitgebreide vragen',
             onTap: () => _launchEmail('support@menutri.app'),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           _buildContactMethod(
             icon: Icons.chat,
             title: 'Live chat',
@@ -301,9 +315,9 @@ class _HelpPageState extends ConsumerState<HelpPage> with TickerProviderStateMix
             description: 'Chat direct met ons support team',
             onTap: _openLiveChat,
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           _buildContactMethod(
             icon: Icons.phone,
             title: 'Telefoon',
@@ -311,19 +325,19 @@ class _HelpPageState extends ConsumerState<HelpPage> with TickerProviderStateMix
             description: 'Bel ons voor urgente vragen',
             onTap: () => _launchPhone('+31201234567'),
           ),
-          
+
           const SizedBox(height: 32),
-          
+
           // Social media
           Text(
             'Volg ons',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           Row(
             children: [
               _buildSocialButton(
@@ -345,14 +359,14 @@ class _HelpPageState extends ConsumerState<HelpPage> with TickerProviderStateMix
               ),
             ],
           ),
-          
+
           const SizedBox(height: 32),
-          
+
           // Feedback section
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.lightBrown.withOpacity(0.3),
+              color: AppColors.withAlphaFraction(lightBrown, 0.3),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Column(
@@ -365,8 +379,8 @@ class _HelpPageState extends ConsumerState<HelpPage> with TickerProviderStateMix
                     Text(
                       'Feedback geven',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                   ],
                 ),
@@ -402,7 +416,7 @@ class _HelpPageState extends ConsumerState<HelpPage> with TickerProviderStateMix
         leading: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: AppColors.mediumBrown.withOpacity(0.1),
+            color: AppColors.withAlphaFraction(mediumBrown, 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, color: AppColors.mediumBrown),
@@ -410,8 +424,8 @@ class _HelpPageState extends ConsumerState<HelpPage> with TickerProviderStateMix
         title: Text(
           title,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+                fontWeight: FontWeight.w600,
+              ),
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -419,9 +433,9 @@ class _HelpPageState extends ConsumerState<HelpPage> with TickerProviderStateMix
             Text(
               subtitle,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.mediumBrown,
-                fontWeight: FontWeight.w600,
-              ),
+                    color: AppColors.mediumBrown,
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const SizedBox(height: 4),
             Text(description),
@@ -477,74 +491,79 @@ class _HelpPageState extends ConsumerState<HelpPage> with TickerProviderStateMix
                 Text(
                   'Menutri',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Versie 1.0.0',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.grey,
-                  ),
+                        color: AppColors.grey,
+                      ),
                 ),
               ],
             ),
           ),
-          
+
           const SizedBox(height: 32),
-          
+
           // About text
           Text(
             'Over Menutri',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           const Text(
             'Menutri helpt je gezondere keuzes te maken bij het eten. '
             'Ontdek restaurants, bekijk voedingsinformatie en houd je voedingsdoelen bij. '
             'Onze missie is om gezond eten toegankelijk en leuk te maken voor iedereen.',
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Features
           Text(
             'Functies',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
-          
+
           const SizedBox(height: 16),
-          
-          _buildFeatureItem('🍽️', 'Restaurant ontdekking', 'Vind restaurants in je buurt'),
+
+          _buildFeatureItem(
+              '🍽️', 'Restaurant ontdekking', 'Vind restaurants in je buurt'),
           _buildFeatureItem('📱', 'QR-code scanner', 'Scan menu\'s direct'),
           _buildFeatureItem('📊', 'Voedingslogboek', 'Houd je maaltijden bij'),
-          _buildFeatureItem('🎯', 'Persoonlijke doelen', 'Stel je eigen doelen in'),
-          _buildFeatureItem('❤️', 'Favorieten', 'Bewaar je favoriete gerechten'),
-          
+          _buildFeatureItem(
+              '🎯', 'Persoonlijke doelen', 'Stel je eigen doelen in'),
+          _buildFeatureItem(
+              '❤️', 'Favorieten', 'Bewaar je favoriete gerechten'),
+
           const SizedBox(height: 24),
-          
+
           // Legal links
           Text(
             'Juridisch',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
-          
+
           const SizedBox(height: 16),
-          
-          _buildLegalLink('Privacybeleid', () => _launchURL('https://menutri.app/privacy')),
-          _buildLegalLink('Gebruiksvoorwaarden', () => _launchURL('https://menutri.app/terms')),
+
+          _buildLegalLink(
+              'Privacybeleid', () => _launchURL('https://menutri.app/privacy')),
+          _buildLegalLink('Gebruiksvoorwaarden',
+              () => _launchURL('https://menutri.app/terms')),
           _buildLegalLink('Licenties', () => _showLicenses()),
-          
+
           const SizedBox(height: 24),
-          
+
           // Company info
           Container(
             padding: const EdgeInsets.all(16),
@@ -558,8 +577,8 @@ class _HelpPageState extends ConsumerState<HelpPage> with TickerProviderStateMix
                 Text(
                   'Menutri B.V.',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
                 const SizedBox(height: 8),
                 const Text('KvK: 12345678'),
@@ -589,14 +608,14 @@ class _HelpPageState extends ConsumerState<HelpPage> with TickerProviderStateMix
                 Text(
                   title,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
                 Text(
                   description,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.grey,
-                  ),
+                        color: AppColors.grey,
+                      ),
                 ),
               ],
             ),
@@ -621,7 +640,7 @@ class _HelpPageState extends ConsumerState<HelpPage> with TickerProviderStateMix
       path: email,
       query: 'subject=Menutri Support',
     );
-    
+
     if (await canLaunchUrl(emailUri)) {
       await launchUrl(emailUri);
     } else {
@@ -638,7 +657,7 @@ class _HelpPageState extends ConsumerState<HelpPage> with TickerProviderStateMix
 
   Future<void> _launchPhone(String phone) async {
     final Uri phoneUri = Uri(scheme: 'tel', path: phone);
-    
+
     if (await canLaunchUrl(phoneUri)) {
       await launchUrl(phoneUri);
     } else {
@@ -655,7 +674,7 @@ class _HelpPageState extends ConsumerState<HelpPage> with TickerProviderStateMix
 
   Future<void> _launchURL(String url) async {
     final Uri uri = Uri.parse(url);
-    
+
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
@@ -851,4 +870,3 @@ class _FeedbackDialogState extends State<_FeedbackDialog> {
     super.dispose();
   }
 }
-
