@@ -16,7 +16,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
   List<dynamic> _notifications = [];
   bool _isLoading = true;
   String? _errorMessage;
-  
+
   // Notification settings
   bool _favoriteNotifications = true;
   bool _eatenNotifications = true;
@@ -24,7 +24,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
   bool _milestoneNotifications = true;
   bool _promoNotifications = false;
   bool _soundEnabled = true;
-  
+
   @override
   void initState() {
     super.initState();
@@ -41,7 +41,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
       });
 
       final notifications = await ApiService().getNotifications();
-      
+
       setState(() {
         _notifications = notifications;
         _isLoading = false;
@@ -57,7 +57,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
   Future<void> _loadNotificationSettings() async {
     try {
       final settings = await ApiService().getNotificationSettings();
-      
+
       setState(() {
         _favoriteNotifications = settings['favorite_notifications'] ?? true;
         _eatenNotifications = settings['eaten_notifications'] ?? true;
@@ -140,10 +140,10 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
     final isRead = notification['read'] ?? false;
     final type = notification['type'] ?? 'general';
     final createdAt = DateTime.tryParse(notification['created_at'] ?? '');
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      color: isRead ? null : AppColors.lightBrown.withOpacity(0.3),
+      color: isRead ? null : AppColors.withAlphaFraction(lightBrown, 0.3),
       child: InkWell(
         onTap: () => _handleNotificationTap(notification),
         borderRadius: BorderRadius.circular(12),
@@ -165,9 +165,9 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
                   size: 24,
                 ),
               ),
-              
+
               const SizedBox(width: 16),
-              
+
               // Notification content
               Expanded(
                 child: Column(
@@ -178,9 +178,14 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
                         Expanded(
                           child: Text(
                             notification['title'] ?? 'Notificatie',
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: isRead ? FontWeight.normal : FontWeight.w600,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  fontWeight: isRead
+                                      ? FontWeight.normal
+                                      : FontWeight.w600,
+                                ),
                           ),
                         ),
                         if (!isRead)
@@ -194,30 +199,26 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
                           ),
                       ],
                     ),
-                    
                     const SizedBox(height: 4),
-                    
                     Text(
                       notification['message'] ?? '',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.grey,
-                      ),
+                            color: AppColors.grey,
+                          ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    
                     const SizedBox(height: 8),
-                    
                     Text(
                       _formatNotificationTime(createdAt),
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: AppColors.grey,
-                      ),
+                            color: AppColors.grey,
+                          ),
                     ),
                   ],
                 ),
               ),
-              
+
               // Actions
               PopupMenuButton(
                 itemBuilder: (context) => [
@@ -270,17 +271,19 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
           ),
           const SizedBox(height: 16),
           Text(
-            showUnreadOnly ? 'Geen ongelezen notificaties' : 'Geen notificaties',
+            showUnreadOnly
+                ? 'Geen ongelezen notificaties'
+                : 'Geen notificaties',
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 8),
           Text(
-            showUnreadOnly 
+            showUnreadOnly
                 ? 'Alle notificaties zijn gelezen'
                 : 'Je ontvangt hier meldingen over favorieten, reviews en meer',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.grey,
-            ),
+                  color: AppColors.grey,
+                ),
             textAlign: TextAlign.center,
           ),
         ],
@@ -327,8 +330,8 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
                   Text(
                     'Notificatie-instellingen',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                   const Spacer(),
                   TextButton(
@@ -340,9 +343,9 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               Expanded(
                 child: SingleChildScrollView(
                   child: Column(
@@ -350,57 +353,56 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
                     children: [
                       Text(
                         'Meldingstypen',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
                       ),
                       const SizedBox(height: 8),
-                      
                       _buildSettingsTile(
                         'Favorieten',
                         'Meldingen wanneer restaurants of gerechten worden toegevoegd aan favorieten',
                         _favoriteNotifications,
-                        (value) => setModalState(() => _favoriteNotifications = value),
+                        (value) =>
+                            setModalState(() => _favoriteNotifications = value),
                       ),
-                      
                       _buildSettingsTile(
                         'Gegeten gerechten',
                         'Meldingen over gelogde maaltijden en voedingsdoelen',
                         _eatenNotifications,
-                        (value) => setModalState(() => _eatenNotifications = value),
+                        (value) =>
+                            setModalState(() => _eatenNotifications = value),
                       ),
-                      
                       _buildSettingsTile(
                         'Reviews',
                         'Meldingen over nieuwe reviews van restaurants',
                         _reviewNotifications,
-                        (value) => setModalState(() => _reviewNotifications = value),
+                        (value) =>
+                            setModalState(() => _reviewNotifications = value),
                       ),
-                      
                       _buildSettingsTile(
                         'Mijlpalen',
                         'Meldingen bij het bereiken van doelen (bijv. 100 favorieten)',
                         _milestoneNotifications,
-                        (value) => setModalState(() => _milestoneNotifications = value),
+                        (value) => setModalState(
+                            () => _milestoneNotifications = value),
                       ),
-                      
                       _buildSettingsTile(
                         'Promoties',
                         'Meldingen over Menutri updates en aanbiedingen',
                         _promoNotifications,
-                        (value) => setModalState(() => _promoNotifications = value),
+                        (value) =>
+                            setModalState(() => _promoNotifications = value),
                       ),
-                      
                       const SizedBox(height: 24),
-                      
                       Text(
                         'Geluid en trillingen',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
                       ),
                       const SizedBox(height: 8),
-                      
                       _buildSettingsTile(
                         'Geluid',
                         'Speel geluid af bij nieuwe notificaties',
@@ -418,14 +420,15 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
     );
   }
 
-  Widget _buildSettingsTile(String title, String subtitle, bool value, ValueChanged<bool> onChanged) {
+  Widget _buildSettingsTile(
+      String title, String subtitle, bool value, ValueChanged<bool> onChanged) {
     return SwitchListTile(
       title: Text(title),
       subtitle: Text(
         subtitle,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: AppColors.grey,
-        ),
+              color: AppColors.grey,
+            ),
       ),
       value: value,
       onChanged: onChanged,
@@ -469,10 +472,10 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
 
   String _formatNotificationTime(DateTime? dateTime) {
     if (dateTime == null) return 'Onbekend';
-    
+
     final now = DateTime.now();
     final difference = now.difference(dateTime);
-    
+
     if (difference.inMinutes < 1) {
       return 'Nu';
     } else if (difference.inHours < 1) {
@@ -491,11 +494,11 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
     if (!(notification['read'] ?? false)) {
       _markAsRead(notification['id']);
     }
-    
+
     // Handle navigation based on notification type
     final type = notification['type'] ?? 'general';
     final data = notification['data'] as Map<String, dynamic>? ?? {};
-    
+
     switch (type) {
       case 'favorite':
         if (data['restaurant_id'] != null) {
@@ -522,9 +525,10 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
   Future<void> _markAsRead(int notificationId) async {
     try {
       await ApiService().markNotificationAsRead(notificationId);
-      
+
       setState(() {
-        final index = _notifications.indexWhere((n) => n['id'] == notificationId);
+        final index =
+            _notifications.indexWhere((n) => n['id'] == notificationId);
         if (index != -1) {
           _notifications[index]['read'] = true;
         }
@@ -544,11 +548,11 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
   Future<void> _deleteNotification(int notificationId) async {
     try {
       await ApiService().deleteNotification(notificationId);
-      
+
       setState(() {
         _notifications.removeWhere((n) => n['id'] == notificationId);
       });
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -579,9 +583,9 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
         'promo_notifications': _promoNotifications,
         'sound_enabled': _soundEnabled,
       };
-      
+
       await ApiService().updateNotificationSettings(settings);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -608,4 +612,3 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
     super.dispose();
   }
 }
-
