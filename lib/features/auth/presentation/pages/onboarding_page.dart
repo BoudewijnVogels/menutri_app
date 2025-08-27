@@ -17,22 +17,26 @@ class _OnboardingPageState extends State<OnboardingPage> {
   final List<OnboardingItem> _items = [
     OnboardingItem(
       title: 'Welkom bij Menutri',
-      description: 'Ontdek gezonde gerechten en restaurants in jouw buurt. Scan QR-codes en bekijk voedingsinformatie.',
+      description:
+          'Ontdek gezonde gerechten en restaurants in jouw buurt. Scan QR-codes en bekijk voedingsinformatie.',
       icon: Icons.restaurant_menu,
     ),
     OnboardingItem(
       title: 'Scan & Ontdek',
-      description: 'Scan QR-codes bij restaurants om direct menu\'s en voedingsinformatie te bekijken.',
+      description:
+          'Scan QR-codes bij restaurants om direct menu\'s en voedingsinformatie te bekijken.',
       icon: Icons.qr_code_scanner,
     ),
     OnboardingItem(
       title: 'Persoonlijke Aanbevelingen',
-      description: 'Krijg gepersonaliseerde aanbevelingen op basis van jouw gezondheidsprofielen doelen.',
+      description:
+          'Krijg gepersonaliseerde aanbevelingen op basis van jouw gezondheidsprofielen doelen.',
       icon: Icons.favorite,
     ),
     OnboardingItem(
       title: 'Kies je rol',
-      description: 'Ben je een gast die restaurants wil ontdekken, of een cateraar die menu\'s wil beheren?',
+      description:
+          'Ben je een gast die restaurants wil ontdekken, of een cateraar die menu\'s wil beheren?',
       icon: Icons.person,
     ),
   ];
@@ -57,14 +61,14 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     child: Text(
                       'Overslaan',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.mediumBrown,
-                        fontWeight: FontWeight.w600,
-                      ),
+                            color: AppColors.mediumBrown,
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                   ),
                 ),
               ),
-              
+
               // Page view
               Expanded(
                 child: PageView.builder(
@@ -87,7 +91,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             width: 120,
                             height: 120,
                             decoration: BoxDecoration(
-                              color: AppColors.mediumBrown.withOpacity(0.1),
+                              color: AppColors.withAlphaFraction(
+                                  AppColors.mediumBrown, 0.1),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
@@ -96,31 +101,36 @@ class _OnboardingPageState extends State<OnboardingPage> {
                               color: AppColors.mediumBrown,
                             ),
                           ),
-                          
+
                           const SizedBox(height: 48),
-                          
+
                           // Title
                           Text(
                             item.title,
-                            style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                              color: AppColors.darkBrown,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .displaySmall
+                                ?.copyWith(
+                                  color: AppColors.darkBrown,
+                                  fontWeight: FontWeight.bold,
+                                ),
                             textAlign: TextAlign.center,
                           ),
-                          
+
                           const SizedBox(height: 24),
-                          
+
                           // Description
                           Text(
                             item.description,
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: AppColors.darkBrown.withOpacity(0.8),
-                              height: 1.5,
-                            ),
+                            style:
+                                Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                      color: AppColors.withAlphaFraction(
+                                          AppColors.darkBrown, 0.8),
+                                      height: 1.5,
+                                    ),
                             textAlign: TextAlign.center,
                           ),
-                          
+
                           // Role selection for last page
                           if (index == _items.length - 1) ...[
                             const SizedBox(height: 48),
@@ -132,7 +142,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   },
                 ),
               ),
-              
+
               // Page indicator and navigation
               Padding(
                 padding: const EdgeInsets.all(32.0),
@@ -150,15 +160,16 @@ class _OnboardingPageState extends State<OnboardingPage> {
                           decoration: BoxDecoration(
                             color: _currentPage == index
                                 ? AppColors.mediumBrown
-                                : AppColors.mediumBrown.withOpacity(0.3),
+                                : AppColors.withAlphaFraction(
+                                    AppColors.mediumBrown, 0.3),
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),
                       ),
                     ),
-                    
+
                     const SizedBox(height: 32),
-                    
+
                     // Navigation buttons
                     if (_currentPage < _items.length - 1)
                       Row(
@@ -230,7 +241,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: AppColors.mediumBrown.withOpacity(0.1),
+                  color:
+                      AppColors.withAlphaFraction(AppColors.mediumBrown, 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -247,15 +259,15 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     Text(
                       title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       description,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.grey,
-                      ),
+                            color: AppColors.grey,
+                          ),
                     ),
                   ],
                 ),
@@ -321,4 +333,3 @@ class OnboardingItem {
     required this.icon,
   });
 }
-
