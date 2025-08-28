@@ -133,7 +133,8 @@ class _CateraarProfileManagementPageState
     try {
       final profileResponse = await _apiService.getCurrentUser();
       final businessResponse = await _apiService.getBusinessProfile();
-      final teamResponse = await _apiService.getTeamMembers();
+      final teamResponse =
+          await _apiService.getTeamMembers(_businessData['id']);
 
       final profile = profileResponse['profile'] ?? {};
       final business = businessResponse['business'] ?? {};
