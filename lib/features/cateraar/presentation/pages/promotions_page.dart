@@ -438,7 +438,7 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
                   children: [
                     Expanded(
                       child: DropdownButtonFormField<String>(
-                        value: _selectedStatus,
+                        initialValue: _selectedStatus,
                         decoration: const InputDecoration(
                           labelText: 'Status',
                           border: OutlineInputBorder(),
@@ -461,7 +461,7 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
                     const SizedBox(width: 8),
                     Expanded(
                       child: DropdownButtonFormField<String>(
-                        value: _selectedType,
+                        initialValue: _selectedType,
                         decoration: const InputDecoration(
                           labelText: 'Type',
                           border: OutlineInputBorder(),
@@ -500,7 +500,7 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
                   Tab(text: 'Campagnes', icon: Icon(Icons.campaign, size: 16)),
                   Tab(
                       text: 'Templates',
-                      icon: Icon(Icons.template_outlined, size: 16)),
+                      icon: Icon(Icons.description_outlined, size: 16)),
                   Tab(text: 'Analytics', icon: Icon(Icons.analytics, size: 16)),
                 ],
               ),
@@ -957,7 +957,7 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.AppColors.withAlphaFraction(green, 0.1),
+                    color: AppColors.withAlphaFraction(Colors.green, 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -1186,7 +1186,7 @@ class _CateraarPromotionsPageState extends ConsumerState<CateraarPromotionsPage>
                         ],
                       ),
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ),
