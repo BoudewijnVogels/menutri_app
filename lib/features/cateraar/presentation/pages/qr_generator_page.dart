@@ -102,7 +102,8 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
     if (_selectedRestaurant == null) return;
 
     try {
-      final response = await _apiService.getMenus(_selectedRestaurant!['id']);
+      final restaurantId = _selectedRestaurant!['id'] as int;
+      final response = await _apiService.getMenus(restaurantId);
       final menus = List<Map<String, dynamic>>.from(response['menus'] ?? []);
 
       setState(() {
@@ -409,7 +410,8 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
               if (value == null || value.isEmpty) {
                 return 'Voer een URL in';
               }
-              if (!Uri.tryParse(value)?.hasAbsolutePath == true) {
+              final uri = Uri.tryParse(value);
+              if (uri == null || !uri.hasAbsolutePath) {
                 return 'Voer een geldige URL in';
               }
               return null;
@@ -906,7 +908,7 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
           throw Exception('Onbekend QR type');
       }
 
-      final response = await _apiService.generateQRCode({
+      final response = await _apiService.getMenuQR({
         'target_url': targetUrl,
         'description': description,
         'qr_color': '#${_qrColor.value.toRadixString(16).substring(2)}',
