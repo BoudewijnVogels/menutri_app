@@ -1285,7 +1285,7 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
                 ),
                 const Divider(height: 1),
                 ListTile(
-                  leading: const Icon(Icons.rate_limit),
+                  leading: const Icon(Icons.speed),
                   title: const Text('Rate Limiting'),
                   subtitle: const Text('Configureer API limieten'),
                   trailing: const Icon(Icons.arrow_forward_ios),
@@ -1525,7 +1525,7 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              _resetToDefaults();
+              _resetToDefaults(); // ← backend reset + reload
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Terugzetten'),
@@ -1535,72 +1535,101 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
     );
   }
 
-  void _resetToDefaults() {
-    setState(() {
-      // Reset all settings to default values
-      _darkMode = false;
-      _pushNotifications = true;
-      _soundEnabled = true;
-      _vibrationEnabled = true;
-      _autoSync = true;
-      _offlineMode = false;
-      _language = 'nl';
-      _currency = 'EUR';
-      _dateFormat = 'dd/MM/yyyy';
-      _timeFormat = '24h';
-      _theme = 'system';
+  // ⬇⬇⬇ Geüpdatet: reset gebeurt nu via backend en herlaadt daarna de waarden
+  Future<void> _resetToDefaults() async {
+    setState(() => _isSaving = true);
+    try {
+      final response = await _apiService.resetSettings();
+      final settings = response['settings'] ?? {};
+      setState(() {
+        _settings = settings;
+      });
+      _populateSettings();
 
-      _autoApproveReviews = false;
-      _allowGuestReviews = true;
-      _requireReservation = false;
-      _enableDelivery = false;
-      _enableTakeaway = true;
-      _showPrices = true;
-      _showNutrition = true;
-      _showAllergens = true;
-      _defaultMenuStatus = 'active';
-      _businessHours = 'custom';
-      _maxReservationDays = 30;
-      _minReservationHours = 2;
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Instellingen teruggezet naar standaardwaarden'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      // Fallback: als de backend-reset faalt, val terug op lokale defaults
+      setState(() {
+        // App defaults
+        _darkMode = false;
+        _pushNotifications = true;
+        _soundEnabled = true;
+        _vibrationEnabled = true;
+        _autoSync = true;
+        _offlineMode = false;
+        _language = 'nl';
+        _currency = 'EUR';
+        _dateFormat = 'dd/MM/yyyy';
+        _timeFormat = '24h';
+        _theme = 'system';
 
-      _emailNotifications = true;
-      _smsNotifications = false;
-      _pushReviews = true;
-      _pushOrders = true;
-      _pushTeam = true;
-      _pushSystem = true;
-      _pushMarketing = false;
-      _emailDigest = true;
-      _weeklyReport = true;
-      _monthlyReport = true;
-      _quietHoursStart = '22:00';
-      _quietHoursEnd = '08:00';
-      _quietHoursEnabled = false;
+        // Business defaults
+        _autoApproveReviews = false;
+        _allowGuestReviews = true;
+        _requireReservation = false;
+        _enableDelivery = false;
+        _enableTakeaway = true;
+        _showPrices = true;
+        _showNutrition = true;
+        _showAllergens = true;
+        _defaultMenuStatus = 'active';
+        _businessHours = 'custom';
+        _maxReservationDays = 30;
+        _minReservationHours = 2;
 
-      _twoFactorAuth = false;
-      _loginNotifications = true;
-      _dataCollection = true;
-      _analyticsTracking = true;
-      _marketingCookies = false;
-      _shareData = false;
-      _dataRetention = '2_years';
-      _sessionTimeout = '30_minutes';
+        // Notification defaults
+        _emailNotifications = true;
+        _smsNotifications = false;
+        _pushReviews = true;
+        _pushOrders = true;
+        _pushTeam = true;
+        _pushSystem = true;
+        _pushMarketing = false;
+        _emailDigest = true;
+        _weeklyReport = true;
+        _monthlyReport = true;
+        _quietHoursStart = '22:00';
+        _quietHoursEnd = '08:00';
+        _quietHoursEnabled = false;
 
-      _googleMapsEnabled = true;
-      _myFitnessPalEnabled = true;
-      _googleAnalyticsEnabled = false;
-      _facebookPixelEnabled = false;
-      _paymentProvider = 'stripe';
-      _emailProvider = 'sendgrid';
-      _smsProvider = 'twilio';
-    });
+        // Privacy defaults
+        _twoFactorAuth = false;
+        _loginNotifications = true;
+        _dataCollection = true;
+        _analyticsTracking = true;
+        _marketingCookies = false;
+        _shareData = false;
+        _dataRetention = '2_years';
+        _sessionTimeout = '30_minutes';
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Instellingen teruggezet naar standaardwaarden'),
-        backgroundColor: Colors.green,
-      ),
-    );
+        // Integrations defaults
+        _googleMapsEnabled = true;
+        _myFitnessPalEnabled = true;
+        _googleAnalyticsEnabled = false;
+        _facebookPixelEnabled = false;
+        _paymentProvider = 'stripe';
+        _emailProvider = 'sendgrid';
+        _smsProvider = 'twilio';
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Backend reset faalde, lokale defaults gezet: $e'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    } finally {
+      setState(() => _isSaving = false);
+    }
   }
 
   // Placeholder methods for various settings actions
