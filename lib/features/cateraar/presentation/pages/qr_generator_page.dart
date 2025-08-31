@@ -102,8 +102,8 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
     if (_selectedRestaurant == null) return;
 
     try {
-      final restaurantId = _selectedRestaurant!['id'] as int;
-      final response = await _apiService.getMenus(restaurantId);
+      final restaurantId = (_selectedRestaurant!['id'] as num).toInt();
+      final response = await _apiService.getMenus(restaurantId: restaurantId);
       final menus = List<Map<String, dynamic>>.from(response['menus'] ?? []);
 
       setState(() {
@@ -327,7 +327,8 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
             items: _restaurants.map((restaurant) {
               return DropdownMenuItem(
                 value: restaurant,
-                child: Text(restaurant['name'] ?? ''),
+                child: Text((restaurant['name'] ?? restaurant['naam'] ?? '')
+                    .toString()),
               );
             }).toList(),
             onChanged: (restaurant) {
@@ -352,7 +353,8 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
             items: _restaurants.map((restaurant) {
               return DropdownMenuItem(
                 value: restaurant,
-                child: Text(restaurant['name'] ?? ''),
+                child: Text((restaurant['name'] ?? restaurant['naam'] ?? '')
+                    .toString()),
               );
             }).toList(),
             onChanged: (restaurant) {
@@ -380,7 +382,7 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
             items: _menus.map((menu) {
               return DropdownMenuItem(
                 value: menu,
-                child: Text(menu['name'] ?? ''),
+                child: Text((menu['name'] ?? menu['naam'] ?? '').toString()),
               );
             }).toList(),
             onChanged: (menu) {
@@ -643,7 +645,7 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
         const SizedBox(height: 16),
         Row(
           children: [
-            Text('Klein'),
+            const Text('Klein'),
             Expanded(
               child: Slider(
                 value: _qrSize,
@@ -658,7 +660,7 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
                 },
               ),
             ),
-            Text('Groot'),
+            const Text('Groot'),
           ],
         ),
         Center(
@@ -883,6 +885,30 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
     );
   }
 
+  // Helpers om QR-preview URL te maken voor restaurant/custom
+  String _hexNoAlpha(Color c) {
+    // kleur in RRGGBB (zonder alpha)
+    final v = c.value.toRadixString(16).padLeft(8, '0'); // AARRGGBB
+    return v.substring(2); // skip AA
+  }
+
+  String _buildQrPreviewUrl(
+    String data,
+    int size, {
+    required Color fore,
+    required Color back,
+    String format = 'png',
+  }) {
+    // Gebruik eenvoudige publieke QR-service voor preview (zonder extra package)
+    final color = _hexNoAlpha(fore);
+    final bg = _hexNoAlpha(back);
+    final s = '${size}x$size';
+    final f = (format == 'svg') ? 'svg' : 'png';
+    // api.qrserver.com accepteert color=RRGGBB en bgcolor=RRGGBB
+    final encoded = Uri.encodeComponent(data);
+    return 'https://api.qrserver.com/v1/create-qr-code/?size=$s&data=$encoded&color=$color&bgcolor=$bg&format=$f';
+  }
+
   Future<void> _generateQRCode() async {
     setState(() => _isGenerating = true);
 
@@ -893,12 +919,14 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
       switch (_qrType) {
         case 'restaurant':
           targetUrl =
-              'https://menutri.app/restaurant/${_selectedRestaurant!['id']}';
-          description = 'QR code voor ${_selectedRestaurant!['name']}';
+              'https://menutri.nl/restaurant/${_selectedRestaurant!['id']}';
+          description =
+              'QR code voor ${_selectedRestaurant!['name'] ?? _selectedRestaurant!['naam']}';
           break;
         case 'menu':
-          targetUrl = 'https://menutri.app/menu/${_selectedMenu!['id']}';
-          description = 'QR code voor menu ${_selectedMenu!['name']}';
+          targetUrl = 'https://menutri.nl/menu/${_selectedMenu!['id']}';
+          description =
+              'QR code voor menu ${_selectedMenu!['name'] ?? _selectedMenu!['naam']}';
           break;
         case 'custom':
           targetUrl = _customUrl;
@@ -908,23 +936,54 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
           throw Exception('Onbekend QR type');
       }
 
-      final response = await _apiService.getMenuQR({
-        'target_url': targetUrl,
-        'description': description,
-        'qr_color': '#${_qrColor.value.toRadixString(16).substring(2)}',
-        'background_color':
-            '#${_backgroundColor.value.toRadixString(16).substring(2)}',
-        'size': _qrSize.round(),
-        'format': _format,
-        'logo_position': _logoPosition,
-        'restaurant_id': _selectedRestaurant?['id'],
-        'menu_id': _selectedMenu?['id'],
-      });
+      if (_qrType == 'menu') {
+        // ✅ Backend ondersteunt: GET /menus/<id>/qr
+        final menuId = (_selectedMenu!['id'] as num).toInt();
+        final resp = await _apiService.getMenuQR(menuId);
+        final Map<String, dynamic> response = Map<String, dynamic>.from(resp);
 
-      setState(() {
-        _generatedQR = response;
-        _isGenerating = false;
-      });
+        // Als backend geen 'qr_url' teruggeeft, maak zelf een preview URL
+        final qrUrl = response['qr_url'] ??
+            _buildQrPreviewUrl(
+              targetUrl,
+              _qrSize.round(),
+              fore: _qrColor,
+              back: _backgroundColor,
+              format: _format,
+            );
+
+        setState(() {
+          _generatedQR = {
+            ...response,
+            'qr_url': qrUrl,
+            'target_url': response['target_url'] ?? targetUrl,
+            'description': response['description'] ?? description,
+          };
+          _isGenerating = false;
+        });
+      } else {
+        // ✅ Voor restaurant/custom: gebruik preview-URL (geen backend nodig)
+        final qrUrl = _buildQrPreviewUrl(
+          targetUrl,
+          _qrSize.round(),
+          fore: _qrColor,
+          back: _backgroundColor,
+          format: _format,
+        );
+
+        setState(() {
+          _generatedQR = {
+            'qr_url': qrUrl,
+            'target_url': targetUrl,
+            'description': description,
+            'format': _format,
+            'size': _qrSize.round(),
+            'qr_color': '#${_hexNoAlpha(_qrColor)}',
+            'background_color': '#${_hexNoAlpha(_backgroundColor)}',
+          };
+          _isGenerating = false;
+        });
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
