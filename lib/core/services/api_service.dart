@@ -430,10 +430,10 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> getMenuQR(int id) async {
-    final response = await _apiService.getMenuQR(
-      _selectedMenu?['id'],
-    );
-
+    final response = await _dio.get('/menus/$id/qr');
+    // Zorg dat je daadwerkelijk iets retourneert:
+    return Map<String, dynamic>.from(response.data);
+  }
 
   Future<Map<String, dynamic>> addMenuItemToMenu(
       int menuId, Map<String, dynamic> itemData) async {
