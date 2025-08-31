@@ -45,10 +45,10 @@ class _QrScannerPageState extends ConsumerState<QrScannerPage> {
             controller: cameraController,
             onDetect: _onQRCodeDetected,
           ),
-          
+
           // Overlay with scanning frame
           _buildScanningOverlay(),
-          
+
           // Error banner
           if (_errorMessage != null)
             Positioned(
@@ -80,7 +80,7 @@ class _QrScannerPageState extends ConsumerState<QrScannerPage> {
                 ),
               ),
             ),
-          
+
           // Loading indicator
           if (_isProcessing)
             Container(
@@ -181,19 +181,19 @@ class _QrScannerPageState extends ConsumerState<QrScannerPage> {
 
   void _onQRCodeDetected(BarcodeCapture capture) {
     if (_isProcessing) return;
-    
+
     final List<Barcode> barcodes = capture.barcodes;
     if (barcodes.isEmpty) return;
-    
+
     final String? code = barcodes.first.rawValue;
     if (code == null) return;
-    
+
     _processQRCode(code);
   }
 
   Future<void> _processQRCode(String qrCode) async {
     if (_isProcessing) return;
-    
+
     setState(() {
       _isProcessing = true;
       _errorMessage = null;
@@ -202,19 +202,20 @@ class _QrScannerPageState extends ConsumerState<QrScannerPage> {
     try {
       // Stop camera while processing
       await cameraController.stop();
-      
+
       // Parse QR code to extract restaurant/menu information
       final qrData = _parseQRCode(qrCode);
-      
+
       if (qrData == null) {
         setState(() {
-          _errorMessage = 'Ongeldige QR code. Scan een Menutri restaurant QR code.';
+          _errorMessage =
+              'Ongeldige QR code. Scan een Menutri restaurant QR code.';
           _isProcessing = false;
         });
         await cameraController.start();
         return;
       }
-      
+
       // Log scan activity
       try {
         await ApiService().logActivity(
@@ -226,12 +227,11 @@ class _QrScannerPageState extends ConsumerState<QrScannerPage> {
         // Activity logging is optional
         print('Could not log scan activity: $e');
       }
-      
+
       // Navigate to restaurant detail
       if (mounted) {
         context.go('/guest/restaurant/${qrData['restaurant_id']}');
       }
-      
     } catch (e) {
       setState(() {
         _errorMessage = 'Fout bij verwerken QR code: $e';
@@ -243,33 +243,33 @@ class _QrScannerPageState extends ConsumerState<QrScannerPage> {
 
   Map<String, dynamic>? _parseQRCode(String qrCode) {
     try {
-      // Expected format: https://menutri.app/restaurant/{id}
+      // Expected format: https://menutri.nl/restaurant/{id}
       // or menutri://restaurant/{id}
       // or direct restaurant ID
-      
-      if (qrCode.startsWith('https://menutri.app/restaurant/')) {
+
+      if (qrCode.startsWith('https://menutri.nl/restaurant/')) {
         final id = qrCode.split('/').last;
         return {'restaurant_id': int.parse(id)};
       }
-      
+
       if (qrCode.startsWith('menutri://restaurant/')) {
         final id = qrCode.split('/').last;
         return {'restaurant_id': int.parse(id)};
       }
-      
+
       // Try parsing as direct ID
       final id = int.tryParse(qrCode);
       if (id != null) {
         return {'restaurant_id': id};
       }
-      
+
       // Check if it's a JSON format
       if (qrCode.startsWith('{') && qrCode.endsWith('}')) {
         // Try parsing as JSON (for more complex QR codes)
         // This would be implemented based on actual QR code format
         return {'restaurant_id': 1}; // Placeholder
       }
-      
+
       return null;
     } catch (e) {
       return null;
@@ -339,7 +339,8 @@ class QrScannerOverlayShape extends ShapeBorder {
       return Path()
         ..moveTo(rect.left, rect.bottom)
         ..lineTo(rect.left, rect.top + borderRadius)
-        ..quadraticBezierTo(rect.left, rect.top, rect.left + borderRadius, rect.top)
+        ..quadraticBezierTo(
+            rect.left, rect.top, rect.left + borderRadius, rect.top)
         ..lineTo(rect.right, rect.top);
     }
 
@@ -347,7 +348,8 @@ class QrScannerOverlayShape extends ShapeBorder {
       return Path()
         ..moveTo(rect.left, rect.top)
         ..lineTo(rect.right - borderRadius, rect.top)
-        ..quadraticBezierTo(rect.right, rect.top, rect.right, rect.top + borderRadius)
+        ..quadraticBezierTo(
+            rect.right, rect.top, rect.right, rect.top + borderRadius)
         ..lineTo(rect.right, rect.bottom);
     }
 
@@ -356,7 +358,8 @@ class QrScannerOverlayShape extends ShapeBorder {
         ..moveTo(rect.left, rect.bottom)
         ..lineTo(rect.right, rect.bottom)
         ..lineTo(rect.right, rect.top + borderRadius)
-        ..quadraticBezierTo(rect.right, rect.top, rect.right - borderRadius, rect.top)
+        ..quadraticBezierTo(
+            rect.right, rect.top, rect.right - borderRadius, rect.top)
         ..lineTo(rect.left, rect.top);
     }
 
@@ -364,7 +367,8 @@ class QrScannerOverlayShape extends ShapeBorder {
       return Path()
         ..moveTo(rect.right, rect.bottom)
         ..lineTo(rect.left + borderRadius, rect.bottom)
-        ..quadraticBezierTo(rect.left, rect.bottom, rect.left, rect.bottom - borderRadius)
+        ..quadraticBezierTo(
+            rect.left, rect.bottom, rect.left, rect.bottom - borderRadius)
         ..lineTo(rect.left, rect.top);
     }
 
@@ -373,7 +377,8 @@ class QrScannerOverlayShape extends ShapeBorder {
     final height = rect.height;
     final borderHeightSize = height / 2;
     final cutOutWidth = cutOutSize < width ? cutOutSize : width - borderWidth;
-    final cutOutHeight = cutOutSize < height ? cutOutSize : height - borderWidth;
+    final cutOutHeight =
+        cutOutSize < height ? cutOutSize : height - borderWidth;
 
     final cutOutRect = Rect.fromLTWH(
       rect.left + (width - cutOutWidth) / 2 + borderWidth,
@@ -401,7 +406,8 @@ class QrScannerOverlayShape extends ShapeBorder {
     final height = rect.height;
     final borderHeightSize = height / 2;
     final cutOutWidth = cutOutSize < width ? cutOutSize : width - borderWidth;
-    final cutOutHeight = cutOutSize < height ? cutOutSize : height - borderWidth;
+    final cutOutHeight =
+        cutOutSize < height ? cutOutSize : height - borderWidth;
 
     final cutOutRect = Rect.fromLTWH(
       rect.left + (width - cutOutWidth) / 2 + borderWidth,
@@ -433,11 +439,11 @@ class QrScannerOverlayShape extends ShapeBorder {
     canvas.drawPath(overlayPath, overlayPaint);
 
     // Draw corner borders
-    final borderLength = this.borderLength > cutOutWidth / 2 
-        ? cutOutWidth / 2 
+    final borderLength = this.borderLength > cutOutWidth / 2
+        ? cutOutWidth / 2
         : this.borderLength;
-    final borderHeight = this.borderLength > cutOutHeight / 2 
-        ? cutOutHeight / 2 
+    final borderHeight = this.borderLength > cutOutHeight / 2
+        ? cutOutHeight / 2
         : this.borderLength;
 
     // Top left corner
@@ -445,7 +451,8 @@ class QrScannerOverlayShape extends ShapeBorder {
       Path()
         ..moveTo(cutOutRect.left, cutOutRect.top + borderHeight)
         ..lineTo(cutOutRect.left, cutOutRect.top + borderRadius)
-        ..quadraticBezierTo(cutOutRect.left, cutOutRect.top, cutOutRect.left + borderRadius, cutOutRect.top)
+        ..quadraticBezierTo(cutOutRect.left, cutOutRect.top,
+            cutOutRect.left + borderRadius, cutOutRect.top)
         ..lineTo(cutOutRect.left + borderLength, cutOutRect.top),
       borderPaint,
     );
@@ -455,7 +462,8 @@ class QrScannerOverlayShape extends ShapeBorder {
       Path()
         ..moveTo(cutOutRect.right - borderLength, cutOutRect.top)
         ..lineTo(cutOutRect.right - borderRadius, cutOutRect.top)
-        ..quadraticBezierTo(cutOutRect.right, cutOutRect.top, cutOutRect.right, cutOutRect.top + borderRadius)
+        ..quadraticBezierTo(cutOutRect.right, cutOutRect.top, cutOutRect.right,
+            cutOutRect.top + borderRadius)
         ..lineTo(cutOutRect.right, cutOutRect.top + borderHeight),
       borderPaint,
     );
@@ -465,7 +473,8 @@ class QrScannerOverlayShape extends ShapeBorder {
       Path()
         ..moveTo(cutOutRect.right, cutOutRect.bottom - borderHeight)
         ..lineTo(cutOutRect.right, cutOutRect.bottom - borderRadius)
-        ..quadraticBezierTo(cutOutRect.right, cutOutRect.bottom, cutOutRect.right - borderRadius, cutOutRect.bottom)
+        ..quadraticBezierTo(cutOutRect.right, cutOutRect.bottom,
+            cutOutRect.right - borderRadius, cutOutRect.bottom)
         ..lineTo(cutOutRect.right - borderLength, cutOutRect.bottom),
       borderPaint,
     );
@@ -475,7 +484,8 @@ class QrScannerOverlayShape extends ShapeBorder {
       Path()
         ..moveTo(cutOutRect.left + borderLength, cutOutRect.bottom)
         ..lineTo(cutOutRect.left + borderRadius, cutOutRect.bottom)
-        ..quadraticBezierTo(cutOutRect.left, cutOutRect.bottom, cutOutRect.left, cutOutRect.bottom - borderRadius)
+        ..quadraticBezierTo(cutOutRect.left, cutOutRect.bottom, cutOutRect.left,
+            cutOutRect.bottom - borderRadius)
         ..lineTo(cutOutRect.left, cutOutRect.bottom - borderHeight),
       borderPaint,
     );
@@ -490,4 +500,3 @@ class QrScannerOverlayShape extends ShapeBorder {
     );
   }
 }
-
