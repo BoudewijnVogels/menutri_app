@@ -474,7 +474,7 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
               children: [
                 Icon(Icons.email, color: AppColors.mediumBrown),
                 SizedBox(width: 8),
-                Text('support@menutri.app'),
+                Text('support@menutri.nl'),
               ],
             ),
             SizedBox(height: 8),
