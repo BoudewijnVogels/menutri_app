@@ -1491,7 +1491,7 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
   Future<void> _copyInvitationLink(Map<String, dynamic> invitation) async {
     try {
       final link = invitation['invitation_link'] ??
-          'https://menutri.app/invite/${invitation['token']}';
+          'https://menutri.nl/invite/${invitation['token']}';
       await Clipboard.setData(ClipboardData(text: link));
 
       if (mounted) {
