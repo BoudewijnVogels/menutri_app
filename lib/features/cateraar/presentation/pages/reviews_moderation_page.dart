@@ -1178,7 +1178,7 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
                   Navigator.pop(context);
                 },
               );
-            }).toList(),
+            }),
             const Divider(),
             SwitchListTile(
               title: const Text('Oplopend'),
@@ -1215,9 +1215,6 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
         break;
       case 'respond':
         _showResponseDialog(review);
-        break;
-      case 'flag':
-        _flagReview(review);
         break;
       case 'hide':
         _hideReview(review);
