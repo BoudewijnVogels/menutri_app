@@ -41,7 +41,6 @@ import '../../features/cateraar/presentation/pages/notifications_cateraar_page.d
 import '../../features/cateraar/presentation/pages/profile_management_page.dart';
 import '../../features/cateraar/presentation/pages/settings_page.dart';
 import '../../features/cateraar/presentation/pages/help_support_page.dart';
-import '../../features/cateraar/presentation/pages/reports_page.dart';
 
 // Route names
 class AppRoutes {
@@ -268,11 +267,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.cateraarHelp,
         name: 'cateraar-help',
         builder: (context, state) => const CateraarHelpSupportPage(),
-      ),
-      GoRoute(
-        path: AppRoutes.reports,
-        name: 'reports',
-        builder: (context, state) => const CateraarReportsPage(),
       ),
     ],
 
