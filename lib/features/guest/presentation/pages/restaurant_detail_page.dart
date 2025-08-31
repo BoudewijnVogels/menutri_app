@@ -1150,7 +1150,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
 
   Future<void> _shareRestaurant() async {
     try {
-      final shareUrl = 'https://menutri.app/restaurant/${widget.restaurantId}';
+      final shareUrl = 'https://menutri.nl/restaurant/${widget.restaurantId}';
       await Share.share(
         'Bekijk ${_restaurant!.name} op Menutri!\n\n'
         '${_restaurant!.description ?? ''}\n\n'
@@ -1285,7 +1285,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
         '${item.calories != null ? '🔥 ${item.calories!.round()} kcal\n' : ''}'
         '💰 €${item.price?.toStringAsFixed(2) ?? 'Prijs op aanvraag'}\n\n'
         'Bij ${_restaurant!.name}\n'
-        'https://menutri.app/restaurant/${widget.restaurantId}',
+        'https://menutri.nl/restaurant/${widget.restaurantId}',
         subject: 'Gerecht: ${item.name}',
       );
     } catch (e) {
