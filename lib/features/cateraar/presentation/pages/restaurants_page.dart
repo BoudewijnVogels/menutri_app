@@ -103,8 +103,7 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
               color: AppColors.surface,
               boxShadow: [
                 BoxShadow(
-                  color:
-                      Colors.AppColors.withAlphaFraction(AppColors.black, 0.05),
+                  color: AppColors.withAlphaFraction(AppColors.black, 0.05),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
