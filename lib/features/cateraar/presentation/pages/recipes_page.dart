@@ -774,9 +774,6 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
       case 'edit':
         _editRecipe(recipe);
         break;
-      case 'duplicate':
-        _duplicateRecipe(recipe);
-        break;
       case 'share':
         _shareRecipe(recipe);
         break;
@@ -802,31 +799,6 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
         ],
       ),
     );
-  }
-
-  void _duplicateRecipe(Map<String, dynamic> recipe) async {
-    try {
-      await _apiService.duplicateRecipe(recipe['id']);
-      await _loadData();
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Recept "${recipe['name']}" gedupliceerd'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Fout bij dupliceren: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
   }
 
   void _shareRecipe(Map<String, dynamic> recipe) {
