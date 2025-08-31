@@ -352,8 +352,6 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
     final rejectedCount =
         _reviews.where((r) => r['status'] == 'rejected').length;
     final flaggedCount = _reviews.where((r) => r['status'] == 'flagged').length;
-    final respondedCount =
-        _reviews.where((r) => r['status'] == 'responded').length;
 
     final averageRating = _reviews.isNotEmpty
         ? _reviews.map((r) => r['rating'] ?? 0).reduce((a, b) => a + b) /
@@ -497,7 +495,7 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
         color: AppColors.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.AppColors.withAlphaFraction(AppColors.black, 0.05),
+            color: AppColors.withAlphaFraction(AppColors.black, 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -584,7 +582,7 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
                       },
                       backgroundColor: AppColors.background,
                       selectedColor:
-                          Colors.AppColors.withAlphaFraction(orange, 0.2),
+                          AppColors.withAlphaFraction(Colors.orange, 0.2),
                       checkmarkColor: Colors.orange,
                     ),
                   );
@@ -647,7 +645,7 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
         borderRadius: BorderRadius.circular(12),
         side: isFlagged
             ? BorderSide(
-                color: Colors.AppColors.withAlphaFraction(red, 0.3), width: 2)
+                color: AppColors.withAlphaFraction(Colors.red, 0.3), width: 2)
             : BorderSide.none,
       ),
       child: Padding(
@@ -855,10 +853,10 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.AppColors.withAlphaFraction(red, 0.1),
+                  color: AppColors.withAlphaFraction(Colors.red, 0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                      color: Colors.AppColors.withAlphaFraction(red, 0.3)),
+                      color: AppColors.withAlphaFraction(Colors.red, 0.3)),
                 ),
                 child: Row(
                   children: [
@@ -1331,7 +1329,7 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
             onPressed: () {
               if (_responseController.text.isNotEmpty) {
                 Navigator.pop(context);
-                _respondToReview(review, _responseController.text);
+                replyToReview(review, _responseController.text);
               }
             },
             style: ElevatedButton.styleFrom(
@@ -1345,10 +1343,10 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
     );
   }
 
-  Future<void> _respondToReview(
+  Future<void> replyToReview(
       Map<String, dynamic> review, String response) async {
     try {
-      await _apiService.respondToReview(review['id'], response);
+      await _apiService.replyToReview(review['id'], response);
       await _loadData();
 
       if (mounted) {
@@ -1364,31 +1362,6 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Fout bij versturen reactie: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _flagReview(Map<String, dynamic> review) async {
-    try {
-      await _apiService.flagReview(review['id'], 'Inappropriate content');
-      await _loadData();
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Review gemarkeerd'),
-            backgroundColor: Colors.orange,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Fout bij markeren: $e'),
             backgroundColor: Colors.red,
           ),
         );
