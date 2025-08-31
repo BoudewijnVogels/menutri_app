@@ -299,7 +299,7 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
         color: AppColors.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.AppColors.withAlphaFraction(AppColors.black, 0.05),
+            color: AppColors.withAlphaFraction(AppColors.black, 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -454,8 +454,8 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: Colors.AppColors.withAlphaFraction(
-                                      blue, 0.1),
+                                  color: AppColors.withAlphaFraction(
+                                      Colors.blue, 0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
@@ -781,8 +781,8 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: isExpired
-                        ? Colors.AppColors.withAlphaFraction(red, 0.1)
-                        : Colors.AppColors.withAlphaFraction(orange, 0.1),
+                        ? AppColors.withAlphaFraction(Colors.red, 0.1)
+                        : AppColors.withAlphaFraction(Colors.orange, 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -1593,7 +1593,7 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
   IconData _getRoleIcon(String role) {
     switch (role) {
       case 'owner':
-        return Icons.crown;
+        return Icons.emoji_events;
       case 'admin':
         return Icons.admin_panel_settings;
       case 'manager':
