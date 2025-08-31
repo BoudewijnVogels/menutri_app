@@ -1068,6 +1068,10 @@ class ApiService {
     return response.data;
   }
 
+  Future<void> hideReview(int reviewId) async {
+    await _dio.post('/reviews/$reviewId/hide');
+  }
+
   // Moderation
   Future<Map<String, dynamic>> getPendingReviews({
     int page = 1,
