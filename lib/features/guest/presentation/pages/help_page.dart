@@ -301,9 +301,9 @@ class _HelpPageState extends ConsumerState<HelpPage>
           _buildContactMethod(
             icon: Icons.email,
             title: 'E-mail support',
-            subtitle: 'support@menutri.app',
+            subtitle: 'support@menutri.nl',
             description: 'Stuur ons een e-mail voor uitgebreide vragen',
-            onTap: () => _launchEmail('support@menutri.app'),
+            onTap: () => _launchEmail('support@menutri.nl'),
           ),
 
           const SizedBox(height: 16),
@@ -557,9 +557,9 @@ class _HelpPageState extends ConsumerState<HelpPage>
           const SizedBox(height: 16),
 
           _buildLegalLink(
-              'Privacybeleid', () => _launchURL('https://menutri.app/privacy')),
+              'Privacybeleid', () => _launchURL('https://menutri.nl/privacy')),
           _buildLegalLink('Gebruiksvoorwaarden',
-              () => _launchURL('https://menutri.app/terms')),
+              () => _launchURL('https://menutri.nl/terms')),
           _buildLegalLink('Licenties', () => _showLicenses()),
 
           const SizedBox(height: 24),
@@ -706,7 +706,7 @@ class _HelpPageState extends ConsumerState<HelpPage>
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
-              _launchEmail('support@menutri.app');
+              _launchEmail('support@menutri.nl');
             },
             child: const Text('E-mail versturen'),
           ),
