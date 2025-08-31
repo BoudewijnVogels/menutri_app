@@ -1179,7 +1179,22 @@ class ApiService {
     return _dio.delete(path);
   }
 
-  Future getSettings() async {}
+  // === Settings endpoints ===
+  Future<Map<String, dynamic>> getSettings() async {
+    final response = await _dio.get('/settings');
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>> updateSettings(
+      Map<String, dynamic> settings) async {
+    final response = await _dio.put('/settings', data: settings);
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>> resetSettings() async {
+    final response = await _dio.post('/settings/reset');
+    return response.data;
+  }
 }
 
 // --------------------------- Interceptors ---------------------------
