@@ -1102,40 +1102,47 @@ class ApiService {
   // TEAMS (src/routes/teams.py)
   // ---------------------------------------------------------------------------
 
-  Future<Map<String, dynamic>> getRestaurantTeam(int restaurantId) async {
-    final response = await _dio.get('/restaurants/$restaurantId/team');
-    return response.data;
+// ==== Teams: leden ====
+
+  Future<Map<String, dynamic>> getTeamMembers() async {
+    final res = await get('/team/members');
+    return Map<String, dynamic>.from(res.data);
   }
 
-  Future<Map<String, dynamic>> updateRestaurantTeam(
-      int restaurantId, Map<String, dynamic> teamData) async {
-    final response =
-        await _dio.put('/restaurants/$restaurantId/team', data: teamData);
-    return response.data;
+  Future<void> updateTeamMemberRole(int membershipId, String newRole) async {
+    await put('/team/members/$membershipId', data: {'role': newRole});
   }
 
-  Future<Map<String, dynamic>> getTeamMembers(int restaurantId) async {
-    final response = await _dio.get('/restaurants/$restaurantId/teams');
-    return response.data;
+  Future<void> suspendTeamMember(int membershipId) async {
+    await put('/team/members/$membershipId', data: {'is_active': false});
   }
 
-  Future<Map<String, dynamic>> addTeamMember(
-      int restaurantId, Map<String, dynamic> memberData) async {
-    final response =
-        await _dio.post('/restaurants/$restaurantId/teams', data: memberData);
-    return response.data;
+  Future<void> activateTeamMember(int membershipId) async {
+    await put('/team/members/$membershipId', data: {'is_active': true});
   }
 
-  Future<Map<String, dynamic>> updateTeamMember(int restaurantId,
-      int membershipId, Map<String, dynamic> memberData) async {
-    final response = await _dio.put(
-        '/restaurants/$restaurantId/teams/$membershipId',
-        data: memberData);
-    return response.data;
+  Future<void> removeTeamMember(int membershipId) async {
+    await delete('/team/members/$membershipId');
   }
 
-  Future<void> removeTeamMember(int restaurantId, int membershipId) async {
-    await _dio.delete('/restaurants/$restaurantId/teams/$membershipId');
+  // ==== Teams: uitnodigingen ====
+
+  Future<Map<String, dynamic>> getPendingInvitations() async {
+    final res = await get('/team/invitations?status=pending');
+    return Map<String, dynamic>.from(res.data);
+  }
+
+  Future<void> inviteTeamMember(Map<String, dynamic> payload) async {
+    // payload: { 'email': String, 'role': String, 'restaurant_access': List<int> }
+    await post('/team/invitations', data: payload);
+  }
+
+  Future<void> resendInvitation(int invitationId) async {
+    await post('/team/invitations/$invitationId/resend');
+  }
+
+  Future<void> cancelInvitation(int invitationId) async {
+    await delete('/team/invitations/$invitationId');
   }
 
   // ---------------------------------------------------------------------------
