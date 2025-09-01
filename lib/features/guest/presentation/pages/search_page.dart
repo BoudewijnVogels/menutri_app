@@ -96,7 +96,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         params['radius'] = 10000; // 10km radius
       }
 
-      final restaurants = await ApiService().searchRestaurants(params);
+      final restaurants = await ApiService().searchRestaurants(params: params);
 
       setState(() {
         _restaurants = restaurants;
