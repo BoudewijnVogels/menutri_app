@@ -448,14 +448,16 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
       // Upload photo if selected
       String? avatarUrl;
       if (_selectedImage != null) {
-        avatarUrl = await ApiService().uploadProfilePhoto(_selectedImage!);
-        profileData['avatar_url'] = avatarUrl;
+        final uploadResult =
+            await ApiService().uploadProfileImage(_selectedImage!.path);
+        avatarUrl = uploadResult['avatar_url'] as String?;
+        profileData['avatar_url'] = avatarUrl ?? '';
       } else if (_currentAvatarUrl == null) {
         // Photo was removed
         profileData['avatar_url'] = '';
       }
 
-      await ApiService().updateUserProfile(profileData);
+      await ApiService().updateProfile(profileData);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
