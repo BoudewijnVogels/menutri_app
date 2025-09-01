@@ -406,7 +406,8 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: AppColors.withAlphaFraction(mediumBrown, 0.1),
+                  color:
+                      AppColors.withAlphaFraction(AppColors.mediumBrown, 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
