@@ -143,7 +143,9 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      color: isRead ? null : AppColors.withAlphaFraction(lightBrown, 0.3),
+      color: isRead
+          ? null
+          : AppColors.withAlphaFraction(AppColors.lightBrown, 0.3),
       child: InkWell(
         onTap: () => _handleNotificationTap(notification),
         borderRadius: BorderRadius.circular(12),
