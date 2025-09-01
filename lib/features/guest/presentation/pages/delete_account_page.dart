@@ -150,7 +150,7 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.withAlphaFraction(lightBrown, 0.3),
+                  color: AppColors.withAlphaFraction(AppColors.lightBrown, 0.3),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(
