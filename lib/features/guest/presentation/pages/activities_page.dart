@@ -47,18 +47,18 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage>
     setState(() => _isLoading = true);
     try {
       final futures = await Future.wait([
-        _apiService.getActivities(),
+        _apiService.getUserActivity(),
         _apiService.getFavorites(),
         _apiService.getEatenHistory(),
       ]);
 
       setState(() {
-        _activities =
-            List<Map<String, dynamic>>.from(futures[0]['activities'] ?? []);
-        _favorites =
-            List<Map<String, dynamic>>.from(futures[1]['favorites'] ?? []);
-        _eatenHistory =
-            List<Map<String, dynamic>>.from(futures[2]['eaten_items'] ?? []);
+        _activities = List<Map<String, dynamic>>.from(
+            (futures[0] as Map<String, dynamic>)['activities'] ?? []);
+        _favorites = List<Map<String, dynamic>>.from(
+            (futures[1] as Map<String, dynamic>)['favorites'] ?? []);
+        _eatenHistory = List<Map<String, dynamic>>.from(
+            (futures[2] as Map<String, dynamic>)['eaten_items'] ?? []);
       });
     } catch (e) {
       if (mounted) {
