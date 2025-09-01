@@ -452,7 +452,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
         profileData['avatar_url'] = avatarUrl;
       } else if (_currentAvatarUrl == null) {
         // Photo was removed
-        profileData['avatar_url'] = null;
+        profileData['avatar_url'] = '';
       }
 
       await ApiService().updateUserProfile(profileData);
