@@ -306,7 +306,7 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage>
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.AppColors.withAlphaFraction(red, 0.1),
+            color: AppColors.withAlphaFraction(Colors.red, 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
@@ -351,7 +351,7 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage>
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.AppColors.withAlphaFraction(green, 0.1),
+            color: AppColors.withAlphaFraction(Colors.green, 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: const Icon(Icons.restaurant, color: Colors.green),
