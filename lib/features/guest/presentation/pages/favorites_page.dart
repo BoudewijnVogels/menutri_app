@@ -32,10 +32,14 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
         _errorMessage = null;
       });
 
-      final favorites = await ApiService().getFavorites();
+      final response = await ApiService().getFavorites();
+      // Assuming the list is under the key 'favorites' in the response map
+      final favorites = response is List
+          ? response
+          : (response['favorites'] as List<dynamic>? ?? []);
 
       setState(() {
-        _favorites = favorites;
+        _favorites = favorites as List<dynamic>;
         _isLoading = false;
       });
     } catch (e) {
@@ -510,7 +514,7 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
 
   Future<void> _removeFavorite(int favoriteId) async {
     try {
-      await ApiService().removeFavorite(favoriteId);
+      await ApiService().deleteFavorite(favoriteId);
       await _loadFavorites();
 
       if (mounted) {
