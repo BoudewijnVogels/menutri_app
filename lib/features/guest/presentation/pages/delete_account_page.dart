@@ -420,7 +420,7 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
             : null,
       };
 
-      await ApiService().deleteAccount(deletionData);
+      await ApiService().deleteAccount();
 
       if (mounted) {
         // Show success message and navigate to login
