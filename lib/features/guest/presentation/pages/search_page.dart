@@ -288,7 +288,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       ),
       selected: isSelected,
       onSelected: (_) => onTap?.call(),
-      selectedColor: AppColors.withAlphaFraction(mediumBrown, 0.3),
+      selectedColor: AppColors.withAlphaFraction(AppColors.mediumBrown, 0.3),
       checkmarkColor: AppColors.mediumBrown,
     );
   }
@@ -580,8 +580,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                                 }
                               });
                             },
-                            selectedColor:
-                                AppColors.withAlphaFraction(mediumBrown, 0.3),
+                            selectedColor: AppColors.withAlphaFraction(
+                                AppColors.mediumBrown, 0.3),
                             checkmarkColor: AppColors.mediumBrown,
                           );
                         }).toList(),
@@ -616,8 +616,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                                 }
                               });
                             },
-                            selectedColor:
-                                AppColors.withAlphaFraction(mediumBrown, 0.3),
+                            selectedColor: AppColors.withAlphaFraction(
+                                AppColors.mediumBrown, 0.3),
                             checkmarkColor: AppColors.mediumBrown,
                           );
                         }),
