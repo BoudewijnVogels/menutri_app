@@ -302,7 +302,8 @@ class _HomePageState extends ConsumerState<HomePage> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.withAlphaFraction(mediumBrown, 0.1),
+                  color:
+                      AppColors.withAlphaFraction(AppColors.mediumBrown, 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
