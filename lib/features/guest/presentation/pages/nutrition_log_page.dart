@@ -1,9 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/services/api_service.dart';
-import '../../../../core/models/nutrition_log.dart';
-import '../../../../core/models/health_profile.dart';
+import 'nutrition_log.dart';
+import 'health_profile.dart';
 
 class NutritionLogPage extends ConsumerStatefulWidget {
   const NutritionLogPage({super.key});
@@ -91,9 +92,120 @@ class _NutritionLogPageState extends ConsumerState<NutritionLogPage> {
                     if (_dailySummary != null) _buildDailySummary(),
                     const SizedBox(height: 24),
                     
-                    // Meals
-                    _buildMealSection('breakfast', 'Ontbijt', Icons.wb_sunny),
-                    const SizedBox(height: 16),
-                    _buildMealSection('lunch', 'Lunch', Icons.wb_sunny_outlined),
-                    const SizedBox(height: 16),
-                    _buildMealSection('dinner', 'Diner', Icons.nights_stay),
+                                    // Meals
+                                    _buildMealSection('breakfast', 'Ontbijt', Icons.wb_sunny),
+                                    const SizedBox(height: 16),
+                                    _buildMealSection('lunch', 'Lunch', Icons.wb_sunny_outlined),
+                                    const SizedBox(height: 16),
+                                    _buildMealSection('dinner', 'Diner', Icons.nights_stay),
+                                  ],
+                                ),
+                              ),
+                            ),
+                      );
+                    }
+                
+                    Widget _buildDailySummary() {
+                      return Card(
+                        color: AppColors.surface,
+                        elevation: 2,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Dagoverzicht',
+                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 8),
+                              Text('Calorieën: ${_dailySummary?.calories ?? 0} kcal'),
+                              Text('Eiwitten: ${_dailySummary?.protein ?? 0} g'),
+                              Text('Koolhydraten: ${_dailySummary?.carbs ?? 0} g'),
+                              Text('Vetten: ${_dailySummary?.fat ?? 0} g'),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+                
+                    void _showNutritionAnalytics() {
+                      // TODO: Implement analytics navigation or dialog
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Analytics feature coming soon!')),
+                      );
+                    }
+
+                    Widget _buildDateSelector() {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            DateFormat.yMMMMd('nl').format(_selectedDate),
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.calendar_today),
+                            onPressed: () => _selectDate(context),
+                          ),
+                        ],
+                      );
+                    }
+
+                    Future<void> _selectDate(BuildContext context) async {
+                      final DateTime? picked = await showDatePicker(
+                        context: context,
+                        initialDate: _selectedDate,
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime.now(),
+                      );
+                      if (picked != null && picked != _selectedDate) {
+                        setState(() {
+                          _selectedDate = picked;
+                          _dailySummary = DailySummary.fromLogs(_selectedDate, _nutritionLogs);
+                        });
+                      }
+                    }
+
+                    Widget _buildMealSection(String mealType, String title, IconData icon) {
+                      final mealLogs = _nutritionLogs.where((log) =>
+                        log.mealType == mealType &&
+                        log.date.year == _selectedDate.year &&
+                        log.date.month == _selectedDate.month &&
+                        log.date.day == _selectedDate.day
+                      ).toList();
+
+                      return Card(
+                        color: AppColors.surface,
+                        elevation: 2,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(icon, color: AppColors.primary),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    title,
+                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              if (mealLogs.isEmpty)
+                                const Text('Geen items toegevoegd.'),
+                              for (var log in mealLogs)
+                                ListTile(
+                                  title: Text(log.foodName ?? ''),
+                                  subtitle: Text('${log.calories} kcal'),
+                                ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
