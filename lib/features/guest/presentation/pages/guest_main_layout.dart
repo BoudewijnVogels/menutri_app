@@ -41,7 +41,7 @@ class GuestBottomNavigation extends StatelessWidget {
         color: AppColors.white,
         boxShadow: [
           BoxShadow(
-            color: AppColors.withAlphaFraction(darkBrown, 0.1),
+            color: AppColors.withAlphaFraction(AppColors.darkBrown, 0.1),
             blurRadius: 8,
             offset: const Offset(0, -2),
           ),
@@ -113,7 +113,7 @@ class GuestBottomNavigation extends StatelessWidget {
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: isActive
-                      ? AppColors.withAlphaFraction(mediumBrown, 0.1)
+                      ? AppColors.withAlphaFraction(AppColors.mediumBrown, 0.1)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),
