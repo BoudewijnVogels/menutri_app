@@ -113,7 +113,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             // Avatar
             CircleAvatar(
               radius: 40,
-              backgroundColor: AppColors.withAlphaFraction(mediumBrown, 0.1),
+              backgroundColor:
+                  AppColors.withAlphaFraction(AppColors.mediumBrown, 0.1),
               child: Text(
                 _getInitials(user['full_name'] ?? user['email'] ?? ''),
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -148,7 +149,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppColors.withAlphaFraction(mediumBrown, 0.1),
+                      color: AppColors.withAlphaFraction(
+                          AppColors.mediumBrown, 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -430,7 +432,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 decoration: BoxDecoration(
                   color: isDestructive
                       ? AppColors.withAlphaFraction(AppColors.error, 0.1)
-                      : AppColors.withAlphaFraction(mediumBrown, 0.1),
+                      : AppColors.withAlphaFraction(AppColors.mediumBrown, 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
