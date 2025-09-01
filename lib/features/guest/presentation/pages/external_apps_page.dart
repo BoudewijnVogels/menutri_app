@@ -211,7 +211,7 @@ class _ExternalAppsPageState extends ConsumerState<ExternalAppsPage> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryContainer,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
