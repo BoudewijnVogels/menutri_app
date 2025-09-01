@@ -191,7 +191,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    Colors.AppColors.withAlphaFraction(AppColors.black, 0.7),
+                    AppColors.withAlphaFraction(AppColors.black, 0.7),
                   ],
                 ),
               ),
@@ -214,7 +214,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                         shape: BoxShape.circle,
                         color: _currentImageIndex == entry.key
                             ? Colors.white
-                            : Colors.AppColors.withAlphaFraction(white, 0.4),
+                            : AppColors.withAlphaFraction(Colors.white, 0.4),
                       ),
                     );
                   }).toList(),
@@ -252,8 +252,8 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                       Text(
                         '(${_reviews.length} reviews)',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.AppColors.withAlphaFraction(
-                                  white, 0.8),
+                              color: AppColors.withAlphaFraction(
+                                  Colors.white, 0.8),
                             ),
                       ),
                       const SizedBox(width: 16),
@@ -395,7 +395,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                     children: _restaurant!.cuisineTypes
                         .map((cuisine) => Chip(
                               label: Text(cuisine),
-                              backgroundColor: AppColors.primaryContainer,
+                              backgroundColor: AppColors.primary,
                               labelStyle: TextStyle(color: AppColors.primary),
                             ))
                         .toList(),
@@ -711,7 +711,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryContainer,
+                    color: AppColors.withAlphaFraction(AppColors.primary, 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -819,7 +819,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.AppColors.withAlphaFraction(orange, 0.1),
+                    color: AppColors.withAlphaFraction(Colors.orange, 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -835,7 +835,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.AppColors.withAlphaFraction(green, 0.1),
+                    color: AppColors.withAlphaFraction(Colors.green, 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -851,7 +851,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.AppColors.withAlphaFraction(lightGreen, 0.1),
+                    color: AppColors.withAlphaFraction(Colors.lightGreen, 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
