@@ -366,7 +366,7 @@ class _HelpPageState extends ConsumerState<HelpPage>
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.withAlphaFraction(lightBrown, 0.3),
+              color: AppColors.withAlphaFraction(AppColors.lightBrown, 0.3),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Column(
@@ -416,7 +416,7 @@ class _HelpPageState extends ConsumerState<HelpPage>
         leading: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: AppColors.withAlphaFraction(mediumBrown, 0.1),
+            color: AppColors.withAlphaFraction(AppColors.mediumBrown, 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, color: AppColors.mediumBrown),
