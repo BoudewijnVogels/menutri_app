@@ -43,7 +43,9 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
       final notifications = await ApiService().getNotifications();
 
       setState(() {
-        _notifications = notifications;
+        _notifications = notifications is List
+            ? (notifications as List<dynamic>)
+            : (notifications['notifications'] as List<dynamic>? ?? []);
         _isLoading = false;
       });
     } catch (e) {
@@ -56,7 +58,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
 
   Future<void> _loadNotificationSettings() async {
     try {
-      final settings = await ApiService().getNotificationSettings();
+      final settings = await ApiService().getNotificationPreferences();
 
       setState(() {
         _favoriteNotifications = settings['favorite_notifications'] ?? true;
@@ -526,7 +528,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
 
   Future<void> _markAsRead(int notificationId) async {
     try {
-      await ApiService().markNotificationAsRead(notificationId);
+      await ApiService().markNotificationRead(notificationId);
 
       setState(() {
         final index =
@@ -586,7 +588,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
         'sound_enabled': _soundEnabled,
       };
 
-      await ApiService().updateNotificationSettings(settings);
+      await ApiService().updateNotificationPreferences(settings);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
