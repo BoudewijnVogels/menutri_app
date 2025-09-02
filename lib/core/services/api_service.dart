@@ -759,11 +759,17 @@ class ApiService {
     return response.data;
   }
 
-  Future<Map<String, dynamic>> logActivity(Map<String, dynamic> activityData,
-      {required String type,
-      required restaurantId,
-      required Map<String, String> metadata}) async {
-    final response = await _dio.post('/activities', data: activityData);
+  Future<Map<String, dynamic>> logActivity({
+    required String type,
+    int? restaurantId,
+    Map<String, dynamic>? metadata,
+  }) async {
+    final payload = {
+      'type': type,
+      if (restaurantId != null) 'restaurant_id': restaurantId,
+      if (metadata != null) 'metadata': metadata,
+    };
+    final response = await _dio.post('/activities', data: payload);
     return response.data;
   }
 
