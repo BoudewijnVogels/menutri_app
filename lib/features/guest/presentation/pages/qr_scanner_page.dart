@@ -335,47 +335,8 @@ class QrScannerOverlayShape extends ShapeBorder {
 
   @override
   Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
-    Path getLeftTopPath(Rect rect) {
-      return Path()
-        ..moveTo(rect.left, rect.bottom)
-        ..lineTo(rect.left, rect.top + borderRadius)
-        ..quadraticBezierTo(
-            rect.left, rect.top, rect.left + borderRadius, rect.top)
-        ..lineTo(rect.right, rect.top);
-    }
-
-    Path getRightTopPath(Rect rect) {
-      return Path()
-        ..moveTo(rect.left, rect.top)
-        ..lineTo(rect.right - borderRadius, rect.top)
-        ..quadraticBezierTo(
-            rect.right, rect.top, rect.right, rect.top + borderRadius)
-        ..lineTo(rect.right, rect.bottom);
-    }
-
-    Path getRightBottomPath(Rect rect) {
-      return Path()
-        ..moveTo(rect.left, rect.bottom)
-        ..lineTo(rect.right, rect.bottom)
-        ..lineTo(rect.right, rect.top + borderRadius)
-        ..quadraticBezierTo(
-            rect.right, rect.top, rect.right - borderRadius, rect.top)
-        ..lineTo(rect.left, rect.top);
-    }
-
-    Path getLeftBottomPath(Rect rect) {
-      return Path()
-        ..moveTo(rect.right, rect.bottom)
-        ..lineTo(rect.left + borderRadius, rect.bottom)
-        ..quadraticBezierTo(
-            rect.left, rect.bottom, rect.left, rect.bottom - borderRadius)
-        ..lineTo(rect.left, rect.top);
-    }
-
     final width = rect.width;
-    final borderWidthSize = width / 2;
     final height = rect.height;
-    final borderHeightSize = height / 2;
     final cutOutWidth = cutOutSize < width ? cutOutSize : width - borderWidth;
     final cutOutHeight =
         cutOutSize < height ? cutOutSize : height - borderWidth;
@@ -402,9 +363,7 @@ class QrScannerOverlayShape extends ShapeBorder {
   @override
   void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
     final width = rect.width;
-    final borderWidthSize = width / 2;
     final height = rect.height;
-    final borderHeightSize = height / 2;
     final cutOutWidth = cutOutSize < width ? cutOutSize : width - borderWidth;
     final cutOutHeight =
         cutOutSize < height ? cutOutSize : height - borderWidth;
