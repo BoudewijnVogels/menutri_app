@@ -96,8 +96,12 @@ class HealthProfile {
       appleHealthConnected: json['apple_health_connected'],
       shareHealthData: json['share_health_data'],
       allowRecommendations: json['allow_recommendations'],
-      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
-      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : null,
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
+          : null,
     );
   }
 
@@ -111,7 +115,8 @@ class HealthProfile {
       if (weightKg != null) 'weight_kg': weightKg,
       if (activityLevel != null) 'activity_level': activityLevel,
       if (healthGoals != null) 'health_goals': healthGoals,
-      if (dietaryRestrictions != null) 'dietary_restrictions': dietaryRestrictions,
+      if (dietaryRestrictions != null)
+        'dietary_restrictions': dietaryRestrictions,
       if (foodAllergies != null) 'food_allergies': foodAllergies,
       if (dislikedFoods != null) 'disliked_foods': dislikedFoods,
       if (preferredCuisines != null) 'preferred_cuisines': preferredCuisines,
@@ -126,12 +131,17 @@ class HealthProfile {
       if (hasHeartDisease != null) 'has_heart_disease': hasHeartDisease,
       if (hasKidneyDisease != null) 'has_kidney_disease': hasKidneyDisease,
       if (otherConditions != null) 'other_conditions': otherConditions,
-      if (myfitnesspalConnected != null) 'myfitnesspal_connected': myfitnesspalConnected,
-      if (myfitnesspalUsername != null) 'myfitnesspal_username': myfitnesspalUsername,
-      if (googleFitConnected != null) 'google_fit_connected': googleFitConnected,
-      if (appleHealthConnected != null) 'apple_health_connected': appleHealthConnected,
+      if (myfitnesspalConnected != null)
+        'myfitnesspal_connected': myfitnesspalConnected,
+      if (myfitnesspalUsername != null)
+        'myfitnesspal_username': myfitnesspalUsername,
+      if (googleFitConnected != null)
+        'google_fit_connected': googleFitConnected,
+      if (appleHealthConnected != null)
+        'apple_health_connected': appleHealthConnected,
       if (shareHealthData != null) 'share_health_data': shareHealthData,
-      if (allowRecommendations != null) 'allow_recommendations': allowRecommendations,
+      if (allowRecommendations != null)
+        'allow_recommendations': allowRecommendations,
     };
   }
 
@@ -192,7 +202,8 @@ class HealthProfile {
       hasHeartDisease: hasHeartDisease ?? this.hasHeartDisease,
       hasKidneyDisease: hasKidneyDisease ?? this.hasKidneyDisease,
       otherConditions: otherConditions ?? this.otherConditions,
-      myfitnesspalConnected: myfitnesspalConnected ?? this.myfitnesspalConnected,
+      myfitnesspalConnected:
+          myfitnesspalConnected ?? this.myfitnesspalConnected,
       myfitnesspalUsername: myfitnesspalUsername ?? this.myfitnesspalUsername,
       googleFitConnected: googleFitConnected ?? this.googleFitConnected,
       appleHealthConnected: appleHealthConnected ?? this.appleHealthConnected,
@@ -220,8 +231,9 @@ class HealthProfile {
   }
 
   double? get bmr {
-    if (age == null || heightCm == null || weightKg == null || gender == null) return null;
-    
+    if (age == null || heightCm == null || weightKg == null || gender == null)
+      return null;
+
     // Mifflin-St Jeor Equation
     if (gender!.toLowerCase() == 'male' || gender!.toLowerCase() == 'man') {
       return (10 * weightKg!) + (6.25 * heightCm!) - (5 * age!) + 5;
@@ -233,7 +245,7 @@ class HealthProfile {
   double? get tdee {
     final bmrValue = bmr;
     if (bmrValue == null || activityLevel == null) return null;
-    
+
     final multipliers = {
       'sedentary': 1.2,
       'lightly_active': 1.375,
@@ -241,8 +253,7 @@ class HealthProfile {
       'very_active': 1.725,
       'extremely_active': 1.9,
     };
-    
+
     return bmrValue * (multipliers[activityLevel] ?? 1.2);
   }
 }
-
