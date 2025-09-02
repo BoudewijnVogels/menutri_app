@@ -54,26 +54,110 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     try {
+      // Vervang niet-bestaande ApiService-calls door bestaande endpoints
       final futures = await Future.wait([
-        _apiService.getRestaurantDetails(widget.restaurantId),
-        _apiService.getRestaurantMenuItems(widget.restaurantId),
-        _apiService.getRestaurantReviews(widget.restaurantId),
-        _apiService.checkIfFavorite('restaurant', widget.restaurantId),
-        _apiService.getRestaurantImages(widget.restaurantId),
+        _apiService
+            .getRestaurant(widget.restaurantId), // was getRestaurantDetails
+        _apiService.getMenuItems(
+            restaurantId: widget.restaurantId), // was getRestaurantMenuItems
+        _apiService.getReviews(
+            restaurantId: widget.restaurantId), // was getRestaurantReviews
+        _apiService.getFavorites(), // i.p.v. checkIfFavorite
       ]);
 
-      setState(() {
-        _restaurant = Restaurant.fromJson(futures[0]['restaurant']);
-        _menuItems = (futures[1]['menu_items'] as List)
-            .map((item) => MenuItem.fromJson(item))
-            .toList();
-        _reviews = List<Map<String, dynamic>>.from(futures[2]['reviews'] ?? []);
-        _isFavorite = futures[3]['is_favorite'] ?? false;
-        _images = List<String>.from(futures[4]['images'] ?? []);
+      // --- Restaurant ---
+      final restRaw = futures[0];
+      // backend kan {restaurant: {...}} teruggeven of direct {...}
+      final restMap = (restRaw as Map).containsKey('restaurant')
+          ? Map<String, dynamic>.from((restRaw as Map)['restaurant'])
+          : Map<String, dynamic>.from(restRaw as Map);
+      final restaurant = Restaurant.fromJson(restMap);
 
-        if (_images.isEmpty && _restaurant?.imageUrl != null) {
-          _images.add(_restaurant!.imageUrl!);
+      // --- Menu items ---
+      final miRaw = futures[1];
+      // kan {menu_items: []} of {items: []} of direct []
+      List itemsList;
+      if (miRaw is List) {
+        itemsList = miRaw;
+      } else if (miRaw is Map) {
+        // miRaw is not a List, so treat as Map<String, dynamic>
+        final miMap = Map<String, dynamic>.from(miRaw as Map);
+        itemsList = (miMap['menu_items'] ??
+            miMap['items'] ??
+            miMap['data'] ??
+            miMap['results'] ??
+            []);
+        if (itemsList is! List) {
+          itemsList = [];
         }
+      } else {
+        itemsList = [];
+      }
+      final menuItems = itemsList
+          .map((e) => MenuItem.fromJson(Map<String, dynamic>.from(e)))
+          .toList();
+
+      // --- Reviews ---
+      final rvRaw = futures[2];
+      List<Map<String, dynamic>> reviews;
+      if (rvRaw is Map<String, dynamic>) {
+        final list = (rvRaw['reviews'] ??
+            rvRaw['data'] ??
+            rvRaw['results'] ??
+            []) as List;
+        reviews = list.map((e) => Map<String, dynamic>.from(e)).toList();
+      } else if (rvRaw is List) {
+        reviews = rvRaw.map((e) => Map<String, dynamic>.from(e)).toList();
+      } else {
+        reviews = [];
+      }
+
+      // --- Favorites ---
+      final favRaw = futures[3];
+      List favs;
+      if (favRaw is Map<String, dynamic>) {
+        favs = (favRaw['favorites'] ??
+            favRaw['data'] ??
+            favRaw['results'] ??
+            []) as List;
+      } else if (favRaw is List) {
+        favs = favRaw;
+      } else {
+        favs = [];
+      }
+      final isFav = favs.any((f) {
+        final m = Map<String, dynamic>.from(f);
+        final rid = m['restaurant_id'] ?? m['restaurantId'];
+        return rid == widget.restaurantId;
+      });
+
+      // --- Images ---
+      final images = <String>[];
+      // probeer gallery uit restaurant json
+      final gallery = restMap['images'] ?? restMap['gallery'];
+      if (gallery is List) {
+        for (final g in gallery) {
+          final url = (g is String)
+              ? g
+              : (g is Map ? (g['url'] ?? g['image_url']) : null);
+          if (url is String && url.isNotEmpty) images.add(url);
+        }
+      }
+      // fallback op enkele image velden
+      final singleImage = restMap['image'] ??
+          restMap['image_url'] ??
+          restMap['imageUrl'] ??
+          restaurant.imageUrl;
+      if (images.isEmpty && singleImage is String && singleImage.isNotEmpty) {
+        images.add(singleImage);
+      }
+
+      setState(() {
+        _restaurant = restaurant;
+        _menuItems = menuItems;
+        _reviews = reviews;
+        _isFavorite = isFav;
+        _images = images;
       });
     } catch (e) {
       if (mounted) {
@@ -347,6 +431,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
       onRefresh: _loadData,
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
+        physics: const AlwaysScrollableScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1121,14 +1206,30 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
   Future<void> _toggleFavorite() async {
     try {
       if (_isFavorite) {
-        await _apiService.removeFavorite('restaurant', widget.restaurantId);
+        // zoek favorite-id voor dit restaurant en verwijder
+        final favData = await _apiService.getFavorites();
+        final favList = (favData is Map<String, dynamic>)
+            ? (favData['favorites'] ??
+                favData['data'] ??
+                favData['results'] ??
+                []) as List
+            : (favData as List? ?? []);
+        final target =
+            favList.cast<Map>().cast<Map<String, dynamic>>().firstWhere(
+                  (f) =>
+                      (f['restaurant_id'] ?? f['restaurantId']) ==
+                      widget.restaurantId,
+                  orElse: () => {},
+                );
+        final favId = target['id'];
+        if (favId != null) {
+          await _apiService.deleteFavorite(favId);
+          setState(() => _isFavorite = false);
+        }
       } else {
-        await _apiService.addFavorite('restaurant', widget.restaurantId);
+        await _apiService.addFavorite(restaurantId: widget.restaurantId);
+        setState(() => _isFavorite = true);
       }
-
-      setState(() {
-        _isFavorite = !_isFavorite;
-      });
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1245,7 +1346,8 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
 
   Future<void> _addToFavorites(MenuItem item) async {
     try {
-      await _apiService.addFavorite('menu_item', item.id);
+      await _apiService.addFavorite(
+          menuItemId: item.id); // named param i.p.v. type+id
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('${item.name} toegevoegd aan favorieten')),
@@ -1262,7 +1364,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
 
   Future<void> _markAsEaten(MenuItem item) async {
     try {
-      await _apiService.markAsEaten(item.id);
+      await _apiService.addEaten(menuItemId: item.id); // i.p.v. markAsEaten
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('${item.name} gemarkeerd als gegeten')),
@@ -1403,11 +1505,12 @@ class _ReviewDialogState extends State<_ReviewDialog> {
     setState(() => _isSubmitting = true);
 
     try {
-      await _apiService.submitReview(
-        widget.restaurantId,
-        _rating,
-        _commentController.text.trim(),
-      );
+      // ApiService heeft createReview(Map<String, dynamic>)
+      await _apiService.createReview({
+        'restaurant_id': widget.restaurantId,
+        'rating': _rating,
+        'comment': _commentController.text.trim(),
+      });
 
       if (mounted) {
         Navigator.pop(context);
