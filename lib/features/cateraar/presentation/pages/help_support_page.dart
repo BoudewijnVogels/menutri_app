@@ -26,13 +26,10 @@ class _CateraarHelpSupportPageState
 
   bool _isLoading = true;
   bool _isSubmittingFeedback = false;
-  bool _isSubmittingTicket = false;
   List<Map<String, dynamic>> _faqItems = [];
   List<Map<String, dynamic>> _filteredFaqItems = [];
   List<Map<String, dynamic>> _supportTickets = [];
   String _selectedCategory = 'all';
-  String _selectedTicketPriority = 'medium';
-  String _selectedTicketCategory = 'general';
 
   final List<Map<String, dynamic>> _helpCategories = [
     {'id': 'all', 'name': 'Alle', 'icon': Icons.help_outline},
