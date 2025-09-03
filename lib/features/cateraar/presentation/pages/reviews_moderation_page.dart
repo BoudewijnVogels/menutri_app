@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/services/api_service.dart';
 
@@ -450,7 +449,7 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
                 ],
               ),
             );
-          }).toList(),
+          }),
 
           const SizedBox(height: 24),
 
@@ -482,7 +481,7 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
                 trailing: _buildRatingStars(review['rating'] ?? 0),
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );
@@ -562,7 +561,7 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
                           _statusColors[entry.key] ?? AppColors.primary,
                     ),
                   );
-                }).toList(),
+                }),
 
                 const SizedBox(width: 8),
 
@@ -586,7 +585,7 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
                       checkmarkColor: Colors.orange,
                     ),
                   );
-                }).toList(),
+                }),
               ],
             ),
           ),
@@ -595,7 +594,7 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
           if (_restaurants.isNotEmpty) ...[
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: _selectedRestaurant,
+              initialValue: _selectedRestaurant,
               decoration: const InputDecoration(
                 labelText: 'Filter op Restaurant',
                 border: OutlineInputBorder(),
@@ -612,7 +611,7 @@ class _ReviewsModerationPageState extends ConsumerState<ReviewsModerationPage>
                     value: restaurant['id'],
                     child: Text(restaurant['name'] ?? ''),
                   );
-                }).toList(),
+                }),
               ],
               onChanged: (value) {
                 setState(() {
