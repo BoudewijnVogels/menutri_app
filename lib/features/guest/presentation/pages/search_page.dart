@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart'; // voor debugPrint
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -23,8 +24,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   Set<Marker> _markers = {};
 
   // Filter states
-  List<String> _selectedCuisines = [];
-  List<int> _selectedPriceRanges = [];
+  final List<String> _selectedCuisines = [];
+  final List<int> _selectedPriceRanges = [];
   bool _openNowOnly = false;
   bool _suitableForMeOnly = false;
 
@@ -54,15 +55,14 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
   Future<void> _getCurrentLocation() async {
     try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) return;
 
-      LocationPermission permission = await Geolocator.checkPermission();
+      var permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) return;
       }
-
       if (permission == LocationPermission.deniedForever) return;
 
       final position = await Geolocator.getCurrentPosition();
@@ -72,43 +72,54 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
       _searchRestaurants();
     } catch (e) {
-      print('Error getting location: $e');
+      debugPrint('Error getting location: $e');
     }
   }
 
   Future<void> _searchRestaurants() async {
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     try {
-      final params = <String, dynamic>{
-        'search': _searchController.text,
-        'cuisines': _selectedCuisines,
-        'price_ranges': _selectedPriceRanges,
-        'open_now': _openNowOnly,
-        'suitable_for_me': _suitableForMeOnly,
-      };
-
-      if (_currentPosition != null) {
-        params['lat'] = _currentPosition!.latitude;
-        params['lng'] = _currentPosition!.longitude;
-        params['radius'] = 10000; // 10km radius
+      if (_currentPosition == null) {
+        await _getCurrentLocation();
+        if (_currentPosition == null) {
+          setState(() => _isLoading = false);
+          return;
+        }
       }
 
-      final restaurants = await ApiService().searchRestaurants(params: params);
+      final resp = await ApiService().searchRestaurants(
+        lat: _currentPosition!.latitude,
+        lng: _currentPosition!.longitude,
+        radius: 10.0,
+        openNow: _openNowOnly ? true : null,
+        // Mapping van jouw UI-filters:
+        priceRange: _selectedPriceRanges.isNotEmpty
+            ? _selectedPriceRanges
+                .map((i) => _priceRangeLabels[i - 1])
+                .join(',')
+            : null,
+        cuisine: _selectedCuisines.isNotEmpty ? _selectedCuisines.first : null,
+        // Let op: in jouw model had je ook delivery/takeaway/wheelchair,
+        // die kun je hier later koppelen aan extra switches in de UI
+      );
+
+      // Haal de lijst restaurants veilig uit de Map
+      final list = (resp['restaurants'] ??
+              resp['data'] ??
+              resp['results'] ??
+              resp['items'] ??
+              []) as List? ??
+          [];
 
       setState(() {
-        _restaurants = restaurants;
+        _restaurants = list.cast<Map<String, dynamic>>();
         _isLoading = false;
       });
 
       _updateMapMarkers();
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-
+      setState(() => _isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -124,19 +135,23 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     final markers = <Marker>{};
 
     for (int i = 0; i < _restaurants.length; i++) {
-      final restaurant = _restaurants[i];
-      final lat = restaurant['latitude'] as double?;
-      final lng = restaurant['longitude'] as double?;
+      final dynamic r = _restaurants[i];
+      if (r is! Map) continue;
+      final restaurant = r.cast<String, dynamic>();
+
+      final lat = (restaurant['latitude'] as num?)?.toDouble();
+      final lng = (restaurant['longitude'] as num?)?.toDouble();
 
       if (lat != null && lng != null) {
         markers.add(
           Marker(
-            markerId: MarkerId(restaurant['id'].toString()),
+            markerId: MarkerId('${restaurant['id']}'),
             position: LatLng(lat, lng),
             infoWindow: InfoWindow(
-              title: restaurant['name'],
+              title: (restaurant['name'] ?? restaurant['naam'] ?? 'Restaurant')
+                  .toString(),
               snippet:
-                  '${restaurant['cuisine_type']} • ${_getPriceRange(restaurant['price_range'])}',
+                  '${(restaurant['cuisine_type'] ?? restaurant['cuisineType'] ?? '')} • ${_getPriceRange(restaurant['price_range'] is int ? restaurant['price_range'] as int : null)}',
               onTap: () =>
                   context.push('/guest/restaurant/${restaurant['id']}'),
             ),
@@ -322,7 +337,11 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         padding: const EdgeInsets.all(16),
         itemCount: _restaurants.length,
         itemBuilder: (context, index) {
-          final restaurant = _restaurants[index];
+          final dynamic r = _restaurants[index];
+          // Zorg dat we een Map hebben voor de card
+          final restaurant =
+              (r is Map) ? r.cast<String, dynamic>() : <String, dynamic>{};
+
           return _buildRestaurantCard(restaurant);
         },
       ),
@@ -331,6 +350,23 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
   Widget _buildRestaurantCard(Map<String, dynamic> restaurant) {
     final distance = _calculateDistance(restaurant);
+
+    // Foto ophalen (String of Map met url/image_url)
+    String? primaryPhotoUrl;
+    final photos = restaurant['photos'];
+    if (photos is List && photos.isNotEmpty) {
+      final first = photos.first;
+      if (first is String) {
+        primaryPhotoUrl = first;
+      } else if (first is Map) {
+        final m = first.cast<String, dynamic>();
+        primaryPhotoUrl =
+            (m['url'] ?? m['image_url'] ?? m['image'])?.toString();
+      }
+    }
+
+    final displayName =
+        (restaurant['name'] ?? restaurant['naam'] ?? 'Restaurant').toString();
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -348,9 +384,9 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   width: 80,
                   height: 80,
                   color: AppColors.lightBrown,
-                  child: restaurant['photos']?.isNotEmpty == true
+                  child: (primaryPhotoUrl != null && primaryPhotoUrl.isNotEmpty)
                       ? Image.network(
-                          restaurant['photos'][0]['url'],
+                          primaryPhotoUrl,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
                             return const Icon(
@@ -377,7 +413,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                       children: [
                         Expanded(
                           child: Text(
-                            restaurant['name'] ?? 'Restaurant',
+                            displayName,
                             style: Theme.of(context)
                                 .textTheme
                                 .titleMedium
@@ -388,7 +424,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                         ),
                         IconButton(
                           icon: const Icon(Icons.favorite_border),
-                          onPressed: () => _toggleFavorite(restaurant['id']),
+                          onPressed: () =>
+                              _toggleFavorite((restaurant['id'] as int?) ?? -1),
                           constraints: const BoxConstraints(),
                           padding: EdgeInsets.zero,
                         ),
@@ -398,7 +435,10 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                     Row(
                       children: [
                         Text(
-                          restaurant['cuisine_type'] ?? 'Restaurant',
+                          (restaurant['cuisine_type'] ??
+                                  restaurant['cuisineType'] ??
+                                  'Restaurant')
+                              .toString(),
                           style:
                               Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: AppColors.grey,
@@ -406,7 +446,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '• ${_getPriceRange(restaurant['price_range'])}',
+                          '• ${_getPriceRange(restaurant['price_range'] is int ? restaurant['price_range'] as int : null)}',
                           style:
                               Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: AppColors.grey,
@@ -434,7 +474,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                                 color: Colors.amber, size: 16),
                             const SizedBox(width: 4),
                             Text(
-                              '${restaurant['rating'] ?? 0.0}',
+                              '${(restaurant['rating'] as num?)?.toStringAsFixed(1) ?? '0.0'}',
                               style: Theme.of(context)
                                   .textTheme
                                   .bodySmall
@@ -506,7 +546,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         _mapController = controller;
       },
       onTap: (LatLng position) {
-        // Handle map tap if needed
+        // optional
       },
     );
   }
@@ -634,7 +674,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   onPressed: () {
                     Navigator.of(context).pop();
                     setState(() {
-                      // Update main state
+                      // main state kan hier worden gesynchroniseerd indien nodig
                     });
                     _searchRestaurants();
                   },
@@ -668,7 +708,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   }
 
   bool _isOpen(Map<String, dynamic> restaurant) {
-    // Mock implementation - in real app this would check actual opening hours
+    // Mock implementatie - vervang met echte openingstijden als die er zijn
     final now = DateTime.now();
     final hour = now.hour;
     return hour >= 9 && hour <= 22;
@@ -677,8 +717,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   double? _calculateDistance(Map<String, dynamic> restaurant) {
     if (_currentPosition == null) return null;
 
-    final lat = restaurant['latitude'] as double?;
-    final lng = restaurant['longitude'] as double?;
+    final lat = (restaurant['latitude'] as num?)?.toDouble();
+    final lng = (restaurant['longitude'] as num?)?.toDouble();
 
     if (lat == null || lng == null) return null;
 
@@ -688,7 +728,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           lat,
           lng,
         ) /
-        1000; // Convert to kilometers
+        1000; // km
   }
 
   Future<void> _toggleFavorite(int restaurantId) async {
