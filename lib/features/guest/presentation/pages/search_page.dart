@@ -474,7 +474,9 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                                 color: Colors.amber, size: 16),
                             const SizedBox(width: 4),
                             Text(
-                              '${(restaurant['rating'] as num?)?.toStringAsFixed(1) ?? '0.0'}',
+                              (restaurant['rating'] as num?)
+                                      ?.toStringAsFixed(1) ??
+                                  '0.0',
                               style: Theme.of(context)
                                   .textTheme
                                   .bodySmall
