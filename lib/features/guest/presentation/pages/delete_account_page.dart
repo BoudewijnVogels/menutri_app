@@ -117,7 +117,7 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
               const SizedBox(height: 16),
 
               DropdownButtonFormField<String>(
-                value: _selectedReason,
+                initialValue: _selectedReason,
                 decoration: const InputDecoration(
                   labelText: 'Selecteer een reden',
                   border: OutlineInputBorder(),
@@ -412,14 +412,7 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
     });
 
     try {
-      final deletionData = {
-        'password': _passwordController.text,
-        'reason': _selectedReason,
-        'other_reason': _selectedReason == 'Andere reden'
-            ? _otherReasonController.text
-            : null,
-      };
-
+      // If deletionData is not needed, remove it
       await ApiService().deleteAccount();
 
       if (mounted) {
