@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/services/api_service.dart';
@@ -318,7 +317,7 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
         if (_qrType == 'restaurant') ...[
           // Restaurant selector
           DropdownButtonFormField<Map<String, dynamic>>(
-            value: _selectedRestaurant,
+            initialValue: _selectedRestaurant,
             decoration: const InputDecoration(
               labelText: 'Selecteer Restaurant',
               border: OutlineInputBorder(),
@@ -344,7 +343,7 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
         ] else if (_qrType == 'menu') ...[
           // Restaurant selector
           DropdownButtonFormField<Map<String, dynamic>>(
-            value: _selectedRestaurant,
+            initialValue: _selectedRestaurant,
             decoration: const InputDecoration(
               labelText: 'Selecteer Restaurant',
               border: OutlineInputBorder(),
@@ -373,7 +372,7 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
 
           // Menu selector
           DropdownButtonFormField<Map<String, dynamic>>(
-            value: _selectedMenu,
+            initialValue: _selectedMenu,
             decoration: const InputDecoration(
               labelText: 'Selecteer Menu',
               border: OutlineInputBorder(),
