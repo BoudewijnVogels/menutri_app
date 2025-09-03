@@ -436,7 +436,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
       ),
       value: value,
       onChanged: onChanged,
-      activeColor: AppColors.mediumBrown,
+      activeThumbColor: AppColors.mediumBrown,
     );
   }
 
