@@ -28,7 +28,7 @@ class _CateraarHelpSupportPageState
   bool _isSubmittingFeedback = false;
   List<Map<String, dynamic>> _faqItems = [];
   List<Map<String, dynamic>> _filteredFaqItems = [];
-  List<Map<String, dynamic>> _supportTickets = [];
+  final List<Map<String, dynamic>> _supportTickets = [];
   String _selectedCategory = 'all';
 
   final List<Map<String, dynamic>> _helpCategories = [
