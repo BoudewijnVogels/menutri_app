@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/services/api_service.dart';
 
@@ -23,7 +22,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
   bool _isScanning = false;
   List<Map<String, dynamic>> _ingredients = [];
   List<Map<String, dynamic>> _filteredIngredients = [];
-  List<Map<String, dynamic>> _categories = [];
+  final List<Map<String, dynamic>> _categories = [];
   String? _selectedCategory;
   String _searchQuery = '';
   String _sortBy = 'name'; // name, created_at, calories, protein
@@ -355,7 +354,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
                       checkmarkColor: AppColors.primary,
                     ),
                   );
-                }).toList(),
+                }),
 
                 const SizedBox(width: 8),
 
@@ -379,7 +378,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
                       checkmarkColor: AppColors.primary,
                     ),
                   );
-                }).toList(),
+                }),
               ],
             ),
           ),
@@ -915,7 +914,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
                   Navigator.pop(context);
                 },
               );
-            }).toList(),
+            }),
             const Divider(),
             SwitchListTile(
               title: const Text('Oplopend'),
