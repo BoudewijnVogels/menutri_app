@@ -250,7 +250,7 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
           const SizedBox(width: 12),
           Expanded(
             child: DropdownButtonFormField<Map<String, dynamic>>(
-              value: _selectedRestaurant,
+              initialValue: _selectedRestaurant,
               decoration: const InputDecoration(
                 labelText: 'Selecteer Restaurant',
                 border: OutlineInputBorder(),
@@ -332,7 +332,7 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage>
                           },
                         ),
                       );
-                    }).toList(),
+                    }),
                   ],
                 ),
               ),
