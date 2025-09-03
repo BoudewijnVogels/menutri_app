@@ -341,14 +341,14 @@ class _HomePageState extends ConsumerState<HomePage> {
                 height: 120,
                 decoration: BoxDecoration(
                   color: AppColors.lightBrown,
-                  image: restaurant.primaryPhoto.isNotEmpty
+                  image: (restaurant.primaryPhoto?.isNotEmpty ?? false)
                       ? DecorationImage(
-                          image: NetworkImage(restaurant.primaryPhoto),
+                          image: NetworkImage(restaurant.primaryPhoto ?? ''),
                           fit: BoxFit.cover,
                         )
                       : null,
                 ),
-                child: restaurant.primaryPhoto.isEmpty
+                child: (restaurant.primaryPhoto?.isEmpty ?? true)
                     ? const Center(
                         child: Icon(
                           Icons.restaurant,
@@ -421,14 +421,14 @@ class _HomePageState extends ConsumerState<HomePage> {
                 decoration: BoxDecoration(
                   color: AppColors.lightBrown,
                   borderRadius: BorderRadius.circular(8),
-                  image: restaurant.primaryPhoto.isNotEmpty
+                  image: (restaurant.primaryPhoto?.isNotEmpty ?? false)
                       ? DecorationImage(
-                          image: NetworkImage(restaurant.primaryPhoto),
+                          image: NetworkImage(restaurant.primaryPhoto ?? ''),
                           fit: BoxFit.cover,
                         )
                       : null,
                 ),
-                child: restaurant.primaryPhoto.isEmpty
+                child: (restaurant.primaryPhoto?.isEmpty ?? true)
                     ? const Icon(
                         Icons.restaurant,
                         color: AppColors.mediumBrown,
