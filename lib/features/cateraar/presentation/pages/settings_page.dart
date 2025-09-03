@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/services/api_service.dart';
 
@@ -1372,7 +1371,7 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
       trailing: Switch(
         value: value,
         onChanged: enabled ? onChanged : null,
-        activeColor: AppColors.primary,
+        activeThumbColor: AppColors.primary,
       ),
       onTap: enabled ? () => onChanged(!value) : null,
     );
