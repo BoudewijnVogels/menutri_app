@@ -483,7 +483,7 @@ class _ExportAnalyticsDialogState extends State<_ExportAnalyticsDialog> {
           const Text('Selecteer periode:'),
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
-            value: _selectedPeriod,
+            initialValue: _selectedPeriod,
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -504,7 +504,7 @@ class _ExportAnalyticsDialogState extends State<_ExportAnalyticsDialog> {
           const Text('Selecteer formaat:'),
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
-            value: _selectedFormat,
+            initialValue: _selectedFormat,
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
