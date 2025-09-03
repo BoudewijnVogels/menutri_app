@@ -1,4 +1,7 @@
+// lib/core/models/menu_item.dart
+
 class MenuItem {
+  // --- Oorspronkelijke NL-velden ---
   final int id;
   final int menuId;
   final int? recipeId;
@@ -14,7 +17,7 @@ class MenuItem {
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
-  MenuItem({
+  const MenuItem({
     required this.id,
     required this.menuId,
     this.recipeId,
@@ -36,23 +39,24 @@ class MenuItem {
       id: json['id'] as int,
       menuId: json['menu_id'] as int,
       recipeId: json['recipe_id'] as int?,
-      naam: json['naam'] as String,
-      beschrijving: json['beschrijving'] as String?,
+      naam: json['naam'] as String? ?? json['name'] as String? ?? '',
+      beschrijving:
+          json['beschrijving'] as String? ?? json['description'] as String?,
       price: (json['price'] as num).toDouble(),
       category: json['category'] as String?,
       available: json['available'] as bool? ?? true,
       order: json['order'] as int? ?? 0,
-      labels: json['labels'] != null 
+      labels: (json['labels'] is List)
           ? List<String>.from(json['labels'] as List)
-          : [],
-      nutrition: json['nutrition'] != null 
+          : const [],
+      nutrition: (json['nutrition'] is Map)
           ? NutritionInfo.fromJson(json['nutrition'] as Map<String, dynamic>)
           : null,
       image: json['image'] as String?,
-      createdAt: json['created_at'] != null 
+      createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : null,
-      updatedAt: json['updated_at'] != null 
+      updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'] as String)
           : null,
     );
@@ -77,13 +81,33 @@ class MenuItem {
     };
   }
 
+  // ---------- Convenience (NL) ----------
   String get priceDisplay => '€${price.toStringAsFixed(2)}';
 
-  bool get isVegan => labels.contains('vegan');
-  bool get isVegetarian => labels.contains('vegetarian');
+  bool get isVeganLabel => labels.contains('vegan');
+  bool get isVegetarianLabel => labels.contains('vegetarian');
   bool get isGlutenFree => labels.contains('gluten-free');
   bool get isDairyFree => labels.contains('dairy-free');
   bool get isNutFree => labels.contains('nut-free');
+
+  // ---------- Compatibiliteits-getters (EN) ----------
+  String get name => naam;
+  String? get description => beschrijving;
+
+  /// UI gebruikt `double? calories`
+  double? get calories => nutrition?.calories;
+
+  /// UI gebruikt `List<String> allergens` — niet aanwezig in jouw model.
+  /// We leiden niets af; retourneer lege lijst (of map labels -> allergens als je wil).
+  List<String> get allergens => const [];
+
+  /// UI gebruikt booleans voor dieetlabels:
+  bool get isVegetarian => isVegetarianLabel;
+  bool get isVegan => isVeganLabel;
+
+  /// UI gebruikt `double? price` (nullable). Wij hebben verplicht `price`.
+  /// Getter blijft gewoon bestaan voor compatibiliteit.
+  double? get priceNullable => price;
 
   MenuItem copyWith({
     int? id,
@@ -120,15 +144,12 @@ class MenuItem {
   }
 
   @override
-  String toString() {
-    return 'MenuItem(id: $id, naam: $naam, price: $price, available: $available)';
-  }
+  String toString() =>
+      'MenuItem(id: $id, naam: $naam, price: $price, available: $available)';
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is MenuItem && other.id == id;
-  }
+  bool operator ==(Object other) =>
+      identical(this, other) || (other is MenuItem && other.id == id);
 
   @override
   int get hashCode => id.hashCode;
@@ -145,7 +166,7 @@ class NutritionInfo {
   final String? calorieMargin;
   final String? calorieNote;
 
-  NutritionInfo({
+  const NutritionInfo({
     this.calories,
     this.protein,
     this.carbs,
@@ -159,15 +180,24 @@ class NutritionInfo {
 
   factory NutritionInfo.fromJson(Map<String, dynamic> json) {
     return NutritionInfo(
-      calories: (json['energie_kcal'] as num?)?.toDouble(),
-      protein: (json['eiwit_g'] as num?)?.toDouble(),
-      carbs: (json['koolhydraten_g'] as num?)?.toDouble(),
-      fat: (json['vet_g'] as num?)?.toDouble(),
-      fiber: (json['vezels_g'] as num?)?.toDouble(),
-      sodium: (json['natrium_mg'] as num?)?.toDouble(),
-      sugar: (json['suiker_g'] as num?)?.toDouble(),
-      calorieMargin: json['cal_margin'] as String?,
-      calorieNote: json['cal_note'] as String?,
+      calories: (json['energie_kcal'] as num?)?.toDouble() ??
+          (json['calories'] as num?)?.toDouble(),
+      protein: (json['eiwit_g'] as num?)?.toDouble() ??
+          (json['protein'] as num?)?.toDouble(),
+      carbs: (json['koolhydraten_g'] as num?)?.toDouble() ??
+          (json['carbs'] as num?)?.toDouble(),
+      fat: (json['vet_g'] as num?)?.toDouble() ??
+          (json['fat'] as num?)?.toDouble(),
+      fiber: (json['vezels_g'] as num?)?.toDouble() ??
+          (json['fiber'] as num?)?.toDouble(),
+      sodium: (json['natrium_mg'] as num?)?.toDouble() ??
+          (json['sodium'] as num?)?.toDouble(),
+      sugar: (json['suiker_g'] as num?)?.toDouble() ??
+          (json['sugar'] as num?)?.toDouble(),
+      calorieMargin:
+          json['cal_margin'] as String? ?? json['calorie_margin'] as String?,
+      calorieNote:
+          json['cal_note'] as String? ?? json['calorie_note'] as String?,
     );
   }
 
@@ -185,12 +215,8 @@ class NutritionInfo {
     };
   }
 
-  String get caloriesDisplay {
-    if (calories != null) {
-      return '${calories!.round()} kcal';
-    }
-    return 'Calorieën onbekend';
-  }
+  String get caloriesDisplay =>
+      (calories != null) ? '${calories!.round()} kcal' : 'Calorieën onbekend';
 
   String get macrosDisplay {
     final parts = <String>[];
@@ -216,11 +242,4 @@ class NutritionInfo {
   }
 }
 
-enum CalorieMarginLevel {
-  low,
-  medium,
-  high,
-  veryHigh,
-  unknown,
-}
-
+enum CalorieMarginLevel { low, medium, high, veryHigh, unknown }
