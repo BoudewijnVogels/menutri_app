@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/services/api_service.dart';
-import 'nutrition_log.dart';
-import 'health_profile.dart';
+import '../../data/models/nutrition_log.dart';
+import '../../data/models/health_profile.dart';
 
 class NutritionLogPage extends ConsumerStatefulWidget {
   const NutritionLogPage({super.key});
