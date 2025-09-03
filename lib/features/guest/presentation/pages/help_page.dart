@@ -791,7 +791,7 @@ class _FeedbackDialogState extends State<_FeedbackDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             DropdownButtonFormField<String>(
-              value: _feedbackType,
+              initialValue: _feedbackType,
               decoration: const InputDecoration(
                 labelText: 'Type feedback',
                 border: OutlineInputBorder(),
