@@ -5,8 +5,10 @@ import 'package:share_plus/share_plus.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/services/api_service.dart';
-import '../../../../core/models/restaurant.dart';
-import '../../../../core/models/menu_item.dart';
+
+// Belangrijk: alias je modellen om type-verwarring te voorkomen
+import '../../../../core/models/restaurant.dart' as models_restaurant;
+import '../../../../core/models/menu_item.dart' as models_menu;
 
 class RestaurantDetailPage extends ConsumerStatefulWidget {
   final int restaurantId;
@@ -27,14 +29,13 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
   late TabController _tabController;
   late PageController _imageController;
 
-  Restaurant? _restaurant;
-  List<MenuItem> _menuItems = [];
+  models_restaurant.Restaurant? _restaurant;
+  List<models_menu.MenuItem> _menuItems = [];
   List<Map<String, dynamic>> _reviews = [];
   List<String> _images = [];
   bool _isLoading = true;
   bool _isFavorite = false;
   int _currentImageIndex = 0;
-  GoogleMapController? _mapController;
 
   @override
   void initState() {
@@ -54,86 +55,79 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     try {
-      // Vervang niet-bestaande ApiService-calls door bestaande endpoints
       final futures = await Future.wait([
-        _apiService
-            .getRestaurant(widget.restaurantId), // was getRestaurantDetails
-        _apiService.getMenuItems(
-            restaurantId: widget.restaurantId), // was getRestaurantMenuItems
-        _apiService.getReviews(
-            restaurantId: widget.restaurantId), // was getRestaurantReviews
-        _apiService.getFavorites(), // i.p.v. checkIfFavorite
+        _apiService.getRestaurant(widget.restaurantId),
+        _apiService.getMenuItems(restaurantId: widget.restaurantId),
+        _apiService.getReviews(restaurantId: widget.restaurantId),
+        _apiService.getFavorites(),
       ]);
 
       // --- Restaurant ---
       final restRaw = futures[0];
-      // backend kan {restaurant: {...}} teruggeven of direct {...}
-      final restMap = (restRaw as Map).containsKey('restaurant')
+      final restMap = ((restRaw as Map).containsKey('restaurant'))
           ? Map<String, dynamic>.from((restRaw as Map)['restaurant'])
           : Map<String, dynamic>.from(restRaw as Map);
-      final restaurant = Restaurant.fromJson(restMap);
+      final restaurant = models_restaurant.Restaurant.fromJson(restMap);
 
       // --- Menu items ---
       final miRaw = futures[1];
-      // kan {menu_items: []} of {items: []} of direct []
-      List itemsList;
+      List<dynamic> itemsList;
       if (miRaw is List) {
-        itemsList = miRaw;
-      } else if (miRaw is Map) {
-        // miRaw is not a List, so treat as Map<String, dynamic>
+        itemsList = miRaw as List<dynamic>;
+      } else {
         final miMap = Map<String, dynamic>.from(miRaw as Map);
-        itemsList = (miMap['menu_items'] ??
+        final extracted = (miMap['menu_items'] ??
             miMap['items'] ??
             miMap['data'] ??
             miMap['results'] ??
             []);
-        if (itemsList is! List) {
-          itemsList = [];
+        if (extracted is List) {
+          itemsList = extracted;
+        } else {
+          // fallback: vaak is het { data: { items: [] } } of zoiets
+          final maybeList = (extracted is Map)
+              ? ((extracted['items'] ??
+                  extracted['menu_items'] ??
+                  extracted['results']) as List?)
+              : null;
+          itemsList = maybeList ?? <dynamic>[];
         }
-      } else {
-        itemsList = [];
       }
+
       final menuItems = itemsList
-          .map((e) => MenuItem.fromJson(Map<String, dynamic>.from(e)))
+          .whereType<dynamic>()
+          .map((e) => models_menu.MenuItem.fromJson(
+              Map<String, dynamic>.from(e as Map)))
           .toList();
 
       // --- Reviews ---
       final rvRaw = futures[2];
-      List<Map<String, dynamic>> reviews;
-      if (rvRaw is Map<String, dynamic>) {
-        final list = (rvRaw['reviews'] ??
-            rvRaw['data'] ??
-            rvRaw['results'] ??
-            []) as List;
-        reviews = list.map((e) => Map<String, dynamic>.from(e)).toList();
-      } else if (rvRaw is List) {
-        reviews = rvRaw.map((e) => Map<String, dynamic>.from(e)).toList();
-      } else {
-        reviews = [];
-      }
+      Map<String, dynamic> rvMap = Map<String, dynamic>.from(rvRaw as Map);
+      final revList = (rvMap['reviews'] ??
+              rvMap['data'] ??
+              rvMap['results'] ??
+              []) as List? ??
+          <dynamic>[];
+      final reviews =
+          revList.map((e) => Map<String, dynamic>.from(e as Map)).toList();
 
       // --- Favorites ---
       final favRaw = futures[3];
-      List favs;
-      if (favRaw is Map<String, dynamic>) {
-        favs = (favRaw['favorites'] ??
-            favRaw['data'] ??
-            favRaw['results'] ??
-            []) as List;
-      } else if (favRaw is List) {
-        favs = favRaw;
-      } else {
-        favs = [];
-      }
+      final favs = (favRaw['favorites'] ??
+              favRaw['data'] ??
+              favRaw['results'] ??
+              []) as List? ??
+          <dynamic>[];
       final isFav = favs.any((f) {
-        final m = Map<String, dynamic>.from(f);
+        final m = Map<String, dynamic>.from(f as Map);
         final rid = m['restaurant_id'] ?? m['restaurantId'];
         return rid == widget.restaurantId;
       });
 
       // --- Images ---
       final images = <String>[];
-      // probeer gallery uit restaurant json
+
+      // 1) Gallery-lijst
       final gallery = restMap['images'] ?? restMap['gallery'];
       if (gallery is List) {
         for (final g in gallery) {
@@ -143,11 +137,13 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
           if (url is String && url.isNotEmpty) images.add(url);
         }
       }
-      // fallback op enkele image velden
+
+      // 2) Single image velden (optioneel)
       final singleImage = restMap['image'] ??
           restMap['image_url'] ??
           restMap['imageUrl'] ??
           restaurant.imageUrl;
+
       if (images.isEmpty && singleImage is String && singleImage.isNotEmpty) {
         images.add(singleImage);
       }
@@ -234,7 +230,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
         background: Stack(
           fit: StackFit.expand,
           children: [
-            // Image carousel
+            // Image carousel: alleen tonen als we URL's hebben
             if (_images.isNotEmpty)
               PageView.builder(
                 controller: _imageController,
@@ -281,7 +277,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
               ),
             ),
 
-            // Image indicators
+            // Indicatoren
             if (_images.length > 1)
               Positioned(
                 bottom: 80,
@@ -305,7 +301,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                 ),
               ),
 
-            // Restaurant info overlay
+            // Overlay met naam, rating, adres, chips
             Positioned(
               bottom: 16,
               left: 16,
@@ -323,10 +319,10 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Icon(Icons.star, color: Colors.amber, size: 20),
+                      const Icon(Icons.star, color: Colors.amber, size: 20),
                       const SizedBox(width: 4),
                       Text(
-                        '${_restaurant!.rating.toStringAsFixed(1)}',
+                        _restaurant!.rating?.toStringAsFixed(1) ?? '-',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
@@ -341,11 +337,12 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                             ),
                       ),
                       const SizedBox(width: 16),
-                      Icon(Icons.location_on, color: Colors.white, size: 20),
+                      const Icon(Icons.location_on,
+                          color: Colors.white, size: 20),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          _restaurant!.address,
+                          _restaurant!.address ?? '-',
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: Colors.white,
@@ -435,28 +432,35 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Contact info card
+            // Contact
             _buildInfoCard(
               'Contact Informatie',
               [
-                if (_restaurant!.phone != null)
+                if (_restaurant!.phone != null &&
+                    _restaurant!.phone!.isNotEmpty)
                   _buildInfoRow(Icons.phone, 'Telefoon', _restaurant!.phone!,
-                      onTap: () => _callRestaurant()),
-                if (_restaurant!.email != null)
+                      onTap: _callRestaurant),
+                if (_restaurant!.email != null &&
+                    _restaurant!.email!.isNotEmpty)
                   _buildInfoRow(Icons.email, 'Email', _restaurant!.email!,
-                      onTap: () => _emailRestaurant()),
-                if (_restaurant!.website != null)
+                      onTap: _emailRestaurant),
+                if (_restaurant!.website != null &&
+                    _restaurant!.website!.isNotEmpty)
                   _buildInfoRow(Icons.web, 'Website', _restaurant!.website!,
-                      onTap: () => _openWebsite()),
-                _buildInfoRow(Icons.access_time, 'Openingstijden',
-                    _formatOpeningHours(_restaurant!.openingHours)),
+                      onTap: _openWebsite),
+                _buildInfoRow(
+                  Icons.access_time,
+                  'Openingstijden',
+                  _formatOpeningHours(_restaurant!.openingHours),
+                ),
               ],
             ),
 
             const SizedBox(height: 16),
 
-            // Description
-            if (_restaurant!.description != null) ...[
+            // Over het restaurant
+            if (_restaurant!.description != null &&
+                _restaurant!.description!.isNotEmpty) ...[
               _buildInfoCard(
                 'Over ${_restaurant!.name}',
                 [
@@ -469,7 +473,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
               const SizedBox(height: 16),
             ],
 
-            // Cuisine types
+            // Keukentypes
             if (_restaurant!.cuisineTypes.isNotEmpty) ...[
               _buildInfoCard(
                 'Keuken Types',
@@ -478,11 +482,17 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                     spacing: 8,
                     runSpacing: 8,
                     children: _restaurant!.cuisineTypes
-                        .map((cuisine) => Chip(
-                              label: Text(cuisine),
-                              backgroundColor: AppColors.primary,
-                              labelStyle: TextStyle(color: AppColors.primary),
-                            ))
+                        .map(
+                          (cuisine) => Chip(
+                            label: Text(cuisine),
+                            backgroundColor: AppColors.withAlphaFraction(
+                                AppColors.primary, 0.1),
+                            labelStyle: TextStyle(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        )
                         .toList(),
                   ),
                 ],
@@ -490,7 +500,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
               const SizedBox(height: 16),
             ],
 
-            // Features
+            // Voorzieningen
             _buildInfoCard(
               'Voorzieningen',
               [
@@ -519,47 +529,67 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
 
             const SizedBox(height: 16),
 
-            // Location
+            // Locatie & route
             _buildInfoCard(
               'Locatie & Routebeschrijving',
               [
-                Container(
-                  height: 200,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.outline),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: GoogleMap(
-                      initialCameraPosition: CameraPosition(
-                        target: LatLng(
-                            _restaurant!.latitude, _restaurant!.longitude),
-                        zoom: 15,
-                      ),
-                      markers: {
-                        Marker(
-                          markerId: MarkerId('restaurant_${_restaurant!.id}'),
-                          position: LatLng(
-                              _restaurant!.latitude, _restaurant!.longitude),
-                          infoWindow: InfoWindow(
-                            title: _restaurant!.name,
-                            snippet: _restaurant!.address,
+                if (_restaurant!.latitude != null &&
+                    _restaurant!.longitude != null)
+                  Container(
+                    height: 200,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.outline),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: GoogleMap(
+                        initialCameraPosition: CameraPosition(
+                          target: LatLng(
+                            _restaurant!.latitude!,
+                            _restaurant!.longitude!,
                           ),
+                          zoom: 15,
                         ),
-                      },
-                      onMapCreated: (GoogleMapController controller) {
-                        _mapController = controller;
-                      },
-                      myLocationEnabled: true,
-                      myLocationButtonEnabled: false,
-                      zoomControlsEnabled: false,
+                        markers: {
+                          Marker(
+                            markerId: MarkerId('restaurant_${_restaurant!.id}'),
+                            position: LatLng(
+                              _restaurant!.latitude!,
+                              _restaurant!.longitude!,
+                            ),
+                            infoWindow: InfoWindow(
+                              title: _restaurant!.name,
+                              snippet: _restaurant!.address ?? '-',
+                            ),
+                          ),
+                        },
+                        myLocationEnabled: true,
+                        myLocationButtonEnabled: false,
+                        zoomControlsEnabled: false,
+                      ),
+                    ),
+                  )
+                else
+                  Container(
+                    height: 120,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color:
+                          AppColors.withAlphaFraction(AppColors.primary, 0.05),
+                      border: Border.all(color: AppColors.outline),
+                    ),
+                    child: Text(
+                      'Kaart niet beschikbaar',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
                     ),
                   ),
-                ),
                 const SizedBox(height: 12),
                 Text(
-                  _restaurant!.address,
+                  _restaurant!.address ?? '-',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w500,
                       ),
@@ -569,7 +599,10 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                   children: [
                     Expanded(
                       child: ElevatedButton.icon(
-                        onPressed: _openInMaps,
+                        onPressed: (_restaurant!.latitude != null &&
+                                _restaurant!.longitude != null)
+                            ? _openInMaps
+                            : null,
                         icon: const Icon(Icons.directions),
                         label: const Text('Routebeschrijving'),
                         style: ElevatedButton.styleFrom(
@@ -581,7 +614,10 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                     const SizedBox(width: 8),
                     Expanded(
                       child: OutlinedButton.icon(
-                        onPressed: _callRestaurant,
+                        onPressed: (_restaurant!.phone != null &&
+                                _restaurant!.phone!.isNotEmpty)
+                            ? _callRestaurant
+                            : null,
                         icon: const Icon(Icons.phone),
                         label: const Text('Bellen'),
                         style: OutlinedButton.styleFrom(
@@ -626,8 +662,8 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
       );
     }
 
-    // Group menu items by category
-    final groupedItems = <String, List<MenuItem>>{};
+    // Groeperen per categorie
+    final groupedItems = <String, List<models_menu.MenuItem>>{};
     for (final item in _menuItems) {
       final category = item.category ?? 'Overig';
       groupedItems[category] = groupedItems[category] ?? [];
@@ -642,7 +678,6 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
         itemBuilder: (context, index) {
           final category = groupedItems.keys.elementAt(index);
           final items = groupedItems[category]!;
-
           return _buildMenuCategory(category, items);
         },
       ),
@@ -773,7 +808,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
     );
   }
 
-  Widget _buildMenuCategory(String category, List<MenuItem> items) {
+  Widget _buildMenuCategory(String category, List<models_menu.MenuItem> items) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 2,
@@ -818,21 +853,12 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
     );
   }
 
-  Widget _buildMenuItem(MenuItem item) {
-    // Calculate calorie margin color
-    Color calorieColor = AppColors.calorieMarginGrey;
+  Widget _buildMenuItem(models_menu.MenuItem item) {
+    // Bepaal calorie-kleur o.b.v. jouw helper
+    Color calorieColor = AppColors.getCalorieMarginColor(0);
     if (item.calories != null) {
-      final margin =
-          (item.calories! / 500 * 100) - 100; // Assuming 500 as target
-      if (margin <= 5) {
-        calorieColor = AppColors.calorieMarginGrey;
-      } else if (margin <= 10) {
-        calorieColor = AppColors.calorieMarginAmber;
-      } else if (margin <= 15) {
-        calorieColor = AppColors.calorieMarginOrange;
-      } else {
-        calorieColor = AppColors.calorieMarginRed;
-      }
+      final margin = (item.calories! / 500 * 100) - 100; // referentie 500kcal
+      calorieColor = AppColors.getCalorieMarginColor(margin);
     }
 
     return Container(
@@ -855,18 +881,17 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                       ),
                 ),
               ),
-              if (item.price != null)
-                Text(
-                  '€${item.price!.toStringAsFixed(2)}',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
-                      ),
-                ),
+              Text(
+                '€${item.price.toStringAsFixed(2)}',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+              ),
             ],
           ),
 
-          if (item.description != null) ...[
+          if (item.description != null && item.description!.isNotEmpty) ...[
             const SizedBox(height: 4),
             Text(
               item.description!,
@@ -878,7 +903,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
 
           const SizedBox(height: 8),
 
-          // Nutrition and allergen info
+          // Voedings- & allergeneninfo
           Wrap(
             spacing: 8,
             runSpacing: 4,
@@ -916,43 +941,15 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                   ),
                 ),
               if (item.isVegetarian)
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.withAlphaFraction(Colors.green, 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    'Vegetarisch',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Colors.green,
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                ),
+                _buildDietChip('Vegetarisch', Colors.green),
               if (item.isVegan)
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.withAlphaFraction(Colors.lightGreen, 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    'Veganistisch',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Colors.lightGreen,
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                ),
+                _buildDietChip('Veganistisch', Colors.lightGreen),
             ],
           ),
 
           const SizedBox(height: 8),
 
-          // Action buttons
+          // Actieknoppen
           Row(
             children: [
               const Spacer(),
@@ -981,11 +978,28 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
     );
   }
 
+  Widget _buildDietChip(String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.withAlphaFraction(color, 0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: color,
+              fontWeight: FontWeight.w600,
+            ),
+      ),
+    );
+  }
+
   Widget _buildReviewSummary() {
     final avgRating = _restaurant!.rating;
     final totalReviews = _reviews.length;
 
-    // Calculate rating distribution
+    // Verdeling
     final ratingCounts = <int, int>{};
     for (int i = 1; i <= 5; i++) {
       ratingCounts[i] = 0;
@@ -1005,7 +1019,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
             Column(
               children: [
                 Text(
-                  avgRating.toStringAsFixed(1),
+                  avgRating?.toStringAsFixed(1) ?? '-',
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppColors.primary,
@@ -1015,7 +1029,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                   children: List.generate(
                       5,
                       (index) => Icon(
-                            index < avgRating.round()
+                            index < (avgRating ?? 0).round()
                                 ? Icons.star
                                 : Icons.star_border,
                             color: Colors.amber,
@@ -1047,8 +1061,8 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
                                   ? (ratingCounts[i]! / totalReviews)
                                   : 0,
                               backgroundColor: AppColors.outline,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.amber),
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                  Colors.amber),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -1080,9 +1094,11 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
 
   Widget _buildReviewCard(Map<String, dynamic> review) {
     final rating = (review['rating'] as num?)?.toInt() ?? 0;
-    final comment = review['comment'] ?? '';
-    final userName = review['user_name'] ?? 'Anoniem';
-    final createdAt = DateTime.tryParse(review['created_at'] ?? '');
+    final comment = (review['comment'] as String?) ?? '';
+    final userName = (review['user_name'] as String?) ?? 'Anoniem';
+    final createdAtStr = review['created_at'] as String?;
+    final createdAt =
+        createdAtStr != null ? DateTime.tryParse(createdAtStr) : null;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -1178,7 +1194,6 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
   String _formatOpeningHours(Map<String, dynamic>? openingHours) {
     if (openingHours == null) return 'Niet beschikbaar';
 
-    // Format opening hours from map
     final today = DateTime.now().weekday;
     final dayNames = [
       'monday',
@@ -1208,12 +1223,11 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
       if (_isFavorite) {
         // zoek favorite-id voor dit restaurant en verwijder
         final favData = await _apiService.getFavorites();
-        final favList = (favData is Map<String, dynamic>)
-            ? (favData['favorites'] ??
+        final favList = (favData['favorites'] ??
                 favData['data'] ??
                 favData['results'] ??
-                []) as List
-            : (favData as List? ?? []);
+                []) as List? ??
+            <dynamic>[];
         final target =
             favList.cast<Map>().cast<Map<String, dynamic>>().firstWhere(
                   (f) =>
@@ -1252,13 +1266,48 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
   Future<void> _shareRestaurant() async {
     try {
       final shareUrl = 'https://menutri.nl/restaurant/${widget.restaurantId}';
-      await Share.share(
-        'Bekijk ${_restaurant!.name} op Menutri!\n\n'
-        '${_restaurant!.description ?? ''}\n\n'
-        '📍 ${_restaurant!.address}\n'
-        '⭐ ${_restaurant!.rating.toStringAsFixed(1)} sterren\n\n'
-        '$shareUrl',
-        subject: 'Restaurant: ${_restaurant!.name}',
+
+      final text = 'Bekijk ${_restaurant!.name} op Menutri!\n\n'
+          '${_restaurant!.description ?? ''}\n\n'
+          '📍 ${_restaurant!.address ?? '-'}\n'
+          '⭐ ${_restaurant!.rating?.toStringAsFixed(1) ?? '-'} sterren\n\n'
+          '$shareUrl';
+
+      await SharePlus.instance.share(
+        ShareParams(
+          text: text,
+          subject: 'Restaurant: ${_restaurant!.name}',
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Fout bij delen: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _shareMenuItem(models_menu.MenuItem item) async {
+    try {
+      // NB: als 'price' non-nullable is in je model (double), geen null-check meer doen.
+      final priceText = '€${item.price.toStringAsFixed(2)}';
+
+      final caloriesText =
+          (item.calories != null) ? '🔥 ${item.calories!.round()} kcal\n' : '';
+
+      final text = 'Bekijk dit gerecht: ${item.name}\n\n'
+          '${item.description ?? ''}\n\n'
+          '$caloriesText'
+          '💰 $priceText\n\n'
+          'Bij ${_restaurant!.name}\n'
+          'https://menutri.nl/restaurant/${widget.restaurantId}';
+
+      await SharePlus.instance.share(
+        ShareParams(
+          text: text,
+          subject: 'Gerecht: ${item.name}',
+        ),
       );
     } catch (e) {
       if (mounted) {
@@ -1271,12 +1320,17 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
 
   Future<void> _openInMaps() async {
     try {
-      final url =
-          'https://www.google.com/maps/search/?api=1&query=${_restaurant!.latitude},${_restaurant!.longitude}';
-      if (await canLaunchUrl(Uri.parse(url))) {
-        await launchUrl(Uri.parse(url));
+      final lat = _restaurant!.latitude;
+      final lng = _restaurant!.longitude;
+      if (lat == null || lng == null) {
+        throw 'Locatie onbekend';
+      }
+      final url = 'https://www.google.com/maps/search/?api=1&query=$lat,$lng';
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
       } else {
-        throw 'Could not launch $url';
+        throw 'Kon $url niet openen';
       }
     } catch (e) {
       if (mounted) {
@@ -1288,14 +1342,15 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
   }
 
   Future<void> _callRestaurant() async {
-    if (_restaurant!.phone == null) return;
+    final phone = _restaurant!.phone;
+    if (phone == null || phone.isEmpty) return;
 
     try {
-      final url = 'tel:${_restaurant!.phone}';
-      if (await canLaunchUrl(Uri.parse(url))) {
-        await launchUrl(Uri.parse(url));
+      final uri = Uri.parse('tel:$phone');
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
       } else {
-        throw 'Could not launch $url';
+        throw 'Kon $phone niet bellen';
       }
     } catch (e) {
       if (mounted) {
@@ -1307,14 +1362,15 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
   }
 
   Future<void> _emailRestaurant() async {
-    if (_restaurant!.email == null) return;
+    final email = _restaurant!.email;
+    if (email == null || email.isEmpty) return;
 
     try {
-      final url = 'mailto:${_restaurant!.email}';
-      if (await canLaunchUrl(Uri.parse(url))) {
-        await launchUrl(Uri.parse(url));
+      final uri = Uri.parse('mailto:$email');
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
       } else {
-        throw 'Could not launch $url';
+        throw 'Kon e-mailapp niet openen';
       }
     } catch (e) {
       if (mounted) {
@@ -1326,14 +1382,15 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
   }
 
   Future<void> _openWebsite() async {
-    if (_restaurant!.website == null) return;
+    final site = _restaurant!.website;
+    if (site == null || site.isEmpty) return;
 
     try {
-      final url = _restaurant!.website!;
-      if (await canLaunchUrl(Uri.parse(url))) {
-        await launchUrl(Uri.parse(url));
+      final uri = Uri.parse(site);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
       } else {
-        throw 'Could not launch $url';
+        throw 'Kon website niet openen';
       }
     } catch (e) {
       if (mounted) {
@@ -1344,10 +1401,9 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
     }
   }
 
-  Future<void> _addToFavorites(MenuItem item) async {
+  Future<void> _addToFavorites(models_menu.MenuItem item) async {
     try {
-      await _apiService.addFavorite(
-          menuItemId: item.id); // named param i.p.v. type+id
+      await _apiService.addFavorite(menuItemId: item.id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('${item.name} toegevoegd aan favorieten')),
@@ -1362,9 +1418,9 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
     }
   }
 
-  Future<void> _markAsEaten(MenuItem item) async {
+  Future<void> _markAsEaten(models_menu.MenuItem item) async {
     try {
-      await _apiService.addEaten(menuItemId: item.id); // i.p.v. markAsEaten
+      await _apiService.addEaten(menuItemId: item.id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('${item.name} gemarkeerd als gegeten')),
@@ -1379,33 +1435,11 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
     }
   }
 
-  Future<void> _shareMenuItem(MenuItem item) async {
-    try {
-      await Share.share(
-        'Bekijk dit gerecht: ${item.name}\n\n'
-        '${item.description ?? ''}\n\n'
-        '${item.calories != null ? '🔥 ${item.calories!.round()} kcal\n' : ''}'
-        '💰 €${item.price?.toStringAsFixed(2) ?? 'Prijs op aanvraag'}\n\n'
-        'Bij ${_restaurant!.name}\n'
-        'https://menutri.nl/restaurant/${widget.restaurantId}',
-        subject: 'Gerecht: ${item.name}',
-      );
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Fout bij delen: $e')),
-        );
-      }
-    }
-  }
-
   void _scanQRCode() {
-    // Navigate to QR scanner
     Navigator.pushNamed(context, '/qr-scanner');
   }
 
   void _writeReview() {
-    // Show review dialog
     showDialog(
       context: context,
       builder: (context) => _ReviewDialog(
@@ -1505,7 +1539,6 @@ class _ReviewDialogState extends State<_ReviewDialog> {
     setState(() => _isSubmitting = true);
 
     try {
-      // ApiService heeft createReview(Map<String, dynamic>)
       await _apiService.createReview({
         'restaurant_id': widget.restaurantId,
         'rating': _rating,
