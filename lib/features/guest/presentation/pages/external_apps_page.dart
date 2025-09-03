@@ -189,7 +189,7 @@ class _ExternalAppsPageState extends ConsumerState<ExternalAppsPage> {
                           value: _healthProfile?['share_health_data'] ?? false,
                           onChanged: (value) =>
                               _updatePrivacySetting('share_health_data', value),
-                          activeColor: AppColors.primary,
+                          activeThumbColor: AppColors.primary,
                         ),
                         SwitchListTile(
                           title: const Text('Gepersonaliseerde aanbevelingen'),
@@ -199,7 +199,7 @@ class _ExternalAppsPageState extends ConsumerState<ExternalAppsPage> {
                               _healthProfile?['allow_recommendations'] ?? true,
                           onChanged: (value) => _updatePrivacySetting(
                               'allow_recommendations', value),
-                          activeColor: AppColors.primary,
+                          activeThumbColor: AppColors.primary,
                         ),
                       ],
                     ),
