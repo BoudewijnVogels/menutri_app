@@ -259,7 +259,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
               const SizedBox(width: 12),
               Expanded(
                 child: DropdownButtonFormField<Map<String, dynamic>?>(
-                  value: _selectedRestaurant,
+                  initialValue: _selectedRestaurant,
                   decoration: const InputDecoration(
                     labelText: 'Restaurant',
                     border: OutlineInputBorder(),
@@ -276,7 +276,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
                         value: restaurant,
                         child: Text(restaurant['name'] ?? ''),
                       );
-                    }).toList(),
+                    }),
                   ],
                   onChanged: (restaurant) {
                     setState(() {
