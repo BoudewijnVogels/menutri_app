@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:share_plus/share_plus.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/services/api_service.dart';
 
@@ -28,7 +26,7 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
   List<Map<String, dynamic>> _restaurants = [];
   String _searchQuery = '';
   String _filterRole = 'all';
-  String _filterStatus = 'all';
+  final String _filterStatus = 'all';
 
   final Map<String, String> _roleLabels = {
     'owner': 'Eigenaar',
@@ -379,7 +377,7 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
                       checkmarkColor: _roleColors[entry.key],
                     ),
                   );
-                }).toList(),
+                }),
               ],
             ),
           ),
@@ -848,7 +846,7 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
           // Role cards
           ..._roleLabels.entries.map((entry) {
             return _buildRoleCard(entry.key, entry.value);
-          }).toList(),
+          }),
         ],
       ),
     );
@@ -940,7 +938,7 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
                   ],
                 ),
               );
-            }).toList(),
+            }),
           ],
         ),
       ),
@@ -1097,7 +1095,7 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
                     },
                     contentPadding: EdgeInsets.zero,
                   );
-                }).toList(),
+                }),
 
                 const SizedBox(height: 16),
 
@@ -1127,7 +1125,7 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
                     },
                     contentPadding: EdgeInsets.zero,
                   );
-                }).toList(),
+                }),
               ],
             ),
           ),
