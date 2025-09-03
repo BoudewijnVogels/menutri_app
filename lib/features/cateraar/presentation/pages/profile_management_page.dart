@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/services/api_service.dart';
@@ -50,7 +49,7 @@ class _CateraarProfileManagementPageState
   bool _isSaving = false;
   Map<String, dynamic> _profileData = {};
   Map<String, dynamic> _businessData = {};
-  Map<String, dynamic> _statistics = {};
+  final Map<String, dynamic> _statistics = {};
   List<Map<String, dynamic>> _teamMembers = [];
   String? _profileImagePath;
   String? _companyLogoPath;
