@@ -1,15 +1,10 @@
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
-
+/*
+ Top-level build file (geen repositories hier, die staan in settings.gradle)
+*/
 rootProject.buildDir = "../build"
+
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
-}
-subprojects {
     project.evaluationDependsOn(":app")
 }
 
