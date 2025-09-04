@@ -7,38 +7,34 @@ pluginManagement {
         return flutterSdkPath
     }()
 
+    // Gebruik Flutter’s eigen Gradle plugin uit het SDK
     includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
 
     repositories {
         google()
         mavenCentral()
         gradlePluginPortal()
-    }
-}
-
-pluginManagement {
-    repositories {
-        google()
-        mavenCentral()
-        gradlePluginPortal()
+        // Flutter Maven repo centraal
+        maven { url = uri("https://storage.googleapis.com/download.flutter.io") }
     }
 }
 
 plugins {
     id "com.android.application" version "8.7.2" apply false
-    id "com.android.library" version "8.7.2" apply false
+    id "com.android.library"     version "8.7.2" apply false
+    // MATCH Flutter 3.22 toolchain
     id "org.jetbrains.kotlin.android" version "1.9.23" apply false
-    id "dev.flutter.flutter-gradle-plugin" version "1.0.0" apply false
+    // LET OP: géén dev.flutter.flutter-gradle-plugin hier
 }
 
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
     repositories {
         google()
         mavenCentral()
+        maven { url = uri("https://storage.googleapis.com/download.flutter.io") }
     }
 }
 
 rootProject.name = "menutri_app"
 include(":app")
-
