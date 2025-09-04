@@ -1,7 +1,7 @@
 plugins {
     id "com.android.application"
-    id "kotlin-android"
-    // Flutter Gradle Plugin altijd als laatste
+    id "org.jetbrains.kotlin.android"   // correcte plugin id
+    // Flutter plugin zonder versie; komt uit includeBuild in settings.gradle
     id "dev.flutter.flutter-gradle-plugin"
 }
 
@@ -14,7 +14,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-
     kotlinOptions {
         jvmTarget = "17"
     }
@@ -44,7 +43,6 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.release
-            // Voor nu geen obfuscation/shrinking
             minifyEnabled false
             shrinkResources false
         }
