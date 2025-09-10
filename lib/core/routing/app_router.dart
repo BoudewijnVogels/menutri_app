@@ -41,6 +41,8 @@ import '../../features/cateraar/presentation/pages/notifications_cateraar_page.d
 import '../../features/cateraar/presentation/pages/profile_management_page.dart';
 import '../../features/cateraar/presentation/pages/settings_page.dart';
 import '../../features/cateraar/presentation/pages/help_support_page.dart';
+import '../../features/cateraar/presentation/pages/add_restaurant_page.dart';
+import '../../features/cateraar/presentation/pages/restaurant_detail_cateraar_page.dart';
 
 // Route names
 class AppRoutes {
@@ -267,6 +269,29 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.cateraarHelp,
         name: 'cateraar-help',
         builder: (context, state) => const CateraarHelpSupportPage(),
+      ),
+
+      // ✅ Nieuwe routes voor restaurant toevoegen/bewerken
+      GoRoute(
+        path: '/cateraar/restaurants/add',
+        name: 'cateraar-restaurants-add',
+        builder: (context, state) => const AddRestaurantPage(),
+      ),
+      GoRoute(
+        path: '/cateraar/restaurants/:id/edit',
+        name: 'cateraar-restaurants-edit',
+        builder: (context, state) {
+          final restaurant = state.extra as Map<String, dynamic>?;
+          return AddRestaurantPage(existingRestaurant: restaurant);
+        },
+      ),
+      GoRoute(
+        path: '/cateraar/restaurants/:id',
+        name: 'cateraar-restaurant-detail',
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return RestaurantDetailCateraarPage(restaurantId: id);
+        },
       ),
     ],
 
