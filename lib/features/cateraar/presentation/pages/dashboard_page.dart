@@ -39,7 +39,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           period: _selectedPeriod,
           restaurantId: _selectedRestaurant?['id'],
         ),
-        _apiService.getRestaurants(),
+        _apiService.getMyRestaurants(),
         _apiService.getUserActivity(), // correcte naam
       ]);
 
@@ -298,7 +298,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             _buildStatCard(
               title: 'Menu Views',
               value: '${stats['menu_views'] ?? 0}',
-              icon: Icons.visibility,
+              icon: Icons.visibility_outlined,
               color: Colors.green,
               trend: '+8%',
             ),
@@ -832,7 +832,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       case 'qr_scan':
         return Icon(Icons.qr_code_scanner, color: AppColors.primary);
       case 'menu_view':
-        return Icon(Icons.visibility, color: Colors.blue);
+        return Icon(Icons.visibility_outlined, color: Colors.blue);
       case 'favorite':
         return Icon(Icons.favorite, color: Colors.red);
       case 'review':

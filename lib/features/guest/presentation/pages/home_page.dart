@@ -32,7 +32,6 @@ class _HomePageState extends ConsumerState<HomePage> {
         _errorMessage = null;
       });
 
-      // Load nearby restaurants (mock data for now)
       final response = await ApiService().getRestaurants(perPage: 10);
       final restaurantList = response['restaurants'] as List;
 
@@ -84,15 +83,12 @@ class _HomePageState extends ConsumerState<HomePage> {
                 ),
                 actions: [
                   IconButton(
-                    icon: const Icon(Icons.qr_code_scanner,
-                        color: AppColors.mediumBrown),
+                    icon: const Icon(Icons.qr_code_scanner),
                     onPressed: () => context.push(AppRoutes.qrScanner),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.notifications_outlined,
-                        color: AppColors.mediumBrown),
+                    icon: const Icon(Icons.notifications_outlined),
                     onPressed: () {
-                      // TODO: Navigate to notifications
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                             content: Text('Notificaties komen binnenkort')),
@@ -160,7 +156,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: _buildQuickAction(
-                          icon: Icons.favorite_outline,
+                          icon: Icons.favorite_border,
                           label: 'Favorieten',
                           onTap: () => context.go(AppRoutes.guestFavorites),
                         ),
@@ -212,7 +208,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       padding: const EdgeInsets.all(32),
                       child: Column(
                         children: [
-                          const Icon(Icons.error_outline,
+                          const Icon(Icons.error,
                               size: 48, color: AppColors.error),
                           const SizedBox(height: 16),
                           Text(_errorMessage!),
@@ -308,7 +304,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 ),
                 child: Icon(
                   icon,
-                  color: AppColors.mediumBrown,
+                  color: AppColors.white, // ✅ wit voor contrast
                   size: 24,
                 ),
               ),
@@ -353,7 +349,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                         child: Icon(
                           Icons.restaurant,
                           size: 40,
-                          color: AppColors.mediumBrown,
+                          color: AppColors.white, // ✅ wit placeholder
                         ),
                       )
                     : null,
@@ -366,7 +362,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      restaurant.naam,
+                      restaurant.name,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
@@ -431,7 +427,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 child: (restaurant.primaryPhoto?.isEmpty ?? true)
                     ? const Icon(
                         Icons.restaurant,
-                        color: AppColors.mediumBrown,
+                        color: AppColors.white, // ✅ wit placeholder
                       )
                     : null,
               ),
@@ -444,7 +440,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      restaurant.naam,
+                      restaurant.name,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
@@ -452,9 +448,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
-                    if (restaurant.beschrijving != null)
+                    if (restaurant.description != null)
                       Text(
-                        restaurant.beschrijving!,
+                        restaurant.description!,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: AppColors.grey,
                             ),

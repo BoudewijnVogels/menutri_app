@@ -68,12 +68,12 @@ class _AddRestaurantPageState extends ConsumerState<AddRestaurantPage> {
     super.initState();
     if (widget.existingRestaurant != null) {
       final r = widget.existingRestaurant!;
-      _naamController.text = r['naam'] ?? '';
-      _beschrijvingController.text = r['beschrijving'] ?? '';
-      _adresController.text = r['adres'] ?? '';
-      _stadController.text = r['stad'] ?? '';
-      _postcodeController.text = r['postcode'] ?? '';
-      _telefoonController.text = r['telefoon'] ?? '';
+      _naamController.text = r['name'] ?? '';
+      _beschrijvingController.text = r['description'] ?? '';
+      _adresController.text = r['address'] ?? '';
+      _stadController.text = r['city'] ?? '';
+      _postcodeController.text = r['postal_code'] ?? '';
+      _telefoonController.text = r['phone'] ?? '';
       _emailController.text = r['email'] ?? '';
       _websiteController.text = r['website'] ?? '';
       _latitudeController.text = r['latitude']?.toString() ?? '';
@@ -81,7 +81,7 @@ class _AddRestaurantPageState extends ConsumerState<AddRestaurantPage> {
       _hasDelivery = r['has_delivery'] ?? false;
       _hasTakeaway = r['has_takeaway'] ?? false;
       _isWheelchairAccessible = r['wheelchair'] ?? false;
-      _actief = r['actief'] ?? true;
+      _actief = r['is_active'] ?? true;
       _priceRange = r['price_range'];
       _cuisineType = r['cuisine_type'];
     }
@@ -108,12 +108,12 @@ class _AddRestaurantPageState extends ConsumerState<AddRestaurantPage> {
     setState(() => _loading = true);
 
     final restaurantData = {
-      'naam': _naamController.text.trim(),
-      'beschrijving': _beschrijvingController.text.trim(),
-      'adres': _adresController.text.trim(),
-      'stad': _stadController.text.trim(),
-      'postcode': _postcodeController.text.trim(),
-      'telefoon': _telefoonController.text.trim(),
+      'name': _naamController.text.trim(),
+      'description': _beschrijvingController.text.trim(),
+      'adress': _adresController.text.trim(),
+      'city': _stadController.text.trim(),
+      'postalCode': _postcodeController.text.trim(),
+      'phone': _telefoonController.text.trim(),
       'email': _emailController.text.trim(),
       'website': _websiteController.text.trim(),
       'latitude': double.tryParse(_latitudeController.text.trim()),
@@ -121,7 +121,7 @@ class _AddRestaurantPageState extends ConsumerState<AddRestaurantPage> {
       'has_delivery': _hasDelivery,
       'has_takeaway': _hasTakeaway,
       'is_wheelchair_accessible': _isWheelchairAccessible,
-      'actief': _actief,
+      'is_active': _actief,
       'price_range': _priceRange,
       'cuisine_type': _cuisineType,
     };
@@ -240,7 +240,7 @@ class _AddRestaurantPageState extends ConsumerState<AddRestaurantPage> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                value: _priceRange,
+                initialValue: _priceRange,
                 items: _priceRanges
                     .map((pr) => DropdownMenuItem(value: pr, child: Text(pr)))
                     .toList(),
@@ -249,7 +249,7 @@ class _AddRestaurantPageState extends ConsumerState<AddRestaurantPage> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                value: _cuisineType,
+                initialValue: _cuisineType,
                 items: _cuisineTypes
                     .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                     .toList(),

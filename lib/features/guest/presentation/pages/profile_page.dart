@@ -57,13 +57,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              // TODO: Navigate to settings
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Instellingen komen binnenkort')),
-              );
-            },
+            icon: const Icon(Icons.settings, color: AppColors.mediumBrown),
+            onPressed: () => context.push(AppRoutes.guestSettings),
           ),
         ],
       ),
@@ -167,14 +162,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
             // Edit button
             IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () {
-                // TODO: Navigate to edit profile
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text('Profiel bewerken komt binnenkort')),
-                );
-              },
+              icon: const Icon(Icons.edit, color: AppColors.mediumBrown),
+              onPressed: () => context.push(AppRoutes.editProfile),
             ),
           ],
         ),
@@ -194,8 +183,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.health_and_safety,
-                      color: AppColors.mediumBrown),
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: AppColors.mediumBrown,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.health_and_safety,
+                        color: AppColors.white, size: 20),
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     'Gezondheidsprofiel',
@@ -239,6 +235,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 const SizedBox(height: 12),
                 ElevatedButton(
                   onPressed: () => context.push(AppRoutes.healthProfile),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.mediumBrown,
+                  ),
                   child: const Text('Profiel instellen'),
                 ),
               ],
@@ -283,7 +282,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         const SizedBox(width: 12),
         Expanded(
           child: _buildStatCard(
-            icon: Icons.restaurant_menu,
+            icon: Icons.restaurant,
             title: 'Gegeten',
             value: '45',
             onTap: () => context.push(AppRoutes.nutritionLog),
@@ -316,7 +315,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              Icon(icon, color: AppColors.mediumBrown, size: 24),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.mediumBrown,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: AppColors.white, size: 20),
+              ),
               const SizedBox(height: 8),
               Text(
                 value,
@@ -350,7 +356,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           onTap: () => context.push(AppRoutes.healthProfile),
         ),
         _buildMenuOption(
-          icon: Icons.restaurant_menu,
+          icon: Icons.restaurant,
           title: 'Voedingslogboek',
           subtitle: 'Bekijk wat je hebt gegeten',
           onTap: () => context.push(AppRoutes.nutritionLog),
@@ -359,11 +365,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           icon: Icons.notifications,
           title: 'Notificaties',
           subtitle: 'Beheer je meldingen',
-          onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Notificaties komen binnenkort')),
-            );
-          },
+          onTap: () => context.push(AppRoutes.guestNotifications),
         ),
         _buildMenuOption(
           icon: Icons.privacy_tip,
@@ -380,11 +382,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           icon: Icons.help,
           title: 'Help & Support',
           subtitle: 'Veelgestelde vragen en contact',
-          onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Help & Support komt binnenkort')),
-            );
-          },
+          onTap: () => context.push(AppRoutes.guestHelp),
         ),
         _buildMenuOption(
           icon: Icons.info,
@@ -430,15 +428,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: isDestructive
-                      ? AppColors.withAlphaFraction(AppColors.error, 0.1)
-                      : AppColors.withAlphaFraction(AppColors.mediumBrown, 0.1),
+                  color:
+                      isDestructive ? AppColors.error : AppColors.mediumBrown,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   icon,
-                  color:
-                      isDestructive ? AppColors.error : AppColors.mediumBrown,
+                  color: AppColors.white,
                   size: 20,
                 ),
               ),

@@ -27,8 +27,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   void initState() {
     super.initState();
-    // Initialize API service
     ApiService().initialize();
+  }
+
+  // ✅ helper: kies iconkleur op basis van achtergrond
+  Color _getIconColor(Color bgColor) {
+    return bgColor.computeLuminance() < 0.5
+        ? AppColors.white
+        : AppColors.mediumBrown;
   }
 
   @override
@@ -46,7 +52,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               children: [
                 const SizedBox(height: 60),
 
-                // Logo and title
+                // Logo + title
                 Column(
                   children: [
                     Container(
@@ -56,10 +62,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         color: AppColors.mediumBrown,
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: const Icon(
-                        Icons.restaurant_menu,
+                      child: Icon(
+                        Icons.restaurant,
                         size: 40,
-                        color: AppColors.white,
+                        color: _getIconColor(AppColors.mediumBrown),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -83,19 +89,19 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
                 const SizedBox(height: 48),
 
-                // Login form
+                // Form
                 Form(
                   key: _formKey,
                   child: Column(
                     children: [
-                      // Email field
                       TextFormField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                         textInputAction: TextInputAction.next,
                         decoration: const InputDecoration(
                           labelText: 'E-mailadres',
-                          prefixIcon: Icon(Icons.email_outlined),
+                          prefixIcon: Icon(Icons.mail_outline,
+                              color: AppColors.mediumBrown),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -108,22 +114,21 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           return null;
                         },
                       ),
-
                       const SizedBox(height: 16),
-
-                      // Password field
                       TextFormField(
                         controller: _passwordController,
                         obscureText: _obscurePassword,
                         textInputAction: TextInputAction.done,
                         decoration: InputDecoration(
                           labelText: 'Wachtwoord',
-                          prefixIcon: const Icon(Icons.lock_outlined),
+                          prefixIcon: const Icon(Icons.lock,
+                              color: AppColors.mediumBrown),
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscurePassword
-                                  ? Icons.visibility
+                                  ? Icons.visibility_outlined
                                   : Icons.visibility_off,
+                              color: AppColors.mediumBrown,
                             ),
                             onPressed: () {
                               setState(() {
@@ -140,15 +145,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         },
                         onFieldSubmitted: (_) => _login(),
                       ),
-
                       const SizedBox(height: 8),
-
-                      // Forgot password
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
                           onPressed: () {
-                            // TODO: Implement forgot password
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text(
@@ -159,10 +160,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           child: const Text('Wachtwoord vergeten?'),
                         ),
                       ),
-
                       const SizedBox(height: 24),
-
-                      // Error message
                       if (_errorMessage != null) ...[
                         Container(
                           padding: const EdgeInsets.all(12),
@@ -176,7 +174,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.error_outline,
+                              const Icon(Icons.error,
                                   color: AppColors.error, size: 20),
                               const SizedBox(width: 8),
                               Expanded(
@@ -195,8 +193,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ),
                         const SizedBox(height: 16),
                       ],
-
-                      // Login button
                       SizedBox(
                         width: double.infinity,
                         height: AppConstants.buttonHeight,
@@ -215,10 +211,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               : const Text('Inloggen'),
                         ),
                       ),
-
                       const SizedBox(height: 24),
-
-                      // Divider
                       Row(
                         children: [
                           const Expanded(child: Divider()),
@@ -237,10 +230,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           const Expanded(child: Divider()),
                         ],
                       ),
-
                       const SizedBox(height: 24),
-
-                      // Register button
                       SizedBox(
                         width: double.infinity,
                         height: AppConstants.buttonHeight,
@@ -252,10 +242,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 32),
-
-                // Back to onboarding
                 Center(
                   child: TextButton(
                     onPressed: () => context.go(AppRoutes.onboarding),
@@ -284,7 +271,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         _passwordController.text,
       );
 
-      // Store tokens
+      if (!mounted) return;
+
+      ref.read(authStateProvider.notifier).state = true;
+
       await _storage.write(
         key: AppConstants.accessTokenKey,
         value: response['access_token'],
@@ -294,28 +284,28 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         value: response['refresh_token'],
       );
 
-      // Store user info
       final user = response['user'];
+      final role = user['role'] as String;
+
       await _storage.write(
         key: AppConstants.userRoleKey,
-        value: user['role'],
+        value: role,
       );
       await _storage.write(
         key: AppConstants.userIdKey,
         value: user['id'].toString(),
       );
 
-      // Navigate based on role
+      ref.read(userRoleProvider.notifier).state = role;
+
       if (!mounted) return;
 
-      final role = user['role'] as String;
       if (role == AppConstants.guestRole) {
         context.go(AppRoutes.guestHome);
       } else if (role == AppConstants.cateraarRole) {
         context.go(AppRoutes.cateraarDashboard);
       }
 
-      // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(AppConstants.loginSuccessMessage),
@@ -323,6 +313,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         ),
       );
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorMessage = e.toString().contains('DioException')
             ? 'Ongeldige inloggegevens. Controleer je e-mailadres en wachtwoord.'

@@ -578,7 +578,7 @@ class _RecipesPageState extends ConsumerState<RecipesPage>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.restaurant_menu,
+              Icons.restaurant,
               size: 64,
               color: AppColors.textSecondary,
             ),

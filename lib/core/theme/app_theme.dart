@@ -6,6 +6,10 @@ class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
+      fontFamily: null, // test: forceer standaard font
+      //fontFamily: GoogleFonts.inter().fontFamily,
+      //fontFamilyFallback: const ['MaterialIcons'], // ✅ fallback toegevoegd
+
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,
         brightness: Brightness.light,
@@ -210,7 +214,7 @@ class AppTheme {
         ),
       ),
 
-      // Card Theme (✅ gefixt)
+      // Card Theme
       cardTheme: const CardThemeData(
         color: AppColors.white,
         elevation: 2,
@@ -247,6 +251,10 @@ class AppTheme {
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
+      fontFamily: null, // test: forceer standaard font
+      //fontFamily: GoogleFonts.inter().fontFamily,
+      //fontFamilyFallback: const ['MaterialIcons'], // ✅ fallback toegevoegd
+
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.mediumBrown,
         brightness: Brightness.dark,

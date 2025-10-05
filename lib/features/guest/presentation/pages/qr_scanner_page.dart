@@ -33,7 +33,10 @@ class _QrScannerPageState extends ConsumerState<QrScannerPage> {
         foregroundColor: AppColors.white,
         actions: [
           IconButton(
-            icon: Icon(_flashOn ? Icons.flash_on : Icons.flash_off),
+            icon: Icon(
+              _flashOn ? Icons.flash_on : Icons.flash_off,
+              color: AppColors.white,
+            ),
             onPressed: _toggleFlash,
           ),
         ],
@@ -243,10 +246,6 @@ class _QrScannerPageState extends ConsumerState<QrScannerPage> {
 
   Map<String, dynamic>? _parseQRCode(String qrCode) {
     try {
-      // Expected format: https://menutri.nl/restaurant/{id}
-      // or menutri://restaurant/{id}
-      // or direct restaurant ID
-
       if (qrCode.startsWith('https://menutri.nl/restaurant/')) {
         final id = qrCode.split('/').last;
         return {'restaurant_id': int.parse(id)};
@@ -257,16 +256,12 @@ class _QrScannerPageState extends ConsumerState<QrScannerPage> {
         return {'restaurant_id': int.parse(id)};
       }
 
-      // Try parsing as direct ID
       final id = int.tryParse(qrCode);
       if (id != null) {
         return {'restaurant_id': id};
       }
 
-      // Check if it's a JSON format
       if (qrCode.startsWith('{') && qrCode.endsWith('}')) {
-        // Try parsing as JSON (for more complex QR codes)
-        // This would be implemented based on actual QR code format
         return {'restaurant_id': 1}; // Placeholder
       }
 
@@ -288,8 +283,6 @@ class _QrScannerPageState extends ConsumerState<QrScannerPage> {
   }
 
   void _pickFromGallery() {
-    // This would implement image picker functionality
-    // For now, show a message
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('QR code uit galerij selecteren komt binnenkort'),
@@ -397,7 +390,6 @@ class QrScannerOverlayShape extends ShapeBorder {
 
     canvas.drawPath(overlayPath, overlayPaint);
 
-    // Draw corner borders
     final borderLength = this.borderLength > cutOutWidth / 2
         ? cutOutWidth / 2
         : this.borderLength;

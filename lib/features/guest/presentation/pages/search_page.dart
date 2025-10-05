@@ -93,18 +93,14 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         lng: _currentPosition!.longitude,
         radius: 10.0,
         openNow: _openNowOnly ? true : null,
-        // Mapping van jouw UI-filters:
         priceRange: _selectedPriceRanges.isNotEmpty
             ? _selectedPriceRanges
                 .map((i) => _priceRangeLabels[i - 1])
                 .join(',')
             : null,
         cuisine: _selectedCuisines.isNotEmpty ? _selectedCuisines.first : null,
-        // Let op: in jouw model had je ook delivery/takeaway/wheelchair,
-        // die kun je hier later koppelen aan extra switches in de UI
       );
 
-      // Haal de lijst restaurants veilig uit de Map
       final list = (resp['restaurants'] ??
               resp['data'] ??
               resp['results'] ??
@@ -148,7 +144,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
             markerId: MarkerId('${restaurant['id']}'),
             position: LatLng(lat, lng),
             infoWindow: InfoWindow(
-              title: (restaurant['name'] ?? restaurant['naam'] ?? 'Restaurant')
+              title: (restaurant['name'] ?? restaurant['name'] ?? 'Restaurant')
                   .toString(),
               snippet:
                   '${(restaurant['cuisine_type'] ?? restaurant['cuisineType'] ?? '')} • ${_getPriceRange(restaurant['price_range'] is int ? restaurant['price_range'] as int : null)}',
@@ -179,7 +175,10 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         elevation: 0,
         actions: [
           IconButton(
-            icon: Icon(_showMap ? Icons.list : Icons.map),
+            icon: Icon(
+              _showMap ? Icons.list : Icons.map,
+              color: AppColors.mediumBrown,
+            ),
             onPressed: () {
               setState(() {
                 _showMap = !_showMap;
@@ -201,10 +200,11 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   controller: _searchController,
                   decoration: InputDecoration(
                     hintText: 'Zoek restaurants, gerechten...',
-                    prefixIcon: const Icon(Icons.search),
+                    prefixIcon: const Icon(Icons.search, color: AppColors.grey),
                     suffixIcon: _searchController.text.isNotEmpty
                         ? IconButton(
-                            icon: const Icon(Icons.clear),
+                            icon: const Icon(Icons.clear,
+                                color: AppColors.mediumBrown),
                             onPressed: () {
                               _searchController.clear();
                               _searchRestaurants();
@@ -296,7 +296,9 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       label: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16),
+          Icon(icon,
+              size: 16,
+              color: isSelected ? AppColors.mediumBrown : AppColors.grey),
           const SizedBox(width: 4),
           Text(label),
         ],
@@ -338,7 +340,6 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         itemCount: _restaurants.length,
         itemBuilder: (context, index) {
           final dynamic r = _restaurants[index];
-          // Zorg dat we een Map hebben voor de card
           final restaurant =
               (r is Map) ? r.cast<String, dynamic>() : <String, dynamic>{};
 
@@ -351,7 +352,6 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   Widget _buildRestaurantCard(Map<String, dynamic> restaurant) {
     final distance = _calculateDistance(restaurant);
 
-    // Foto ophalen (String of Map met url/image_url)
     String? primaryPhotoUrl;
     final photos = restaurant['photos'];
     if (photos is List && photos.isNotEmpty) {
@@ -366,7 +366,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     }
 
     final displayName =
-        (restaurant['name'] ?? restaurant['naam'] ?? 'Restaurant').toString();
+        (restaurant['name'] ?? restaurant['name'] ?? 'Restaurant').toString();
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -423,7 +423,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.favorite_border),
+                          icon: const Icon(Icons.favorite_border,
+                              color: AppColors.mediumBrown),
                           onPressed: () =>
                               _toggleFavorite((restaurant['id'] as int?) ?? -1),
                           constraints: const BoxConstraints(),
@@ -467,7 +468,6 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        // Rating
                         Row(
                           children: [
                             const Icon(Icons.star,
@@ -486,10 +486,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                             ),
                           ],
                         ),
-
                         const Spacer(),
-
-                        // Open/Closed status
                         Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 4),
@@ -547,9 +544,6 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       onMapCreated: (GoogleMapController controller) {
         _mapController = controller;
       },
-      onTap: (LatLng position) {
-        // optional
-      },
     );
   }
 
@@ -587,15 +581,12 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   ),
                 ],
               ),
-
               const SizedBox(height: 16),
-
               Expanded(
                 child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Cuisine types
                       Text(
                         'Keuken',
                         style:
@@ -628,10 +619,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                           );
                         }).toList(),
                       ),
-
                       const SizedBox(height: 24),
-
-                      // Price range
                       Text(
                         'Prijsklasse',
                         style:
@@ -668,16 +656,12 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   ),
                 ),
               ),
-
-              // Apply button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).pop();
-                    setState(() {
-                      // main state kan hier worden gesynchroniseerd indien nodig
-                    });
+                    setState(() {});
                     _searchRestaurants();
                   },
                   style: ElevatedButton.styleFrom(
@@ -710,7 +694,6 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   }
 
   bool _isOpen(Map<String, dynamic> restaurant) {
-    // Mock implementatie - vervang met echte openingstijden als die er zijn
     final now = DateTime.now();
     final hour = now.hour;
     return hour >= 9 && hour <= 22;
@@ -718,19 +701,16 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
   double? _calculateDistance(Map<String, dynamic> restaurant) {
     if (_currentPosition == null) return null;
-
     final lat = (restaurant['latitude'] as num?)?.toDouble();
     final lng = (restaurant['longitude'] as num?)?.toDouble();
-
     if (lat == null || lng == null) return null;
-
     return Geolocator.distanceBetween(
           _currentPosition!.latitude,
           _currentPosition!.longitude,
           lat,
           lng,
         ) /
-        1000; // km
+        1000;
   }
 
   Future<void> _toggleFavorite(int restaurantId) async {

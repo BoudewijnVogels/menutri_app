@@ -2,40 +2,61 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/theme/app_theme.dart';
 import 'core/routing/app_router.dart';
+import 'core/services/auth_service.dart';
+import 'core/providers/theme_provider.dart';
+import 'core/providers/locale_provider.dart';
 
 // Firebase
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'firebase_options.dart';
+import 'firebase_options.dart'; 
 
 Future<void> main() async {
-  // Zorg dat bindingen/init klaar staan
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Firebase initialiseren met gegenereerde opties
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Crashlytics: vang Flutter-framework errors
+  final authService = AuthService();
+  final token = await authService.loadToken();
+  final storage = const FlutterSecureStorage();
+  final role = await storage.read(key: 'userRole');
+
+  // ✅ Bepaal startRoute
+  String initialRoute;
+  if (token == null) {
+    initialRoute = AppRoutes.onboarding;
+  } else if (role == 'guest') {
+    initialRoute = AppRoutes.guestHome;
+  } else if (role == 'cateraar') {
+    initialRoute = AppRoutes.cateraarDashboard;
+  } else {
+    initialRoute = AppRoutes.onboarding; // fallback
+  }
+
   FlutterError.onError = (FlutterErrorDetails details) {
-    // Log als "fatal" zodat het zichtbaar is in Crashlytics
     FirebaseCrashlytics.instance.recordFlutterFatalError(details);
   };
 
-  // (Optioneel) Alleen in release verzamelen. In debug kun je tijdelijk true zetten om te testen.
   await FirebaseCrashlytics.instance
       .setCrashlyticsCollectionEnabled(!kDebugMode);
 
-  // Vang alle overige uncaught errors
   runZonedGuarded(
     () {
       runApp(
-        const ProviderScope(
-          child: MenutriApp(),
+        ProviderScope(
+          overrides: [
+            authStateProvider.overrideWith((ref) => token != null),
+            userRoleProvider.overrideWith((ref) => role),
+            initialRouteProvider.overrideWith((ref) => initialRoute),
+          ],
+          child: const MenutriApp(),
         ),
       );
     },
@@ -51,23 +72,26 @@ class MenutriApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
+    final themeMode = ref.watch(themeNotifierProvider);
+    final locale = ref.watch(localeNotifierProvider); // ✅ dynamisch
 
     return MaterialApp.router(
       title: 'Menutri',
       debugShowCheckedModeBanner: false,
-
-      // Theme configuration
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
-
-      // Router configuration
+      themeMode: themeMode,
       routerConfig: router,
-
-      // Localization (Dutch)
-      locale: const Locale('nl', 'NL'),
-
-      // Builder for additional configuration
+      locale: locale, // ✅ komt nu uit provider
+      supportedLocales: const [
+        Locale('nl', 'NL'),
+        Locale('en', 'US'),
+      ],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       builder: (context, child) {
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(

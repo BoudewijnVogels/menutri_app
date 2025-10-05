@@ -641,8 +641,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.restaurant_menu,
-                size: 64, color: AppColors.textSecondary),
+            Icon(Icons.restaurant, size: 64, color: AppColors.textSecondary),
             const SizedBox(height: 16),
             Text(
               'Geen menu beschikbaar',

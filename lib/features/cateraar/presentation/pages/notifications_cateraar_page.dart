@@ -49,7 +49,7 @@ class _CateraarNotificationsPageState
     'system': Icons.settings,
     'promotion': Icons.local_offer,
     'analytics': Icons.analytics,
-    'menu': Icons.restaurant_menu,
+    'menu': Icons.restaurant,
     'restaurant': Icons.store,
     'payment': Icons.payment,
     'security': Icons.security,
@@ -95,11 +95,9 @@ class _CateraarNotificationsPageState
     try {
       final notificationsResponse = await _apiService.getNotifications();
       final settingsResponse = await _apiService.getNotificationPreferences();
-
-      final notifications = List<Map<String, dynamic>>.from(
-          notificationsResponse['notifications'] ?? []);
-      final settings =
-          Map<String, bool>.from(settingsResponse['settings'] ?? {});
+      final notifications =
+          List<Map<String, dynamic>>.from(notificationsResponse);
+      final settings = Map<String, bool>.from(settingsResponse);
 
       setState(() {
         _notifications = notifications;

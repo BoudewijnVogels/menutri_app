@@ -11,14 +11,16 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-      # Firebase core & crash reporting
   firebase_core: ^3.5.0
   firebase_crashlytics: ^4.1.0
   firebase_analytics: ^11.3.0
+  material_symbols_icons: ^4.2719.0
+  drag_and_drop_lists: ^0.4.1
+  flutter_localizations:
+    sdk: flutter
 
   # Sentry error & performance monitoring
   sentry_flutter: ^8.7.0
-
 
   # UI & Navigation
   cupertino_icons: ^1.0.8
@@ -26,10 +28,10 @@ dependencies:
   google_fonts: ^6.2.1
   flutter_svg: ^2.0.10+1
 
-  # State Management (alleen deze nodig)
+  # State Management
   flutter_riverpod: ^2.5.1
 
-  # HTTP & API (je kunt beide houden als ApiService soms http en soms dio gebruikt)
+  # HTTP & API
   http: ^1.2.2
   dio: ^5.7.0
 
@@ -45,7 +47,7 @@ dependencies:
   geolocator: ^14.0.2
   google_maps_flutter: ^2.9.0
 
-  # Sharing & External (share_plus v11 gebruikt de nieuwe Share API)
+  # Sharing & External
   share_plus: ^11.1.0
   url_launcher: ^6.3.0
 

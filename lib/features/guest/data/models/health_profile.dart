@@ -8,7 +8,7 @@ class HealthProfile {
   final String? activityLevel;
   final List<String>? healthGoals;
   final List<String>? dietaryRestrictions;
-  final List<String>? foodAllergies;
+  final List<String>? foodallergens;
   final List<String>? dislikedFoods;
   final List<String>? preferredCuisines;
   final double? targetCalories;
@@ -41,7 +41,7 @@ class HealthProfile {
     this.activityLevel,
     this.healthGoals,
     this.dietaryRestrictions,
-    this.foodAllergies,
+    this.foodallergens,
     this.dislikedFoods,
     this.preferredCuisines,
     this.targetCalories,
@@ -76,7 +76,7 @@ class HealthProfile {
       activityLevel: json['activity_level'],
       healthGoals: json['health_goals']?.cast<String>(),
       dietaryRestrictions: json['dietary_restrictions']?.cast<String>(),
-      foodAllergies: json['food_allergies']?.cast<String>(),
+      foodallergens: json['food_allergens']?.cast<String>(),
       dislikedFoods: json['disliked_foods']?.cast<String>(),
       preferredCuisines: json['preferred_cuisines']?.cast<String>(),
       targetCalories: json['target_calories']?.toDouble(),
@@ -117,7 +117,7 @@ class HealthProfile {
       if (healthGoals != null) 'health_goals': healthGoals,
       if (dietaryRestrictions != null)
         'dietary_restrictions': dietaryRestrictions,
-      if (foodAllergies != null) 'food_allergies': foodAllergies,
+      if (foodallergens != null) 'food_allergens': foodallergens,
       if (dislikedFoods != null) 'disliked_foods': dislikedFoods,
       if (preferredCuisines != null) 'preferred_cuisines': preferredCuisines,
       if (targetCalories != null) 'target_calories': targetCalories,
@@ -155,7 +155,7 @@ class HealthProfile {
     String? activityLevel,
     List<String>? healthGoals,
     List<String>? dietaryRestrictions,
-    List<String>? foodAllergies,
+    List<String>? foodallergens,
     List<String>? dislikedFoods,
     List<String>? preferredCuisines,
     double? targetCalories,
@@ -188,7 +188,7 @@ class HealthProfile {
       activityLevel: activityLevel ?? this.activityLevel,
       healthGoals: healthGoals ?? this.healthGoals,
       dietaryRestrictions: dietaryRestrictions ?? this.dietaryRestrictions,
-      foodAllergies: foodAllergies ?? this.foodAllergies,
+      foodallergens: foodallergens ?? this.foodallergens,
       dislikedFoods: dislikedFoods ?? this.dislikedFoods,
       preferredCuisines: preferredCuisines ?? this.preferredCuisines,
       targetCalories: targetCalories ?? this.targetCalories,

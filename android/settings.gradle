@@ -1,34 +1,49 @@
-pluginManagement {
-    def props = new Properties()
-    def lp = new File(rootDir, "local.properties")
-    if (lp.exists()) {
-        lp.withInputStream { props.load(it) }
-    }
-    def flutterSdkPath = props.getProperty("flutter.sdk")
+// settings.gradle — géén app-plugins toepassen hier
 
+pluginManagement {
+    // Lees Flutter SDK-pad uit local.properties
+    def props = new Properties()
+    def lp = file("local.properties")
+    assert lp.exists() : "local.properties niet gevonden in android/"
+    lp.withInputStream { props.load(it) }
+    def flutterSdkPath = props.getProperty("flutter.sdk")
+    assert flutterSdkPath && flutterSdkPath.trim() : "Flutter SDK pad niet gevonden. Zet 'flutter.sdk=<pad>' in android/local.properties"
+
+    // Maak Flutter Gradle plugin zichtbaar
     includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
 
     repositories {
         google()
         mavenCentral()
         gradlePluginPortal()
-        maven { url = uri("https://storage.googleapis.com/download.flutter.io") }
     }
 }
 
+// Declaratieve plugin-versies (NIET toepassen op root)
 plugins {
     id "dev.flutter.flutter-plugin-loader" version "1.0.0"
     id "com.android.application" version "8.6.1" apply false
-    id "org.jetbrains.kotlin.android" version "1.9.23" apply false
+    // START: FlutterFire Configuration
+    id "com.google.gms.google-services" version "4.4.2" apply false
+    id "com.google.firebase.crashlytics" version "3.0.2" apply false
+    // END: FlutterFire Configuration
+    // ⇣ Upgraden om de warning weg te nemen
+    id "org.jetbrains.kotlin.android" version "2.1.0" apply false
 }
 
 dependencyResolutionManagement {
+    // Toestaan dat plugin maven-repos gebruikt, maar settings heeft voorrang
     repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+
     repositories {
         google()
         mavenCentral()
-        maven { url = uri("https://storage.googleapis.com/download.flutter.io") }
+
+        // Flutter maven repos zodat de Flutter plugin ze niet zelf hoeft toe te voegen
+        maven { url "$flutterSdkPath/bin/cache/artifacts/engine/android" }
+        maven { url "https://storage.googleapis.com/download.flutter.io" }
     }
 }
 
+rootProject.name = "menutri_app"
 include(":app")

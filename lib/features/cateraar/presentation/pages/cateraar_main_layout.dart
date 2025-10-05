@@ -108,14 +108,15 @@ class _CateraarMainLayoutState extends ConsumerState<CateraarMainLayout> {
     final item = _navigationItems[index];
     final isSelected = _selectedIndex == index;
 
+    final iconColor = isSelected ? AppColors.white : AppColors.textSecondary;
+    final labelColor = isSelected ? AppColors.white : AppColors.textSecondary;
+
     return GestureDetector(
       onTap: () => _onItemTapped(index),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.withAlphaFraction(AppColors.primary, 0.1)
-              : Colors.transparent,
+          color: isSelected ? AppColors.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -123,16 +124,14 @@ class _CateraarMainLayoutState extends ConsumerState<CateraarMainLayout> {
           children: [
             Icon(
               isSelected ? item.activeIcon : item.icon,
-              color: isSelected ? AppColors.primary : AppColors.textSecondary,
+              color: iconColor,
               size: 24,
             ),
             const SizedBox(height: 4),
             Text(
               item.label,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: isSelected
-                        ? AppColors.primary
-                        : AppColors.textSecondary,
+                    color: labelColor,
                     fontWeight:
                         isSelected ? FontWeight.w600 : FontWeight.normal,
                   ),
@@ -161,10 +160,10 @@ class _CateraarMainLayoutState extends ConsumerState<CateraarMainLayout> {
         );
       case 2: // Menus
         return FloatingActionButton.extended(
-          onPressed: () => _showMenuActions(),
+          onPressed: () => context.push('/cateraar/menus/add'),
           backgroundColor: AppColors.primary,
           icon: const Icon(Icons.add),
-          label: const Text('Menu Item'),
+          label: const Text('Menu Toevoegen'),
         );
       case 3: // Analytics
         return FloatingActionButton(
@@ -195,14 +194,6 @@ class _CateraarMainLayoutState extends ConsumerState<CateraarMainLayout> {
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => _QuickActionsBottomSheet(),
-    );
-  }
-
-  void _showMenuActions() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _MenuActionsBottomSheet(),
     );
   }
 
@@ -367,87 +358,6 @@ class _QuickActionsBottomSheet extends StatelessWidget {
   }
 }
 
-class _MenuActionsBottomSheet extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Handle bar
-          Container(
-            width: 40,
-            height: 4,
-            margin: const EdgeInsets.only(top: 12),
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Menu Acties',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const SizedBox(height: 16),
-                ListTile(
-                  leading:
-                      Icon(Icons.restaurant_menu, color: AppColors.primary),
-                  title: const Text('Menu Item Toevoegen'),
-                  subtitle: const Text('Nieuw gerecht aan menu toevoegen'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    context.push('/cateraar/menu-items/add');
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.category, color: AppColors.primary),
-                  title: const Text('Categorie Toevoegen'),
-                  subtitle: const Text('Nieuwe menu categorie maken'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    context.push('/cateraar/categories/add');
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.receipt_long, color: AppColors.primary),
-                  title: const Text('Recept Toevoegen'),
-                  subtitle: const Text('Nieuw recept met ingrediënten'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    context.push('/cateraar/recipes/add');
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.qr_code_2, color: AppColors.primary),
-                  title: const Text('QR Code Genereren'),
-                  subtitle: const Text('Menu QR code maken'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    context.push('/cateraar/qr-generator');
-                  },
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _ExportAnalyticsDialog extends StatefulWidget {
   @override
   State<_ExportAnalyticsDialog> createState() => _ExportAnalyticsDialogState();
@@ -550,7 +460,7 @@ class _ExportAnalyticsDialogState extends State<_ExportAnalyticsDialog> {
     setState(() => _isExporting = true);
 
     try {
-      // Simulate export process
+      // Simuleer exportproces
       await Future.delayed(const Duration(seconds: 2));
 
       if (mounted) {

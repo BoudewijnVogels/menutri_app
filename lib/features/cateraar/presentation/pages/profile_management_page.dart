@@ -132,12 +132,9 @@ class _CateraarProfileManagementPageState
     try {
       final profileResponse = await _apiService.getCurrentUser();
       final businessResponse = await _apiService.getBusinessProfile();
-      final teamResponse = await _apiService.getTeamMembers();
-
       final profile = profileResponse['profile'] ?? {};
       final business = businessResponse['business'] ?? {};
-      final team =
-          List<Map<String, dynamic>>.from(teamResponse['members'] ?? []);
+      final team = await _apiService.getTeamMembers();
 
       setState(() {
         _profileData = profile;
@@ -181,12 +178,34 @@ class _CateraarProfileManagementPageState
     _jobTitleController.text = _profileData['job_title'] ?? '';
     _bioController.text = _profileData['bio'] ?? '';
 
-    // Settings
-    _selectedCuisineTypes =
-        List<String>.from(_businessData['cuisine_types'] ?? []);
-    _selectedBusinessType = _businessData['business_type'] ?? 'Restaurant';
-    _selectedLanguage = _profileData['language'] ?? 'nl';
-    _selectedTimezone = _profileData['timezone'] ?? 'Europe/Amsterdam';
+    // Settings (defensief)
+    final rawCuisines = _businessData['cuisine_types'];
+    if (rawCuisines is List) {
+      _selectedCuisineTypes = List<String>.from(rawCuisines);
+    } else {
+      _selectedCuisineTypes = [];
+    }
+
+    _selectedBusinessType =
+        _businessTypes.contains(_businessData['business_type'])
+            ? _businessData['business_type']
+            : 'Restaurant';
+
+    _selectedLanguage =
+        ['nl', 'en', 'de', 'fr', 'es'].contains(_profileData['language'])
+            ? _profileData['language']
+            : 'nl';
+
+    _selectedTimezone = [
+      'Europe/Amsterdam',
+      'Europe/London',
+      'America/New_York',
+      'America/Los_Angeles',
+      'Asia/Tokyo'
+    ].contains(_profileData['timezone'])
+        ? _profileData['timezone']
+        : 'Europe/Amsterdam';
+
     _emailNotifications = _profileData['email_notifications'] ?? true;
     _smsNotifications = _profileData['sms_notifications'] ?? false;
     _marketingEmails = _profileData['marketing_emails'] ?? false;
@@ -397,7 +416,10 @@ class _CateraarProfileManagementPageState
           const SizedBox(height: 16),
 
           DropdownButtonFormField<String>(
-            initialValue: _selectedLanguage,
+            initialValue:
+                ['nl', 'en', 'de', 'fr', 'es'].contains(_selectedLanguage)
+                    ? _selectedLanguage
+                    : 'nl',
             decoration: const InputDecoration(
               labelText: 'Taal',
               border: OutlineInputBorder(),
@@ -412,7 +434,7 @@ class _CateraarProfileManagementPageState
             ],
             onChanged: (value) {
               setState(() {
-                _selectedLanguage = value!;
+                _selectedLanguage = value ?? 'nl';
               });
             },
           ),
@@ -420,7 +442,15 @@ class _CateraarProfileManagementPageState
           const SizedBox(height: 16),
 
           DropdownButtonFormField<String>(
-            initialValue: _selectedTimezone,
+            initialValue: [
+              'Europe/Amsterdam',
+              'Europe/London',
+              'America/New_York',
+              'America/Los_Angeles',
+              'Asia/Tokyo'
+            ].contains(_selectedTimezone)
+                ? _selectedTimezone
+                : 'Europe/Amsterdam',
             decoration: const InputDecoration(
               labelText: 'Tijdzone',
               border: OutlineInputBorder(),
@@ -440,7 +470,7 @@ class _CateraarProfileManagementPageState
             ],
             onChanged: (value) {
               setState(() {
-                _selectedTimezone = value!;
+                _selectedTimezone = value ?? 'Europe/Amsterdam';
               });
             },
           ),
@@ -524,7 +554,9 @@ class _CateraarProfileManagementPageState
           const SizedBox(height: 16),
 
           DropdownButtonFormField<String>(
-            initialValue: _selectedBusinessType,
+            initialValue: _businessTypes.contains(_selectedBusinessType)
+                ? _selectedBusinessType
+                : null,
             decoration: const InputDecoration(
               labelText: 'Bedrijfstype',
               border: OutlineInputBorder(),
@@ -535,7 +567,7 @@ class _CateraarProfileManagementPageState
             }).toList(),
             onChanged: (value) {
               setState(() {
-                _selectedBusinessType = value!;
+                _selectedBusinessType = value ?? 'Restaurant';
               });
             },
           ),
@@ -846,7 +878,7 @@ class _CateraarProfileManagementPageState
               _buildStatCard(
                 'Profiel Weergaven',
                 (_statistics['profile_views'] ?? 0).toString(),
-                Icons.visibility,
+                Icons.visibility_outlined,
                 Colors.blue,
               ),
               _buildStatCard(
@@ -858,7 +890,7 @@ class _CateraarProfileManagementPageState
               _buildStatCard(
                 'Menu Items',
                 (_statistics['menu_items_count'] ?? 0).toString(),
-                Icons.restaurant_menu,
+                Icons.restaurant,
                 Colors.orange,
               ),
               _buildStatCard(
@@ -1645,12 +1677,21 @@ class _CateraarProfileManagementPageState
   }
 
   String _getInitials(String name) {
-    if (name.isEmpty) return '?';
-    final parts = name.split(' ');
+    if (name.trim().isEmpty) return '?';
+
+    // Verwijder overbodige spaties
+    final parts = name.trim().split(RegExp(r'\s+'));
+
     if (parts.length >= 2) {
-      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+      final first = parts[0].isNotEmpty ? parts[0][0] : '';
+      final second = parts[1].isNotEmpty ? parts[1][0] : '';
+      final initials = (first + second).toUpperCase();
+      return initials.isEmpty ? '?' : initials;
     }
-    return name[0].toUpperCase();
+
+    // fallback bij één woord
+    final first = parts[0].isNotEmpty ? parts[0][0] : '';
+    return first.isEmpty ? '?' : first.toUpperCase();
   }
 
   String _formatDate(String? dateTime) {

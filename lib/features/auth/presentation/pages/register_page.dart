@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/services/api_service.dart';
@@ -22,12 +23,20 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   final _achternaamController = TextEditingController();
   final _restaurantNaamController = TextEditingController();
   final _telefoonController = TextEditingController();
+  final _storage = const FlutterSecureStorage();
 
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   String _selectedRole = AppConstants.guestRole;
   String? _errorMessage;
+
+  // ✅ helper voor iconkleur
+  Color _getIconColor(Color bgColor) {
+    return bgColor.computeLuminance() < 0.5
+        ? AppColors.white
+        : AppColors.mediumBrown;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +49,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         child: SafeArea(
           child: Column(
             children: [
-              // Scrollbare inhoud met alle invoervelden
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(24.0),
@@ -61,10 +69,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                 color: AppColors.mediumBrown,
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.person_add,
                                 size: 40,
-                                color: AppColors.white,
+                                color: _getIconColor(AppColors.mediumBrown),
                               ),
                             ),
                             const SizedBox(height: 24),
@@ -156,7 +164,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           textInputAction: TextInputAction.next,
                           decoration: const InputDecoration(
                             labelText: 'E-mailadres *',
-                            prefixIcon: Icon(Icons.email_outlined),
+                            prefixIcon: Icon(Icons.mail_outline,
+                                color: AppColors.mediumBrown),
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -179,11 +188,15 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           textInputAction: TextInputAction.next,
                           decoration: InputDecoration(
                             labelText: 'Wachtwoord *',
-                            prefixIcon: const Icon(Icons.lock_outlined),
+                            prefixIcon: const Icon(Icons.lock,
+                                color: AppColors.mediumBrown),
                             suffixIcon: IconButton(
-                              icon: Icon(_obscurePassword
-                                  ? Icons.visibility
-                                  : Icons.visibility_off),
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off,
+                                color: AppColors.mediumBrown,
+                              ),
                               onPressed: () {
                                 setState(() {
                                   _obscurePassword = !_obscurePassword;
@@ -211,11 +224,15 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           textInputAction: TextInputAction.next,
                           decoration: InputDecoration(
                             labelText: 'Bevestig wachtwoord *',
-                            prefixIcon: const Icon(Icons.lock_outlined),
+                            prefixIcon: const Icon(Icons.lock_outlined,
+                                color: AppColors.mediumBrown),
                             suffixIcon: IconButton(
-                              icon: Icon(_obscureConfirmPassword
-                                  ? Icons.visibility
-                                  : Icons.visibility_off),
+                              icon: Icon(
+                                _obscureConfirmPassword
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off,
+                                color: AppColors.mediumBrown,
+                              ),
                               onPressed: () {
                                 setState(() {
                                   _obscureConfirmPassword =
@@ -249,7 +266,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                       _selectedRole == AppConstants.cateraarRole
                                           ? 'Voornaam *'
                                           : 'Voornaam',
-                                  prefixIcon: const Icon(Icons.person_outlined),
+                                  prefixIcon: const Icon(Icons.person,
+                                      color: AppColors.mediumBrown),
                                 ),
                                 validator: _selectedRole ==
                                         AppConstants.cateraarRole
@@ -272,7 +290,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                       _selectedRole == AppConstants.cateraarRole
                                           ? 'Achternaam *'
                                           : 'Achternaam',
-                                  prefixIcon: const Icon(Icons.person_outlined),
+                                  prefixIcon: const Icon(Icons.person,
+                                      color: AppColors.mediumBrown),
                                 ),
                                 validator: _selectedRole ==
                                         AppConstants.cateraarRole
@@ -294,9 +313,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           TextFormField(
                             controller: _restaurantNaamController,
                             textInputAction: TextInputAction.next,
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               labelText: 'Restaurant naam *',
-                              prefixIcon: Icon(Icons.restaurant),
+                              prefixIcon: Icon(Icons.restaurant,
+                                  color: AppColors.mediumBrown),
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -310,9 +330,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                             controller: _telefoonController,
                             keyboardType: TextInputType.phone,
                             textInputAction: TextInputAction.done,
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               labelText: 'Telefoonnummer *',
-                              prefixIcon: Icon(Icons.phone_outlined),
+                              prefixIcon: Icon(Icons.phone,
+                                  color: AppColors.mediumBrown),
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -340,7 +361,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                             ),
                             child: Row(
                               children: [
-                                const Icon(Icons.error_outline,
+                                const Icon(Icons.error,
                                     color: AppColors.error, size: 20),
                                 const SizedBox(width: 8),
                                 Expanded(
@@ -420,25 +441,58 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     });
 
     try {
-      await ApiService().register(
+      final response = await ApiService().register(
         email: _emailController.text.trim(),
         password: _passwordController.text,
         role: _selectedRole,
-        voornaam: _voornaamController.text.trim().isNotEmpty
+        firstName: _voornaamController.text.trim().isNotEmpty
             ? _voornaamController.text.trim()
             : null,
-        achternaam: _achternaamController.text.trim().isNotEmpty
+        lastName: _achternaamController.text.trim().isNotEmpty
             ? _achternaamController.text.trim()
             : null,
-        restaurantNaam: _selectedRole == AppConstants.cateraarRole
+        restaurantName: _selectedRole == AppConstants.cateraarRole
             ? _restaurantNaamController.text.trim()
             : null,
-        telefoon: _selectedRole == AppConstants.cateraarRole
+        phone: _selectedRole == AppConstants.cateraarRole
             ? _telefoonController.text.trim()
             : null,
       );
 
       if (!mounted) return;
+
+      ref.read(authStateProvider.notifier).state = true;
+
+      await _storage.write(
+        key: AppConstants.accessTokenKey,
+        value: response['access_token'],
+      );
+      await _storage.write(
+        key: AppConstants.refreshTokenKey,
+        value: response['refresh_token'],
+      );
+
+      final user = response['user'];
+      final role = user['role'] as String;
+
+      await _storage.write(
+        key: AppConstants.userRoleKey,
+        value: role,
+      );
+      await _storage.write(
+        key: AppConstants.userIdKey,
+        value: user['id'].toString(),
+      );
+
+      ref.read(userRoleProvider.notifier).state = role;
+
+      if (!mounted) return;
+
+      if (role == AppConstants.guestRole) {
+        context.go(AppRoutes.guestHome);
+      } else if (role == AppConstants.cateraarRole) {
+        context.go(AppRoutes.cateraarDashboard);
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -446,9 +500,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           backgroundColor: AppColors.success,
         ),
       );
-
-      context.go(AppRoutes.login);
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorMessage = e.toString().contains('DioException')
             ? 'Registratie mislukt. Controleer je gegevens en probeer opnieuw.'

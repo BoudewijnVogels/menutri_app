@@ -11,7 +11,6 @@ class ApiService {
   static const _storage = FlutterSecureStorage();
 
   ApiService._internal() {
-    // Dio direct één keer aanmaken
     _dio = Dio(BaseOptions(
       baseUrl: AppConstants.baseUrl,
       connectTimeout: AppConstants.connectTimeout,
@@ -22,14 +21,11 @@ class ApiService {
       },
     ));
 
-    // Interceptors slechts één keer toevoegen
     _dio.interceptors.add(_AuthInterceptor());
     _dio.interceptors.add(_LoggingInterceptor());
     _dio.interceptors.add(_ErrorInterceptor());
   }
 
-  // initialize kan nu optioneel nog extra config doen,
-  // maar probeert _dio niet meer opnieuw te overschrijven
   void initialize({String? baseUrl}) {
     if (baseUrl != null && baseUrl != _dio.options.baseUrl) {
       _dio.options.baseUrl = baseUrl;
@@ -39,7 +35,7 @@ class ApiService {
   Dio get client => _dio;
 
   // ---------------------------------------------------------------------------
-  // AUTH (src/routes/auth.py)
+  // AUTH
   // ---------------------------------------------------------------------------
 
   Future<Map<String, dynamic>> login(String email, String password) async {
@@ -54,21 +50,31 @@ class ApiService {
     required String email,
     required String password,
     required String role,
-    String? voornaam,
-    String? achternaam,
-    String? restaurantNaam,
-    String? telefoon,
+    String? firstName,
+    String? lastName,
+    String? restaurantName,
+    String? phone,
   }) async {
     final response = await _dio.post('/auth/register', data: {
       'email': email,
       'password': password,
       'role': role,
-      if (voornaam != null) 'voornaam': voornaam,
-      if (achternaam != null) 'achternaam': achternaam,
-      if (restaurantNaam != null) 'restaurant_naam': restaurantNaam,
-      if (telefoon != null) 'telefoon': telefoon,
+      if (firstName != null) 'first_name': firstName,
+      if (lastName != null) 'last_name': lastName,
+      if (restaurantName != null) 'restaurant_name': restaurantName,
+      if (phone != null) 'phone': phone,
     });
-    return response.data;
+
+    final data = response.data;
+
+    return {
+      'access_token': data['access_token'] ?? '',
+      'refresh_token': data['refresh_token'] ?? '',
+      'user': {
+        'id': data['user']?['id'] ?? data['id'] ?? '',
+        'role': data['user']?['role'] ?? data['role'] ?? role,
+      }
+    };
   }
 
   Future<Map<String, dynamic>> getCurrentUser() async {
@@ -89,7 +95,6 @@ class ApiService {
     await _storage.deleteAll();
   }
 
-  // Auth extra (email & password flows, 2FA)
   Future<Map<String, dynamic>> forgotPassword(String email) async {
     final response = await _dio.post('/auth/password/forgot', data: {
       'email': email,
@@ -153,7 +158,7 @@ class ApiService {
   }
 
   // ---------------------------------------------------------------------------
-  // USERS (src/routes/users.py)
+  // USERS
   // ---------------------------------------------------------------------------
 
   Future<void> deleteAccount() async {
@@ -174,7 +179,6 @@ class ApiService {
     return response.data;
   }
 
-  // Admin / management
   Future<Map<String, dynamic>> listUsers({
     int page = 1,
     int perPage = 20,
@@ -234,30 +238,28 @@ class ApiService {
     return response.data;
   }
 
-  // Uploads gerelateerd aan user
   Future<Map<String, dynamic>> uploadProfileImage(String filePath) async {
     final fileName = filePath.split('/').last;
     final formData = FormData.fromMap({
       'image': await MultipartFile.fromFile(filePath, filename: fileName),
     });
 
-    final response = await _dio.post('/api/v1/profile/image', data: formData);
-    // Backend geeft: { "image_url": "https://.../uploads/..." }
+    final response = await _dio.post('/profile/image', data: formData);
     return response.data as Map<String, dynamic>;
   }
 
   // ---------------------------------------------------------------------------
-  // BUSINESS PROFILES (src/routes/business_profiles.py)
+  // BUSINESS PROFILES
   // ---------------------------------------------------------------------------
 
   Future<Map<String, dynamic>> getBusinessProfile() async {
-    final response = await _dio.get('/api/v1/business');
+    final response = await _dio.get('/business');
     return response.data;
   }
 
   Future<Map<String, dynamic>> updateBusinessProfile(
       Map<String, dynamic> body) async {
-    final response = await _dio.patch('/api/v1/business', data: body);
+    final response = await _dio.patch('/business', data: body);
     return response.data;
   }
 
@@ -267,26 +269,25 @@ class ApiService {
       'logo': await MultipartFile.fromFile(filePath, filename: fileName),
     });
 
-    final response = await _dio.post('/api/v1/business/logo', data: formData);
-    // Backend geeft: { "logo_url": "https://.../uploads/..." }
+    final response = await _dio.post('/business/logo', data: formData);
     return response.data as Map<String, dynamic>;
   }
 
   // ---------------------------------------------------------------------------
-  // RESTAURANTS (src/routes/restaurants.py)
+  // RESTAURANTS
   // ---------------------------------------------------------------------------
 
   Future<Map<String, dynamic>> getRestaurants({
     int page = 1,
     int perPage = 20,
     String? search,
-    String? stad,
+    String? city,
   }) async {
     final response = await _dio.get('/restaurants/', queryParameters: {
       'page': page,
       'per_page': perPage,
       if (search != null) 'search': search,
-      if (stad != null) 'stad': stad,
+      if (city != null) 'city': city,
     });
     return response.data;
   }
@@ -339,7 +340,6 @@ class ApiService {
     }
   }
 
-  // Optioneel: globale promotions (als backend /restaurants/promotions aanbiedt)
   Future<Map<String, dynamic>> getPromotions({
     int page = 1,
     int perPage = 20,
@@ -354,7 +354,6 @@ class ApiService {
     return response.data;
   }
 
-  // CATERAAR: eigen restaurants
   Future<Map<String, dynamic>> getMyRestaurants() async {
     final response = await _dio.get('/restaurants/my');
     return response.data;
@@ -377,18 +376,18 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> getNearbyRestaurants({
-    required String stad,
+    required String city,
     int limit = 10,
   }) async {
     final response = await _dio.get('/restaurants/nearby', queryParameters: {
-      'stad': stad,
+      'city': city,
       'limit': limit,
     });
     return response.data;
   }
 
   // ---------------------------------------------------------------------------
-  // MENUS (src/routes/menus.py)
+  // MENUS
   // ---------------------------------------------------------------------------
 
   Future<Map<String, dynamic>> getMenus({
@@ -414,8 +413,16 @@ class ApiService {
     return response.data;
   }
 
-  Future<Map<String, dynamic>> createMenu(Map<String, dynamic> menuData) async {
-    final response = await _dio.post('/menus/', data: menuData);
+  Future<Map<String, dynamic>> createMenu({
+    required int restaurantId,
+    required String name,
+    String status = "concept",
+  }) async {
+    final response = await _dio.post('/menus/', data: {
+      "restaurant_id": restaurantId,
+      "name": name,
+      "status": status,
+    });
     return response.data;
   }
 
@@ -431,7 +438,6 @@ class ApiService {
 
   Future<Map<String, dynamic>> getMenuQR(int id) async {
     final response = await _dio.get('/menus/$id/qr');
-    // Zorg dat je daadwerkelijk iets retourneert:
     return Map<String, dynamic>.from(response.data);
   }
 
@@ -442,7 +448,7 @@ class ApiService {
   }
 
   // ---------------------------------------------------------------------------
-  // MENU ITEMS (src/routes/menu_items.py)
+  // MENU ITEMS
   // ---------------------------------------------------------------------------
 
   Future<Map<String, dynamic>> getMenuItem(int id) async {
@@ -457,7 +463,7 @@ class ApiService {
     int? restaurantId,
     String? search,
   }) async {
-    final response = await _dio.get('/menu-items', queryParameters: {
+    final response = await _dio.get('/menu-items/', queryParameters: {
       'page': page,
       'per_page': perPage,
       if (menuId != null) 'menu_id': menuId,
@@ -469,7 +475,7 @@ class ApiService {
 
   Future<Map<String, dynamic>> createMenuItem(
       Map<String, dynamic> menuItemData) async {
-    final response = await _dio.post('/menu-items', data: menuItemData);
+    final response = await _dio.post('/menu-items/', data: menuItemData);
     return response.data;
   }
 
@@ -484,7 +490,7 @@ class ApiService {
   }
 
   // ---------------------------------------------------------------------------
-  // CATEGORIES (src/routes/categories.py)
+  // CATEGORIES
   // ---------------------------------------------------------------------------
 
   Future<Map<String, dynamic>> getCategories({int? menuId}) async {
@@ -516,7 +522,7 @@ class ApiService {
   }
 
   // ---------------------------------------------------------------------------
-  // INGREDIENTS (src/routes/ingredients.py)
+  // INGREDIENTS
   // ---------------------------------------------------------------------------
 
   Future<Map<String, dynamic>> getIngredients({
@@ -610,7 +616,6 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> lookupIngredientByBarcode(String barcode) async {
-    // GET /ingredients/lookup?barcode=...
     final response = await _dio.get(
       '/ingredients/lookup',
       queryParameters: {'barcode': barcode},
@@ -619,27 +624,23 @@ class ApiService {
   }
 
   Future<void> duplicateIngredient(int id) async {
-    // POST /ingredients/{id}/duplicate
     await _dio.post('/ingredients/$id/duplicate', data: {});
   }
 
   Future<void> verifyIngredient(int id) async {
-    // POST /ingredients/{id}/verify
     await _dio.post('/ingredients/$id/verify', data: {});
   }
 
   Future<void> unverifyIngredient(int id) async {
-    // POST /ingredients/{id}/unverify
     await _dio.post('/ingredients/$id/unverify', data: {});
   }
 
   Future<void> syncIngredients() async {
-    // POST /ingredients/sync
     await _dio.post('/ingredients/sync', data: {});
   }
 
   // ---------------------------------------------------------------------------
-  // RECIPES (src/routes/recipes.py)
+  // RECIPES
   // ---------------------------------------------------------------------------
 
   Future<Map<String, dynamic>> getRecipes({
@@ -698,7 +699,7 @@ class ApiService {
   }
 
   // ---------------------------------------------------------------------------
-  // ANALYTICS (src/routes/analytics.py)
+  // ANALYTICS
   // ---------------------------------------------------------------------------
 
   Future<List<dynamic>> getAnalytics({
@@ -737,13 +738,13 @@ class ApiService {
         if (restaurantId != null) 'restaurant_id': restaurantId,
         'period': period,
       },
-      options: Options(responseType: ResponseType.bytes), // PDF als bytes
+      options: Options(responseType: ResponseType.bytes),
     );
     return Uint8List.fromList(response.data);
   }
 
   // ---------------------------------------------------------------------------
-  // ACTIVITIES (src/routes/activities.py)
+  // ACTIVITIES
   // ---------------------------------------------------------------------------
 
   Future<Map<String, dynamic>> getUserActivity({
@@ -774,10 +775,9 @@ class ApiService {
   }
 
   // ---------------------------------------------------------------------------
-  // FAVORITES & COLLECTIONS (src/routes/favorites.py, src/routes/collections.py)
+  // FAVORITES & COLLECTIONS
   // ---------------------------------------------------------------------------
 
-  // Favorites
   Future<Map<String, dynamic>> getFavorites() async {
     final response = await _dio.get('/favorites');
     return response.data;
@@ -808,7 +808,6 @@ class ApiService {
     await _dio.delete('/favorites/$id');
   }
 
-  // Collections
   Future<Map<String, dynamic>> getCollections() async {
     final response = await _dio.get('/collections');
     return response.data;
@@ -859,10 +858,9 @@ class ApiService {
   }
 
   // ---------------------------------------------------------------------------
-  // HEALTH (src/routes/health.py) + EATEN (src/routes/eaten.py)
+  // HEALTH + EATEN
   // ---------------------------------------------------------------------------
 
-  // Health Profile
   Future<Map<String, dynamic>> getHealthProfile() async {
     final response = await _dio.get('/health/user-health-profile');
     return response.data;
@@ -875,7 +873,6 @@ class ApiService {
     return response.data;
   }
 
-  // Nutrition Logs
   Future<Map<String, dynamic>> getNutritionLogs() async {
     final response = await _dio.get('/health/nutrition-logs');
     return response.data;
@@ -891,7 +888,6 @@ class ApiService {
     await _dio.delete('/health/nutrition-logs/$id');
   }
 
-  // Eaten
   Future<Map<String, dynamic>> addEaten({
     required int menuItemId,
     double portionSizeG = 100.0,
@@ -909,7 +905,7 @@ class ApiService {
   }
 
   // ---------------------------------------------------------------------------
-  // MEAL RECOMMENDATIONS (src/routes/meal_recommendations.py)
+  // MEAL RECOMMENDATIONS
   // ---------------------------------------------------------------------------
 
   Future<Map<String, dynamic>> getMealRecommendations() async {
@@ -918,14 +914,21 @@ class ApiService {
   }
 
   // ---------------------------------------------------------------------------
-  // NOTIFICATIONS (src/routes/notifications.py)
+  // NOTIFICATIONS
   // ---------------------------------------------------------------------------
 
-  Future<Map<String, dynamic>> getNotifications({bool? unread}) async {
+  Future<List<dynamic>> getNotifications({bool? unread}) async {
     final response = await _dio.get('/notifications', queryParameters: {
       if (unread != null) 'unread': unread,
     });
-    return response.data;
+
+    if (response.data is List) {
+      return List<Map<String, dynamic>>.from(response.data as List);
+    } else {
+      print('⚠️ Unexpected notifications response: ${response.data}');
+      throw Exception(
+          'Unexpected response format: ${response.data.runtimeType}');
+    }
   }
 
   Future<Map<String, dynamic>> getNotification(int id) async {
@@ -953,7 +956,14 @@ class ApiService {
 
   Future<Map<String, dynamic>> getNotificationPreferences() async {
     final response = await _dio.get('/notifications/preferences');
-    return response.data;
+    print('📩 [PREFS RAW] ${response.data.runtimeType} → ${response.data}');
+    if (response.data is Map<String, dynamic>) {
+      return response.data as Map<String, dynamic>;
+    } else {
+      throw Exception(
+        'Unexpected preferences format: ${response.data.runtimeType} → ${response.data}',
+      );
+    }
   }
 
   Future<Map<String, dynamic>> updateNotificationPreferences(
@@ -1010,7 +1020,7 @@ class ApiService {
   }
 
   // ---------------------------------------------------------------------------
-  // INTEGRATIONS (src/routes/integrations.py)
+  // INTEGRATIONS
   // ---------------------------------------------------------------------------
 
   Future<String> getMyFitnessPalAuthUrl() async {
@@ -1024,7 +1034,7 @@ class ApiService {
   }
 
   // ---------------------------------------------------------------------------
-  // REVIEWS (src/routes/reviews.py)
+  // REVIEWS
   // ---------------------------------------------------------------------------
 
   Future<Map<String, dynamic>> getReviews({
@@ -1078,7 +1088,6 @@ class ApiService {
     await _dio.post('/reviews/$reviewId/hide');
   }
 
-  // Moderation
   Future<Map<String, dynamic>> getPendingReviews({
     int page = 1,
     int perPage = 20,
@@ -1105,54 +1114,52 @@ class ApiService {
   }
 
   // ---------------------------------------------------------------------------
-  // TEAMS (src/routes/teams.py)
+  // TEAMS
   // ---------------------------------------------------------------------------
 
-// ==== Teams: leden ====
-
-  Future<Map<String, dynamic>> getTeamMembers() async {
-    final res = await get('/team/members');
-    return Map<String, dynamic>.from(res.data);
+  Future<List<Map<String, dynamic>>> getTeamMembers() async {
+    final res = await get('/teams/members');
+    final members = ((res.data['members'] ?? []) as List)
+        .map((e) => Map<String, dynamic>.from(e as Map))
+        .toList();
+    return members;
   }
 
   Future<void> updateTeamMemberRole(int membershipId, String newRole) async {
-    await put('/team/members/$membershipId', data: {'role': newRole});
+    await put('/teams/members/$membershipId', data: {'role': newRole});
   }
 
   Future<void> suspendTeamMember(int membershipId) async {
-    await put('/team/members/$membershipId', data: {'is_active': false});
+    await put('/teams/members/$membershipId', data: {'is_active': false});
   }
 
   Future<void> activateTeamMember(int membershipId) async {
-    await put('/team/members/$membershipId', data: {'is_active': true});
+    await put('/teams/members/$membershipId', data: {'is_active': true});
   }
 
   Future<void> removeTeamMember(int membershipId) async {
-    await delete('/team/members/$membershipId');
+    await delete('/teams/members/$membershipId');
   }
 
-  // ==== Teams: uitnodigingen ====
-
   Future<Map<String, dynamic>> getPendingInvitations() async {
-    final res = await get('/team/invitations?status=pending');
+    final res = await get('/teams/invitations?status=pending');
     return Map<String, dynamic>.from(res.data);
   }
 
   Future<void> inviteTeamMember(Map<String, dynamic> payload) async {
-    // payload: { 'email': String, 'role': String, 'restaurant_access': List<int> }
-    await post('/team/invitations', data: payload);
+    await post('/teams/invitations', data: payload);
   }
 
   Future<void> resendInvitation(int invitationId) async {
-    await post('/team/invitations/$invitationId/resend');
+    await post('/teams/invitations/$invitationId/resend');
   }
 
   Future<void> cancelInvitation(int invitationId) async {
-    await delete('/team/invitations/$invitationId');
+    await delete('/teams/invitations/$invitationId');
   }
 
   // ---------------------------------------------------------------------------
-  // ANALYSE / SHARE (src/routes/share.py)
+  // SHARE
   // ---------------------------------------------------------------------------
 
   Future<Map<String, dynamic>> createShareLink({
@@ -1172,27 +1179,22 @@ class ApiService {
   // GENERIC HELPERS
   // ---------------------------------------------------------------------------
 
-  // Generic GET request
   Future<Response> get(String path, {Map<String, dynamic>? queryParameters}) {
     return _dio.get(path, queryParameters: queryParameters);
   }
 
-  // Generic POST request
   Future<Response> post(String path, {dynamic data}) {
     return _dio.post(path, data: data);
   }
 
-  // Generic PUT request
   Future<Response> put(String path, {dynamic data}) {
     return _dio.put(path, data: data);
   }
 
-  // Generic DELETE request
   Future<Response> delete(String path) {
     return _dio.delete(path);
   }
 
-  // === Settings endpoints ===
   Future<Map<String, dynamic>> getSettings() async {
     final response = await _dio.get('/settings');
     return response.data;
@@ -1212,7 +1214,6 @@ class ApiService {
 
 // --------------------------- Interceptors ---------------------------
 
-// Auth interceptor to add JWT token to requests
 class _AuthInterceptor extends Interceptor {
   static const _storage = FlutterSecureStorage();
 
@@ -1220,38 +1221,42 @@ class _AuthInterceptor extends Interceptor {
   void onRequest(
       RequestOptions options, RequestInterceptorHandler handler) async {
     final token = await _storage.read(key: AppConstants.accessTokenKey);
-    if (token != null) {
+    if (token != null && token.isNotEmpty) {
       options.headers['Authorization'] = 'Bearer $token';
     }
+    print('➡️ [AUTH] ${options.method} ${options.uri}');
+    print('➡️ [HEADERS] ${options.headers}');
     handler.next(options);
   }
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     if (err.response?.statusCode == 401) {
-      // Try to refresh token
       try {
         final refreshToken =
             await _storage.read(key: AppConstants.refreshTokenKey);
         if (refreshToken != null) {
-          final response = await Dio().post(
-            '${AppConstants.baseUrl}/auth/refresh',
+          print('🔄 [AUTH] Refreshing token...');
+          final refreshDio = Dio(BaseOptions(
+            baseUrl: AppConstants.baseUrl,
+            headers: {'Content-Type': 'application/json'},
+          ));
+          final response = await refreshDio.post(
+            '/auth/refresh',
             data: {'refresh_token': refreshToken},
           );
-
           final newToken = response.data['access_token'];
           await _storage.write(
               key: AppConstants.accessTokenKey, value: newToken);
-
-          // Retry the original request
           final opts = err.requestOptions;
           opts.headers['Authorization'] = 'Bearer $newToken';
-          final cloneReq = await Dio().fetch(opts);
+          print('🔁 [AUTH] Retrying request with new token...');
+          final cloneReq = await refreshDio.fetch(opts);
           handler.resolve(cloneReq);
           return;
         }
       } catch (e) {
-        // Refresh failed, clear tokens en laat 401 bubbelen
+        print('❌ [AUTH] Refresh token failed: $e');
         await _storage.deleteAll();
       }
     }
@@ -1259,37 +1264,35 @@ class _AuthInterceptor extends Interceptor {
   }
 }
 
-// Logging interceptor for debugging
 class _LoggingInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    print('🌐 ${options.method} ${options.uri}');
+    print('🌐 [REQ] ${options.method} ${options.uri}');
     if (options.data != null) {
-      print('📤 ${options.data}');
+      print('📤 [DATA] ${options.data}');
     }
     handler.next(options);
   }
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    print('✅ ${response.statusCode} ${response.requestOptions.uri}');
+    print('✅ [RES] ${response.statusCode} ${response.requestOptions.uri}');
+    print('📩 [BODY] ${response.data}');
     handler.next(response);
   }
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    print('❌ ${err.response?.statusCode} ${err.requestOptions.uri}');
-    print('Error: ${err.message}');
+    print('❌ [ERR] ${err.response?.statusCode} ${err.requestOptions.uri}');
+    print('💥 [MESSAGE] ${err.message}');
     handler.next(err);
   }
 }
 
-// Error interceptor for handling common errors
 class _ErrorInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     String message;
-
     switch (err.type) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.receiveTimeout:
@@ -1299,16 +1302,16 @@ class _ErrorInterceptor extends Interceptor {
       case DioExceptionType.badResponse:
         switch (err.response?.statusCode) {
           case 400:
-            message = err.response?.data['error'] ?? 'Ongeldige aanvraag';
+            message = err.response?.data['error'] ?? 'Invalid request';
             break;
           case 401:
             message = AppConstants.authErrorMessage;
             break;
           case 403:
-            message = 'Geen toegang tot deze resource';
+            message = 'No access to this resource';
             break;
           case 404:
-            message = 'Resource niet gevonden';
+            message = 'Resource not found';
             break;
           case 500:
             message = AppConstants.serverErrorMessage;
@@ -1320,8 +1323,7 @@ class _ErrorInterceptor extends Interceptor {
       default:
         message = AppConstants.networkErrorMessage;
     }
-
-    err = err.copyWith(message: message);
-    handler.next(err);
+    print('⚠️ [ERROR HANDLER] $message');
+    handler.next(err.copyWith(message: message));
   }
 }

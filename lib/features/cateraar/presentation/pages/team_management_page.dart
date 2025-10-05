@@ -110,16 +110,20 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
     setState(() => _isLoading = true);
 
     try {
-      final teamResponse = await _apiService.getTeamMembers();
+      // API calls
+      final members = await _apiService.getTeamMembers();
       final invitationsResponse = await _apiService.getPendingInvitations();
       final restaurantsResponse = await _apiService.getRestaurants();
 
-      final members =
-          List<Map<String, dynamic>>.from(teamResponse['members'] ?? []);
-      final invitations = List<Map<String, dynamic>>.from(
-          invitationsResponse['invitations'] ?? []);
-      final restaurants = List<Map<String, dynamic>>.from(
-          restaurantsResponse['restaurants'] ?? []);
+      final invitations =
+          (invitationsResponse['invitations'] as List<dynamic>? ?? [])
+              .map((e) => Map<String, dynamic>.from(e as Map))
+              .toList();
+
+      final restaurants =
+          (restaurantsResponse['restaurants'] as List<dynamic>? ?? [])
+              .map((e) => Map<String, dynamic>.from(e as Map))
+              .toList();
 
       setState(() {
         _teamMembers = members;
@@ -140,14 +144,15 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
   }
 
   void _filterMembers() {
-    List<Map<String, dynamic>> filtered = List.from(_teamMembers);
+    List<Map<String, dynamic>> filtered =
+        List<Map<String, dynamic>>.from(_teamMembers);
 
     // Apply search filter
     if (_searchQuery.isNotEmpty) {
+      final query = _searchQuery.toLowerCase();
       filtered = filtered.where((member) {
-        final name = (member['name'] ?? '').toLowerCase();
-        final email = (member['email'] ?? '').toLowerCase();
-        final query = _searchQuery.toLowerCase();
+        final name = (member['name'] as String? ?? '').toLowerCase();
+        final email = (member['email'] as String? ?? '').toLowerCase();
         return name.contains(query) || email.contains(query);
       }).toList();
     }
@@ -155,14 +160,16 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
     // Apply role filter
     if (_filterRole != 'all') {
       filtered = filtered.where((member) {
-        return member['role'] == _filterRole;
+        final role = member['role'] as String? ?? '';
+        return role == _filterRole;
       }).toList();
     }
 
     // Apply status filter
     if (_filterStatus != 'all') {
       filtered = filtered.where((member) {
-        return member['status'] == _filterStatus;
+        final status = member['status'] as String? ?? '';
+        return status == _filterStatus;
       }).toList();
     }
 
@@ -472,10 +479,10 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
                         const SizedBox(height: 4),
                         Text(
                           member['email'] ?? '',
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: AppColors.textSecondary,
-                                  ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(color: AppColors.textSecondary),
                         ),
                       ],
                     ),
@@ -630,7 +637,7 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
 
               // Restaurant access
               if (member['restaurant_access'] != null &&
-                  member['restaurant_access'].isNotEmpty) ...[
+                  (member['restaurant_access'] as List).isNotEmpty) ...[
                 const SizedBox(height: 12),
                 Text(
                   'Toegang tot restaurants:',
@@ -643,11 +650,16 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
                   spacing: 4,
                   runSpacing: 4,
                   children: (member['restaurant_access'] as List)
-                      .map<Widget>((restaurantId) {
+                      .map<Widget>((restaurantIdRaw) {
+                    final restaurantId = restaurantIdRaw is int
+                        ? restaurantIdRaw
+                        : int.tryParse(restaurantIdRaw.toString());
+
                     final restaurant = _restaurants.firstWhere(
-                      (r) => r['id'] == restaurantId,
+                      (r) => r['id'].toString() == restaurantId.toString(),
                       orElse: () => {'name': 'Onbekend Restaurant'},
                     );
+
                     return Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 6, vertical: 2),
@@ -668,154 +680,6 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
               ],
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInvitationsTab() {
-    return _pendingInvitations.isEmpty
-        ? _buildEmptyInvitationsState()
-        : RefreshIndicator(
-            onRefresh: _loadData,
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _pendingInvitations.length,
-              itemBuilder: (context, index) {
-                final invitation = _pendingInvitations[index];
-                return _buildInvitationCard(invitation);
-              },
-            ),
-          );
-  }
-
-  Widget _buildInvitationCard(Map<String, dynamic> invitation) {
-    final role = invitation['role'] ?? 'viewer';
-    final expiresAt = invitation['expires_at'];
-    final isExpired =
-        expiresAt != null && DateTime.parse(expiresAt).isBefore(DateTime.now());
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Row(
-              children: [
-                Icon(
-                  Icons.mail_outline,
-                  color: isExpired ? Colors.red : AppColors.primary,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        invitation['email'] ?? '',
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Uitgenodigd als ${_roleLabels[role] ?? role}',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                      ),
-                    ],
-                  ),
-                ),
-                PopupMenuButton<String>(
-                  onSelected: (value) =>
-                      _handleInvitationAction(value, invitation),
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(
-                      value: 'resend',
-                      child: ListTile(
-                        leading: Icon(Icons.send),
-                        title: Text('Opnieuw Versturen'),
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                    ),
-                    const PopupMenuItem(
-                      value: 'copy_link',
-                      child: ListTile(
-                        leading: Icon(Icons.copy),
-                        title: Text('Link Kopiëren'),
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                    ),
-                    const PopupMenuItem(
-                      value: 'cancel',
-                      child: ListTile(
-                        leading: Icon(Icons.cancel, color: Colors.red),
-                        title: Text('Annuleren',
-                            style: TextStyle(color: Colors.red)),
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 12),
-
-            // Status and expiry
-            Row(
-              children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: isExpired
-                        ? AppColors.withAlphaFraction(Colors.red, 0.1)
-                        : AppColors.withAlphaFraction(Colors.orange, 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    isExpired ? 'Verlopen' : 'In afwachting',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: isExpired ? Colors.red : Colors.orange,
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                ),
-                const Spacer(),
-                if (expiresAt != null)
-                  Text(
-                    isExpired
-                        ? 'Verlopen op ${_formatDate(expiresAt)}'
-                        : 'Verloopt op ${_formatDate(expiresAt)}',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color:
-                              isExpired ? Colors.red : AppColors.textSecondary,
-                        ),
-                  ),
-              ],
-            ),
-
-            // Sent info
-            if (invitation['sent_at'] != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                'Verstuurd op ${_formatDateTime(invitation['sent_at'])}',
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-              ),
-            ],
-          ],
         ),
       ),
     );
@@ -848,6 +712,77 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
             return _buildRoleCard(entry.key, entry.value);
           }),
         ],
+      ),
+    );
+  }
+
+  Widget _buildInvitationsTab() {
+    return Column(
+      children: [
+        Expanded(
+          child: _pendingInvitations.isEmpty
+              ? _buildEmptyInvitationsState()
+              : RefreshIndicator(
+                  onRefresh: _loadData,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: _pendingInvitations.length,
+                    itemBuilder: (context, index) {
+                      final invitation = _pendingInvitations[index];
+                      return _buildInvitationCard(invitation);
+                    },
+                  ),
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInvitationCard(Map<String, dynamic> invitation) {
+    final status = invitation['status'] ?? 'pending';
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: ListTile(
+        leading: Icon(Icons.mail_outline, color: AppColors.primary),
+        title: Text(invitation['email'] ?? ''),
+        subtitle: Text(
+          status == 'pending'
+              ? 'Uitgenodigd op ${_formatDate(invitation['sent_at'])}'
+              : _statusLabels[status] ?? status,
+        ),
+        trailing: PopupMenuButton<String>(
+          onSelected: (value) => _handleInvitationAction(value, invitation),
+          itemBuilder: (context) => [
+            const PopupMenuItem(
+              value: 'resend',
+              child: ListTile(
+                leading: Icon(Icons.refresh),
+                title: Text('Opnieuw Versturen'),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+            const PopupMenuItem(
+              value: 'copy_link',
+              child: ListTile(
+                leading: Icon(Icons.link),
+                title: Text('Uitnodigingslink Kopiëren'),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+            const PopupMenuItem(
+              value: 'cancel',
+              child: ListTile(
+                leading: Icon(Icons.cancel, color: Colors.red),
+                title: Text('Annuleren', style: TextStyle(color: Colors.red)),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1599,7 +1534,7 @@ class _TeamManagementPageState extends ConsumerState<TeamManagementPage>
       case 'staff':
         return Icons.person;
       case 'viewer':
-        return Icons.visibility;
+        return Icons.visibility_outlined;
       default:
         return Icons.person;
     }

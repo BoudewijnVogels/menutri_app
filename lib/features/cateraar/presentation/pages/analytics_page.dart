@@ -452,7 +452,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
               title: 'Menu Views',
               value: '${overview['menu_views'] ?? 0}',
               change: '${overview['menu_views_change'] ?? 0}%',
-              icon: Icons.visibility,
+              icon: Icons.visibility_outlined,
               color: Colors.green,
             ),
             _buildMetricCard(
@@ -713,7 +713,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.restaurant_menu,
+              Icons.restaurant,
               size: 64,
               color: AppColors.textSecondary,
             ),
@@ -874,7 +874,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
       case 'qr_scan':
         return Icon(Icons.qr_code_scanner, color: AppColors.primary);
       case 'menu_view':
-        return Icon(Icons.visibility, color: Colors.blue);
+        return Icon(Icons.visibility_outlined, color: Colors.blue);
       case 'favorite':
         return Icon(Icons.favorite, color: Colors.red);
       case 'review':

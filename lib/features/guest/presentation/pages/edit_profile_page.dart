@@ -98,27 +98,20 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Profile photo section
             _buildPhotoSection(),
-
             const SizedBox(height: 32),
-
-            // Personal information
             Text(
               'Persoonlijke gegevens',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
             ),
-
             const SizedBox(height: 16),
-
-            // Name field
             TextFormField(
               controller: _nameController,
               decoration: const InputDecoration(
                 labelText: 'Naam',
-                prefixIcon: Icon(Icons.person),
+                prefixIcon: Icon(Icons.person, color: AppColors.mediumBrown),
                 border: OutlineInputBorder(),
               ),
               validator: (value) {
@@ -131,70 +124,54 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                 return null;
               },
             ),
-
             const SizedBox(height: 16),
-
-            // Email field (readonly)
             TextFormField(
               controller: _emailController,
               decoration: const InputDecoration(
                 labelText: 'E-mailadres',
-                prefixIcon: Icon(Icons.email),
+                prefixIcon: Icon(Icons.email, color: AppColors.mediumBrown),
                 border: OutlineInputBorder(),
                 helperText: 'E-mailadres kan niet worden gewijzigd',
               ),
               enabled: false,
             ),
-
             const SizedBox(height: 32),
-
-            // App preferences
             Text(
               'App voorkeuren',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
             ),
-
             const SizedBox(height: 16),
-
-            // Language selection
             _buildLanguageSelector(),
-
             const SizedBox(height: 32),
-
-            // Account actions
             Text(
               'Account acties',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
             ),
-
             const SizedBox(height: 16),
-
-            // Change password button
             ListTile(
               leading: const Icon(Icons.lock, color: AppColors.mediumBrown),
               title: const Text('Wachtwoord wijzigen'),
               subtitle:
                   const Text('Wijzig je wachtwoord voor extra beveiliging'),
-              trailing: const Icon(Icons.arrow_forward_ios),
+              trailing:
+                  const Icon(Icons.arrow_forward_ios, color: AppColors.grey),
               onTap: _navigateToChangePassword,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
                 side: const BorderSide(color: AppColors.lightGrey),
               ),
             ),
-
             const SizedBox(height: 12),
-
-            // Delete account button
             ListTile(
               leading: const Icon(Icons.delete_forever, color: AppColors.error),
               title: const Text('Account verwijderen'),
               subtitle: const Text('Permanent verwijderen van je account'),
-              trailing: const Icon(Icons.arrow_forward_ios),
+              trailing:
+                  const Icon(Icons.arrow_forward_ios, color: AppColors.grey),
               onTap: _navigateToDeleteAccount,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -211,7 +188,6 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     return Center(
       child: Column(
         children: [
-          // Profile photo
           Stack(
             children: [
               CircleAvatar(
@@ -223,15 +199,10 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                         ? NetworkImage(_currentAvatarUrl!)
                         : null,
                 child: _selectedImage == null && _currentAvatarUrl == null
-                    ? const Icon(
-                        Icons.person,
-                        size: 60,
-                        color: AppColors.mediumBrown,
-                      )
+                    ? const Icon(Icons.person,
+                        size: 60, color: AppColors.mediumBrown)
                     : null,
               ),
-
-              // Edit button
               Positioned(
                 bottom: 0,
                 right: 0,
@@ -248,18 +219,14 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
               ),
             ],
           ),
-
           const SizedBox(height: 16),
-
           Text(
             'Profielfoto',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
           ),
-
           const SizedBox(height: 8),
-
           Text(
             'Kies een foto die anderen van je zien',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -278,16 +245,12 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
         border: Border.all(color: AppColors.lightGrey),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Column(
-        children: [
-          ListTile(
-            leading: const Icon(Icons.language, color: AppColors.mediumBrown),
-            title: const Text('Taal'),
-            subtitle: Text(_getLanguageName(_selectedLanguage)),
-            trailing: const Icon(Icons.expand_more),
-            onTap: _showLanguageSelector,
-          ),
-        ],
+      child: ListTile(
+        leading: const Icon(Icons.language, color: AppColors.mediumBrown),
+        title: const Text('Taal'),
+        subtitle: Text(_getLanguageName(_selectedLanguage)),
+        trailing: const Icon(Icons.expand_more, color: AppColors.grey),
+        onTap: _showLanguageSelector,
       ),
     );
   }
@@ -297,7 +260,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, size: 64, color: AppColors.error),
+          const Icon(Icons.error, size: 64, color: AppColors.error),
           const SizedBox(height: 16),
           Text(
             _errorMessage!,
@@ -321,7 +284,8 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
         child: Wrap(
           children: [
             ListTile(
-              leading: const Icon(Icons.photo_camera),
+              leading:
+                  const Icon(Icons.photo_camera, color: AppColors.mediumBrown),
               title: const Text('Camera'),
               onTap: () {
                 Navigator.of(context).pop();
@@ -329,7 +293,8 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.photo_library),
+              leading:
+                  const Icon(Icons.photo_library, color: AppColors.mediumBrown),
               title: const Text('Galerij'),
               onTap: () {
                 Navigator.of(context).pop();
@@ -395,10 +360,8 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
           children: _languages.map((language) {
             final isSelected = language['code'] == _selectedLanguage;
             return ListTile(
-              leading: Text(
-                language['flag']!,
-                style: const TextStyle(fontSize: 24),
-              ),
+              leading:
+                  Text(language['flag']!, style: const TextStyle(fontSize: 24)),
               title: Text(language['name']!),
               trailing: isSelected
                   ? const Icon(Icons.check, color: AppColors.mediumBrown)
@@ -431,13 +394,9 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
   }
 
   Future<void> _saveProfile() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      _isSaving = true;
-    });
+    setState(() => _isSaving = true);
 
     try {
       final profileData = {
@@ -445,15 +404,12 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
         'language': _selectedLanguage,
       };
 
-      // Upload photo if selected
-      String? avatarUrl;
       if (_selectedImage != null) {
         final uploadResult =
             await ApiService().uploadProfileImage(_selectedImage!.path);
-        avatarUrl = uploadResult['avatar_url'] as String?;
+        final avatarUrl = uploadResult['avatar_url'] as String?;
         profileData['avatar_url'] = avatarUrl ?? '';
       } else if (_currentAvatarUrl == null) {
-        // Photo was removed
         profileData['avatar_url'] = '';
       }
 
@@ -466,23 +422,18 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
             backgroundColor: AppColors.success,
           ),
         );
-
-        // Go back to previous screen
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Kon profiel niet opslaan: $e'),
-            backgroundColor: AppColors.error,
-          ),
+              content: Text('Kon profiel niet opslaan: $e'),
+              backgroundColor: AppColors.error),
         );
       }
     } finally {
-      setState(() {
-        _isSaving = false;
-      });
+      setState(() => _isSaving = false);
     }
   }
 

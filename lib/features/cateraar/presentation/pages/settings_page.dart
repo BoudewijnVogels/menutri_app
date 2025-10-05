@@ -589,7 +589,7 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
                 _buildDropdownTile(
                   'Standaard Menu Status',
                   'Status voor nieuwe menu items',
-                  Icons.restaurant_menu,
+                  Icons.restaurant,
                   _defaultMenuStatus,
                   {
                     'active': 'Actief',
@@ -1062,7 +1062,7 @@ class _CateraarSettingsPageState extends ConsumerState<CateraarSettingsPage>
                 ),
                 const Divider(height: 1),
                 ListTile(
-                  leading: const Icon(Icons.visibility),
+                  leading: const Icon(Icons.visibility_outlined),
                   title: const Text('Privacy Dashboard'),
                   subtitle: const Text('Bekijk wat we over je weten'),
                   trailing: const Icon(Icons.arrow_forward_ios),

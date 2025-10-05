@@ -78,20 +78,20 @@ class _RestaurantDetailCateraarPageState
                     padding: const EdgeInsets.all(16),
                     children: [
                       Text(
-                        _restaurant!['naam'] ?? '',
+                        _restaurant!['name'] ?? '',
                         style: Theme.of(context).textTheme.headlineSmall,
                       ),
                       const SizedBox(height: 8),
-                      if (_restaurant!['beschrijving'] != null)
+                      if (_restaurant!['description'] != null)
                         Text(
-                          _restaurant!['beschrijving'],
+                          _restaurant!['description'],
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       const Divider(height: 32),
-                      _buildDetailRow('Adres', _restaurant!['adres']),
-                      _buildDetailRow('Stad', _restaurant!['stad']),
-                      _buildDetailRow('Postcode', _restaurant!['postcode']),
-                      _buildDetailRow('Telefoon', _restaurant!['telefoon']),
+                      _buildDetailRow('Adres', _restaurant!['address']),
+                      _buildDetailRow('Stad', _restaurant!['city']),
+                      _buildDetailRow('Postcode', _restaurant!['postal_code']),
+                      _buildDetailRow('Telefoon', _restaurant!['phone']),
                       _buildDetailRow('E-mail', _restaurant!['email']),
                       _buildDetailRow('Website', _restaurant!['website']),
                       const Divider(height: 32),
@@ -109,7 +109,7 @@ class _RestaurantDetailCateraarPageState
                           'Afhalen beschikbaar', _restaurant!['has_takeaway']),
                       _buildSwitchInfo(
                           'Rolstoeltoegankelijk', _restaurant!['wheelchair']),
-                      _buildSwitchInfo('Actief', _restaurant!['actief']),
+                      _buildSwitchInfo('Actief', _restaurant!['is_active']),
                     ],
                   ),
                 ),

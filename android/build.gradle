@@ -1,6 +1,7 @@
 /*
- Top-level build file (geen repositories hier, die staan in settings.gradle)
+ Top-level build file (geen repositories hier; die staan in settings.gradle)
 */
+
 rootProject.buildDir = "../build"
 
 subprojects {
@@ -10,12 +11,4 @@ subprojects {
 
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
-}
-
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        maven { url = uri("https://storage.googleapis.com/download.flutter.io") }
-    }
 }

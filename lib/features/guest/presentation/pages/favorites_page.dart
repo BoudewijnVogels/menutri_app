@@ -33,7 +33,6 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
       });
 
       final response = await ApiService().getFavorites();
-      // Assuming the list is under the key 'favorites' in the response map
       final favorites = response is List
           ? response
           : (response['favorites'] as List<dynamic>? ?? []);
@@ -78,11 +77,9 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // TODO: Add new collection
-          _showCreateCollectionDialog();
-        },
-        child: const Icon(Icons.add),
+        backgroundColor: AppColors.mediumBrown,
+        onPressed: _showCreateCollectionDialog,
+        child: const Icon(Icons.add, color: AppColors.white),
       ),
     );
   }
@@ -135,7 +132,7 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
 
     if (dishFavorites.isEmpty) {
       return _buildEmptyState(
-        icon: Icons.restaurant_menu_outlined,
+        icon: Icons.restaurant_outlined,
         title: 'Geen favoriete gerechten',
         subtitle: 'Voeg gerechten toe aan je favorieten tijdens het browsen',
       );
@@ -155,7 +152,6 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
   }
 
   Widget _buildCollections() {
-    // Group favorites by collection
     final collections = <String, List<dynamic>>{};
     for (final fav in _favorites) {
       final collectionName = fav['collection_name'] ?? 'Standaard';
@@ -204,15 +200,11 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: AppColors.lightBrown,
+                  color: AppColors.mediumBrown,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(
-                  Icons.restaurant,
-                  color: AppColors.mediumBrown,
-                ),
+                child: const Icon(Icons.restaurant, color: AppColors.white),
               ),
-
               const SizedBox(width: 16),
 
               // Content
@@ -254,7 +246,7 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
                     value: 'share',
                     child: Row(
                       children: [
-                        Icon(Icons.share),
+                        Icon(Icons.share, color: AppColors.mediumBrown),
                         SizedBox(width: 8),
                         Text('Delen'),
                       ],
@@ -275,7 +267,6 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
                   if (value == 'remove') {
                     _removeFavorite(favorite['id']);
                   } else if (value == 'share') {
-                    // TODO: Implement sharing
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Delen komt binnenkort')),
                     );
@@ -301,15 +292,11 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
               width: 60,
               height: 60,
               decoration: BoxDecoration(
-                color: AppColors.lightBrown,
+                color: AppColors.mediumBrown,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(
-                Icons.restaurant_menu,
-                color: AppColors.mediumBrown,
-              ),
+              child: const Icon(Icons.restaurant, color: AppColors.white),
             ),
-
             const SizedBox(width: 16),
 
             // Content
@@ -359,7 +346,7 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
                   value: 'share',
                   child: Row(
                     children: [
-                      Icon(Icons.share),
+                      Icon(Icons.share, color: AppColors.mediumBrown),
                       SizedBox(width: 8),
                       Text('Delen'),
                     ],
@@ -380,7 +367,6 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
                 if (value == 'remove') {
                   _removeFavorite(favorite['id']);
                 } else if (value == 'share') {
-                  // TODO: Implement sharing
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Delen komt binnenkort')),
                   );
@@ -397,9 +383,7 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: InkWell(
-        onTap: () {
-          // TODO: Navigate to collection detail
-        },
+        onTap: () {},
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -410,17 +394,11 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color:
-                      AppColors.withAlphaFraction(AppColors.mediumBrown, 0.1),
+                  color: AppColors.mediumBrown,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(
-                  Icons.collections,
-                  color: AppColors.mediumBrown,
-                  size: 32,
-                ),
+                child: const Icon(Icons.collections, color: AppColors.white),
               ),
-
               const SizedBox(width: 16),
 
               // Content
@@ -445,11 +423,8 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
                 ),
               ),
 
-              const Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-                color: AppColors.grey,
-              ),
+              const Icon(Icons.arrow_forward_ios,
+                  size: 16, color: AppColors.grey),
             ],
           ),
         ),
@@ -468,10 +443,7 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
         children: [
           Icon(icon, size: 64, color: AppColors.grey),
           const SizedBox(height: 16),
-          Text(
-            title,
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
+          Text(title, style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 8),
           Text(
             subtitle,
@@ -495,7 +467,7 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, size: 64, color: AppColors.error),
+          const Icon(Icons.error, size: 64, color: AppColors.error),
           const SizedBox(height: 16),
           Text(
             _errorMessage!,
@@ -560,7 +532,6 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
           ElevatedButton(
             onPressed: () {
               if (controller.text.trim().isNotEmpty) {
-                // TODO: Create collection
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
@@ -577,7 +548,6 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage>
 
   String _formatDate(String? dateString) {
     if (dateString == null) return 'Onbekend';
-
     try {
       final date = DateTime.parse(dateString);
       return '${date.day}/${date.month}/${date.year}';

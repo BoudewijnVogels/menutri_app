@@ -14,7 +14,11 @@ import 'package:menutri_app/main.dart';
 void main() {
   testWidgets('App loads correctly', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const ProviderScope(child: MenutriApp()));
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MenutriApp(),
+      ),
+    );
 
     // Verify that the app loads
     expect(find.byType(MaterialApp), findsOneWidget);

@@ -19,7 +19,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       title: 'Welkom bij Menutri',
       description:
           'Ontdek gezonde gerechten en restaurants in jouw buurt. Scan QR-codes en bekijk voedingsinformatie.',
-      icon: Icons.restaurant_menu,
+      icon: Icons.restaurant,
     ),
     OnboardingItem(
       title: 'Scan & Ontdek',
@@ -40,6 +40,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
       icon: Icons.person,
     ),
   ];
+
+  Color _getIconColor(Color bgColor) {
+    return bgColor.computeLuminance() < 0.5
+        ? AppColors.white
+        : AppColors.mediumBrown;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,24 +87,26 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   itemCount: _items.length,
                   itemBuilder: (context, index) {
                     final item = _items[index];
+                    final bgColor = AppColors.mediumBrown;
+                    final iconColor = _getIconColor(bgColor);
+
                     return Padding(
                       padding: const EdgeInsets.all(32.0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          // Icon
+                          // Icon in cirkel
                           Container(
                             width: 120,
                             height: 120,
                             decoration: BoxDecoration(
-                              color: AppColors.withAlphaFraction(
-                                  AppColors.mediumBrown, 0.1),
+                              color: bgColor,
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
                               item.icon,
                               size: 60,
-                              color: AppColors.mediumBrown,
+                              color: iconColor,
                             ),
                           ),
 
@@ -228,6 +236,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
     required IconData icon,
     required VoidCallback onTap,
   }) {
+    final bgColor = AppColors.mediumBrown;
+    final iconColor = _getIconColor(bgColor);
+
     return Card(
       elevation: 2,
       child: InkWell(
@@ -241,13 +252,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color:
-                      AppColors.withAlphaFraction(AppColors.mediumBrown, 0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  color: bgColor,
+                  shape: BoxShape.circle,
                 ),
                 child: Icon(
                   icon,
-                  color: AppColors.mediumBrown,
+                  color: iconColor,
                   size: 24,
                 ),
               ),
@@ -311,7 +321,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 
   void _selectRole(String role) {
-    // Store the selected role and navigate to login
     context.go('${AppRoutes.login}?role=$role');
   }
 

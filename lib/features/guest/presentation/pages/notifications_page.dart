@@ -40,12 +40,11 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
         _errorMessage = null;
       });
 
+      // ✅ API call geeft nu altijd een List<dynamic> terug
       final notifications = await ApiService().getNotifications();
 
       setState(() {
-        _notifications = notifications is List
-            ? (notifications as List<dynamic>)
-            : (notifications['notifications'] as List<dynamic>? ?? []);
+        _notifications = notifications;
         _isLoading = false;
       });
     } catch (e) {
@@ -83,7 +82,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings),
+            icon: const Icon(Icons.settings), // ✅ pakt nu theme kleur
             onPressed: _showSettingsBottomSheet,
           ),
         ],
@@ -165,7 +164,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
                 ),
                 child: Icon(
                   _getNotificationIcon(type),
-                  color: _getNotificationColor(type),
+                  color: _getNotificationColor(type), // ✅ typekleur blijft
                   size: 24,
                 ),
               ),
@@ -231,7 +230,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
                       value: 'mark_read',
                       child: Row(
                         children: [
-                          Icon(Icons.mark_email_read),
+                          Icon(Icons.mark_email_read), // ✅ geen kleur
                           SizedBox(width: 8),
                           Text('Markeer als gelezen'),
                         ],
@@ -241,7 +240,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
                     value: 'delete',
                     child: Row(
                       children: [
-                        Icon(Icons.delete, color: AppColors.error),
+                        Icon(Icons.delete, color: AppColors.error), // ✅ rood
                         SizedBox(width: 8),
                         Text('Verwijderen'),
                       ],
@@ -300,7 +299,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, size: 64, color: AppColors.error),
+          const Icon(Icons.error, size: 64, color: AppColors.error),
           const SizedBox(height: 16),
           Text(
             _errorMessage!,
@@ -445,7 +444,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
       case 'favorite':
         return Icons.favorite;
       case 'eaten':
-        return Icons.restaurant_menu;
+        return Icons.restaurant;
       case 'review':
         return Icons.rate_review;
       case 'milestone':
@@ -494,34 +493,28 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
   }
 
   void _handleNotificationTap(Map<String, dynamic> notification) {
-    // Mark as read if not already read
     if (!(notification['read'] ?? false)) {
       _markAsRead(notification['id']);
     }
 
-    // Handle navigation based on notification type
     final type = notification['type'] ?? 'general';
     final data = notification['data'] as Map<String, dynamic>? ?? {};
 
     switch (type) {
       case 'favorite':
         if (data['restaurant_id'] != null) {
-          // Navigate to restaurant detail
           // context.push('/guest/restaurant/${data['restaurant_id']}');
         }
         break;
       case 'eaten':
-        // Navigate to nutrition log
         // context.push('/guest/nutrition-log');
         break;
       case 'review':
         if (data['restaurant_id'] != null) {
-          // Navigate to restaurant reviews
           // context.push('/guest/restaurant/${data['restaurant_id']}?tab=reviews');
         }
         break;
       default:
-        // General notification, no specific action
         break;
     }
   }

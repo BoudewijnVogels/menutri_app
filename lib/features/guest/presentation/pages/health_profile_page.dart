@@ -25,7 +25,7 @@ class _HealthProfilePageState extends ConsumerState<HealthProfilePage> {
 
   // Dietary preferences
   final List<String> _selectedDietaryPreferences = [];
-  final List<String> _selectedAllergies = [];
+  final List<String> _selectedallergens = [];
   final List<String> _selectedConditions = [];
 
   // Daily goals
@@ -192,14 +192,14 @@ class _HealthProfilePageState extends ConsumerState<HealthProfilePage> {
     // Optioneel: als jouw backend arrays terugstuurt:
     final diets =
         (profile['dietary_preferences'] as List?)?.cast<String>() ?? [];
-    final allergies = (profile['allergies'] as List?)?.cast<String>() ?? [];
+    final allergens = (profile['allergens'] as List?)?.cast<String>() ?? [];
     final conditions = (profile['conditions'] as List?)?.cast<String>() ?? [];
     _selectedDietaryPreferences
       ..clear()
       ..addAll(diets);
-    _selectedAllergies
+    _selectedallergens
       ..clear()
-      ..addAll(allergies);
+      ..addAll(allergens);
     _selectedConditions
       ..clear()
       ..addAll(conditions);

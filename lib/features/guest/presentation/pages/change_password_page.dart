@@ -90,12 +90,14 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
                 obscureText: _obscureCurrentPassword,
                 decoration: InputDecoration(
                   labelText: 'Huidig wachtwoord',
-                  prefixIcon: const Icon(Icons.lock_outline),
+                  prefixIcon: const Icon(Icons.lock_outline,
+                      color: AppColors.mediumBrown),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscureCurrentPassword
-                          ? Icons.visibility
+                          ? Icons.visibility_outlined
                           : Icons.visibility_off,
+                      color: AppColors.mediumBrown,
                     ),
                     onPressed: () {
                       setState(() {
@@ -130,12 +132,14 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
                 obscureText: _obscureNewPassword,
                 decoration: InputDecoration(
                   labelText: 'Nieuw wachtwoord',
-                  prefixIcon: const Icon(Icons.lock),
+                  prefixIcon:
+                      const Icon(Icons.lock, color: AppColors.mediumBrown),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscureNewPassword
-                          ? Icons.visibility
+                          ? Icons.visibility_outlined
                           : Icons.visibility_off,
+                      color: AppColors.mediumBrown,
                     ),
                     onPressed: () {
                       setState(() {
@@ -158,14 +162,12 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
                   return null;
                 },
                 onChanged: (value) {
-                  setState(
-                      () {}); // Trigger rebuild for password strength indicator
+                  setState(() {}); // Trigger rebuild for strength indicator
                 },
               ),
 
               const SizedBox(height: 8),
 
-              // Password strength indicator
               if (_newPasswordController.text.isNotEmpty)
                 _buildPasswordStrengthIndicator(),
 
@@ -177,12 +179,14 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
                 obscureText: _obscureConfirmPassword,
                 decoration: InputDecoration(
                   labelText: 'Bevestig nieuw wachtwoord',
-                  prefixIcon: const Icon(Icons.lock),
+                  prefixIcon:
+                      const Icon(Icons.lock, color: AppColors.mediumBrown),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscureConfirmPassword
-                          ? Icons.visibility
+                          ? Icons.visibility_outlined
                           : Icons.visibility_off,
+                      color: AppColors.mediumBrown,
                     ),
                     onPressed: () {
                       setState(() {
@@ -278,6 +282,7 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
     );
   }
 
+  // Password strength indicator en helpers blijven gelijk...
   Widget _buildPasswordStrengthIndicator() {
     final password = _newPasswordController.text;
     final strength = _calculatePasswordStrength(password);
@@ -301,10 +306,8 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
       children: [
         Row(
           children: [
-            Text(
-              'Wachtwoordsterkte: ',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
+            Text('Wachtwoordsterkte: ',
+                style: Theme.of(context).textTheme.bodySmall),
             Text(
               strengthText,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -343,11 +346,9 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
   }
 
   bool _isPasswordStrong(String password) {
-    // Check for at least one letter, one number, and one special character
     final hasLetter = RegExp(r'[a-zA-Z]').hasMatch(password);
     final hasNumber = RegExp(r'[0-9]').hasMatch(password);
     final hasSpecialChar = RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password);
-
     return hasLetter && hasNumber && hasSpecialChar;
   }
 
@@ -355,31 +356,19 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
     if (password.isEmpty) return 0.0;
 
     double strength = 0.0;
-
-    // Length check
     if (password.length >= 8) strength += 0.2;
     if (password.length >= 12) strength += 0.1;
-
-    // Character variety checks
     if (RegExp(r'[a-z]').hasMatch(password)) strength += 0.2;
     if (RegExp(r'[A-Z]').hasMatch(password)) strength += 0.2;
     if (RegExp(r'[0-9]').hasMatch(password)) strength += 0.2;
     if (RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password)) strength += 0.2;
-
-    // Bonus for no repeated characters
     if (!RegExp(r'(.)\1{2,}').hasMatch(password)) strength += 0.1;
-
     return strength.clamp(0.0, 1.0);
   }
 
   Future<void> _changePassword() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    setState(() {
-      _isChanging = true;
-    });
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _isChanging = true);
 
     try {
       await ApiService().changePassword(
@@ -388,22 +377,17 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
       );
 
       if (mounted) {
-        // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Wachtwoord succesvol gewijzigd'),
             backgroundColor: AppColors.success,
           ),
         );
-
-        // Go back to previous screen
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
         String errorMessage = 'Kon wachtwoord niet wijzigen';
-
-        // Handle specific error cases
         if (e.toString().contains('current_password')) {
           errorMessage = 'Huidig wachtwoord is onjuist';
         } else if (e.toString().contains('weak_password')) {
@@ -411,18 +395,13 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
         } else if (e.toString().contains('same_password')) {
           errorMessage = 'Nieuw wachtwoord moet anders zijn dan het huidige';
         }
-
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: AppColors.error,
-          ),
+              content: Text(errorMessage), backgroundColor: AppColors.error),
         );
       }
     } finally {
-      setState(() {
-        _isChanging = false;
-      });
+      setState(() => _isChanging = false);
     }
   }
 

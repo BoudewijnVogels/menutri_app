@@ -310,7 +310,7 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage>
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
-            targetType == 'restaurant' ? Icons.store : Icons.restaurant_menu,
+            targetType == 'restaurant' ? Icons.store : Icons.restaurant,
             color: Colors.red,
           ),
         ),

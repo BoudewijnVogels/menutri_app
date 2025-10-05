@@ -71,7 +71,7 @@ class GuestBottomNavigation extends StatelessWidget {
               ),
               _buildNavItem(
                 context: context,
-                icon: Icons.favorite_outline,
+                icon: Icons.favorite_border,
                 activeIcon: Icons.favorite,
                 label: 'Favorieten',
                 isActive: currentIndex == 2,
@@ -100,6 +100,10 @@ class GuestBottomNavigation extends StatelessWidget {
     required bool isActive,
     required VoidCallback onTap,
   }) {
+    // ✅ Nieuwe kleurkeuze
+    final iconColor = isActive ? AppColors.white : AppColors.grey;
+    final labelColor = isActive ? AppColors.mediumBrown : AppColors.grey;
+
     return Expanded(
       child: InkWell(
         onTap: onTap,
@@ -112,14 +116,12 @@ class GuestBottomNavigation extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: isActive
-                      ? AppColors.withAlphaFraction(AppColors.mediumBrown, 0.1)
-                      : Colors.transparent,
+                  color: isActive ? AppColors.mediumBrown : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   isActive ? activeIcon : icon,
-                  color: isActive ? AppColors.mediumBrown : AppColors.grey,
+                  color: iconColor,
                   size: 24,
                 ),
               ),
@@ -127,7 +129,7 @@ class GuestBottomNavigation extends StatelessWidget {
               Text(
                 label,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: isActive ? AppColors.mediumBrown : AppColors.grey,
+                      color: labelColor,
                       fontWeight:
                           isActive ? FontWeight.w600 : FontWeight.normal,
                     ),

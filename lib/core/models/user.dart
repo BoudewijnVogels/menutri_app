@@ -1,13 +1,15 @@
+// lib/core/models/user.dart
+
 enum UserRole {
-  gast,
-  cateraar,
+  guest,
+  caterer,
 }
 
 class User {
   final int id;
   final String email;
-  final String? voornaam;
-  final String? achternaam;
+  final String? firstName;
+  final String? lastName;
   final String? fullName;
   final String? phone;
   final UserRole role;
@@ -18,8 +20,8 @@ class User {
   User({
     required this.id,
     required this.email,
-    this.voornaam,
-    this.achternaam,
+    this.firstName,
+    this.lastName,
     this.fullName,
     this.phone,
     required this.role,
@@ -32,17 +34,17 @@ class User {
     return User(
       id: json['id'] as int,
       email: json['email'] as String,
-      voornaam: json['voornaam'] as String?,
-      achternaam: json['achternaam'] as String?,
+      firstName: json['first_name'] as String?,
+      lastName: json['last_name'] as String?,
       fullName: json['full_name'] as String?,
       phone: json['phone'] as String?,
       role: _parseRole(json['role'] as String?),
       isActive: json['is_active'] as bool? ?? true,
-      createdAt: json['created_at'] != null 
-          ? DateTime.parse(json['created_at'] as String)
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'] as String)
           : null,
-      lastLogin: json['last_login'] != null 
-          ? DateTime.parse(json['last_login'] as String)
+      lastLogin: json['last_login'] != null
+          ? DateTime.tryParse(json['last_login'] as String)
           : null,
     );
   }
@@ -51,8 +53,8 @@ class User {
     return {
       'id': id,
       'email': email,
-      'voornaam': voornaam,
-      'achternaam': achternaam,
+      'first_name': firstName,
+      'last_name': lastName,
       'full_name': fullName,
       'phone': phone,
       'role': role.name,
@@ -64,11 +66,11 @@ class User {
 
   static UserRole _parseRole(String? roleString) {
     switch (roleString?.toLowerCase()) {
-      case 'cateraar':
-        return UserRole.cateraar;
-      case 'gast':
+      case 'caterer':
+        return UserRole.caterer;
+      case 'guest':
       default:
-        return UserRole.gast;
+        return UserRole.guest;
     }
   }
 
@@ -76,23 +78,23 @@ class User {
     if (fullName != null && fullName!.isNotEmpty) {
       return fullName!;
     }
-    if (voornaam != null && achternaam != null) {
-      return '$voornaam $achternaam'.trim();
+    if (firstName != null && lastName != null) {
+      return '$firstName $lastName'.trim();
     }
-    if (voornaam != null) {
-      return voornaam!;
+    if (firstName != null) {
+      return firstName!;
     }
     return email;
   }
 
-  bool get isGuest => role == UserRole.gast;
-  bool get isCateraar => role == UserRole.cateraar;
+  bool get isGuest => role == UserRole.guest;
+  bool get isCaterer => role == UserRole.caterer;
 
   User copyWith({
     int? id,
     String? email,
-    String? voornaam,
-    String? achternaam,
+    String? firstName,
+    String? lastName,
     String? fullName,
     String? phone,
     UserRole? role,
@@ -103,8 +105,8 @@ class User {
     return User(
       id: id ?? this.id,
       email: email ?? this.email,
-      voornaam: voornaam ?? this.voornaam,
-      achternaam: achternaam ?? this.achternaam,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
       fullName: fullName ?? this.fullName,
       phone: phone ?? this.phone,
       role: role ?? this.role,
@@ -128,4 +130,3 @@ class User {
   @override
   int get hashCode => id.hashCode;
 }
-

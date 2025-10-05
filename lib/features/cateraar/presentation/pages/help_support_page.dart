@@ -35,7 +35,7 @@ class _CateraarHelpSupportPageState
     {'id': 'all', 'name': 'Alle', 'icon': Icons.help_outline},
     {'id': 'getting_started', 'name': 'Aan de slag', 'icon': Icons.play_arrow},
     {'id': 'restaurants', 'name': 'Restaurants', 'icon': Icons.restaurant},
-    {'id': 'menus', 'name': 'Menu\'s', 'icon': Icons.restaurant_menu},
+    {'id': 'menus', 'name': 'Menu\'s', 'icon': Icons.restaurant},
     {'id': 'analytics', 'name': 'Analytics', 'icon': Icons.analytics},
     {'id': 'team', 'name': 'Team', 'icon': Icons.group},
     {'id': 'billing', 'name': 'Facturering', 'icon': Icons.payment},

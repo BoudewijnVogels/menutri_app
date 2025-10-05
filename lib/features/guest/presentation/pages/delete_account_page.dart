@@ -94,9 +94,7 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
                       fontWeight: FontWeight.bold,
                     ),
               ),
-
               const SizedBox(height: 16),
-
               _buildDeletionItem('Je profiel en persoonlijke gegevens'),
               _buildDeletionItem('Al je favoriete restaurants en gerechten'),
               _buildDeletionItem('Je voedingslogboek en geschiedenis'),
@@ -113,9 +111,7 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
                       fontWeight: FontWeight.bold,
                     ),
               ),
-
               const SizedBox(height: 16),
-
               DropdownButtonFormField<String>(
                 initialValue: _selectedReason,
                 decoration: const InputDecoration(
@@ -199,7 +195,6 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
                       fontWeight: FontWeight.bold,
                     ),
               ),
-
               const SizedBox(height: 16),
 
               // Password confirmation
@@ -208,12 +203,14 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
                 obscureText: _obscurePassword,
                 decoration: InputDecoration(
                   labelText: 'Bevestig met je wachtwoord',
-                  prefixIcon: const Icon(Icons.lock_outline),
+                  prefixIcon: const Icon(Icons.lock_outline,
+                      color: AppColors.mediumBrown),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscurePassword
-                          ? Icons.visibility
+                          ? Icons.visibility_outlined
                           : Icons.visibility_off,
+                      color: AppColors.mediumBrown,
                     ),
                     onPressed: () {
                       setState(() {
@@ -382,7 +379,6 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
       return;
     }
 
-    // Final confirmation dialog
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -412,37 +408,28 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
     });
 
     try {
-      // If deletionData is not needed, remove it
       await ApiService().deleteAccount();
 
       if (mounted) {
-        // Show success message and navigate to login
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Je account is succesvol verwijderd'),
             backgroundColor: AppColors.success,
           ),
         );
-
-        // Clear all navigation stack and go to login
         context.go('/login');
       }
     } catch (e) {
       if (mounted) {
         String errorMessage = 'Kon account niet verwijderen';
-
-        // Handle specific error cases
         if (e.toString().contains('invalid_password')) {
           errorMessage = 'Wachtwoord is onjuist';
         } else if (e.toString().contains('account_not_found')) {
           errorMessage = 'Account niet gevonden';
         }
-
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: AppColors.error,
-          ),
+              content: Text(errorMessage), backgroundColor: AppColors.error),
         );
       }
     } finally {

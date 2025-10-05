@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "807018264189",
+    "project_id": "menutri-dev-bv",
+    "storage_bucket": "menutri-dev-bv.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:807018264189:android:a8e5d542bd2d6e5dda6314",
+        "android_client_info": {
+          "package_name": "com.menutri.menutri_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCfBF-fMsxY_hPpBnTPxPbhXQvpLoVhcIE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

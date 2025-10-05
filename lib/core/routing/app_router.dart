@@ -24,11 +24,14 @@ import '../../features/guest/presentation/pages/edit_profile_page.dart';
 import '../../features/guest/presentation/pages/change_password_page.dart';
 import '../../features/guest/presentation/pages/delete_account_page.dart';
 import '../../features/guest/presentation/pages/help_page.dart';
+import '../../features/guest/presentation/pages/settings_page.dart';
 
 // Cateraar pages
 import '../../features/cateraar/presentation/pages/cateraar_main_layout.dart';
 import '../../features/cateraar/presentation/pages/dashboard_page.dart';
 import '../../features/cateraar/presentation/pages/restaurants_page.dart';
+import '../../features/cateraar/presentation/pages/menus_page.dart';
+import '../../features/cateraar/presentation/pages/add_menu_page.dart';
 import '../../features/cateraar/presentation/pages/menu_management_page.dart';
 import '../../features/cateraar/presentation/pages/analytics_page.dart';
 import '../../features/cateraar/presentation/pages/qr_generator_page.dart';
@@ -43,6 +46,13 @@ import '../../features/cateraar/presentation/pages/settings_page.dart';
 import '../../features/cateraar/presentation/pages/help_support_page.dart';
 import '../../features/cateraar/presentation/pages/add_restaurant_page.dart';
 import '../../features/cateraar/presentation/pages/restaurant_detail_cateraar_page.dart';
+import '../../features/cateraar/presentation/pages/add_menu_item_page.dart';
+import '../../features/cateraar/presentation/pages/edit_menu_item_page.dart';
+
+final authStateProvider = StateProvider<bool>((ref) => false);
+final userRoleProvider = StateProvider<String?>((ref) => null);
+final initialRouteProvider =
+    StateProvider<String>((ref) => AppRoutes.onboarding);
 
 // Route names
 class AppRoutes {
@@ -67,9 +77,10 @@ class AppRoutes {
   static const String changePassword = '/guest/change-password';
   static const String deleteAccount = '/guest/delete-account';
   static const String guestHelp = '/guest/help';
+  static const String guestSettings = '/guest/settings';
 
   // Cateraar routes
-  static const String cateraarDashboard = '/cateraar';
+  static const String cateraarDashboard = '/cateraar/dashboard';
   static const String cateraarRestaurants = '/cateraar/restaurants';
   static const String cateraarMenus = '/cateraar/menus';
   static const String cateraarAnalytics = '/cateraar/analytics';
@@ -88,8 +99,10 @@ class AppRoutes {
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
+  final initialRoute = ref.watch(initialRouteProvider);
+
   return GoRouter(
-    initialLocation: AppRoutes.onboarding,
+    initialLocation: initialRoute,
     routes: [
       // Auth routes
       GoRoute(
@@ -135,7 +148,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         ],
       ),
 
-      // Guest detail routes (without shell)
+      // Guest detail routes
       GoRoute(
         path: AppRoutes.restaurantDetail,
         name: 'restaurant-detail',
@@ -194,6 +207,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         name: 'guest-help',
         builder: (context, state) => const HelpPage(),
       ),
+      GoRoute(
+        path: AppRoutes.guestSettings,
+        name: 'guest-settings',
+        builder: (context, state) => const SettingsPage(),
+      ),
 
       // Cateraar routes with shell
       ShellRoute(
@@ -210,10 +228,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: 'cateraar-restaurants',
             builder: (context, state) => const RestaurantsPage(),
           ),
+          // ✅ Menus overzicht
           GoRoute(
             path: AppRoutes.cateraarMenus,
             name: 'cateraar-menus',
-            builder: (context, state) => const MenuManagementPage(),
+            builder: (context, state) => const MenusPage(),
           ),
           GoRoute(
             path: AppRoutes.cateraarAnalytics,
@@ -223,7 +242,42 @@ final routerProvider = Provider<GoRouter>((ref) {
         ],
       ),
 
-      // Cateraar detail routes (without shell)
+      // Cateraar detail routes
+      GoRoute(
+        path: '/cateraar/menus/add',
+        name: 'cateraar-menus-add',
+        builder: (context, state) => const AddMenuPage(),
+      ),
+      GoRoute(
+        path: '/cateraar/menus/:id',
+        name: 'cateraar-menu-detail',
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return MenuManagementPage(menuId: id);
+        },
+      ),
+      GoRoute(
+        path: '/cateraar/menu-items/add',
+        name: 'cateraar-menu-items-add',
+        builder: (context, state) {
+          final menuId =
+              int.tryParse(state.uri.queryParameters['menu_id'] ?? '');
+          if (menuId == null) {
+            return const Scaffold(
+              body: Center(child: Text('Geen menu_id opgegeven')),
+            );
+          }
+          return AddMenuItemPage(menuId: menuId);
+        },
+      ),
+      GoRoute(
+        path: '/cateraar/menu-items/:id/edit',
+        name: 'cateraar-menu-items-edit',
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return EditMenuItemPage(itemId: id);
+        },
+      ),
       GoRoute(
         path: AppRoutes.qrGenerator,
         name: 'qr-generator',
@@ -271,7 +325,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const CateraarHelpSupportPage(),
       ),
 
-      // ✅ Nieuwe routes voor restaurant toevoegen/bewerken
+      // Nieuwe restaurant-routes
       GoRoute(
         path: '/cateraar/restaurants/add',
         name: 'cateraar-restaurants-add',
@@ -294,15 +348,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
     ],
-
-    // Error handling
     errorBuilder: (context, state) => Scaffold(
       appBar: AppBar(title: const Text('Fout')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 64, color: Colors.red),
+            const Icon(Icons.error, size: 64, color: Colors.red),
             const SizedBox(height: 16),
             Text(
               'Pagina niet gevonden',
@@ -322,11 +374,23 @@ final routerProvider = Provider<GoRouter>((ref) {
         ),
       ),
     ),
-
-    // Redirect logic based on authentication state
     redirect: (context, state) {
-      // TODO: Implement authentication state checking
-      // For now, allow all routes
+      final loggedIn = ref.read(authStateProvider);
+      final role = ref.read(userRoleProvider);
+
+      final goingToAuth = state.matchedLocation == AppRoutes.login ||
+          state.matchedLocation == AppRoutes.register ||
+          state.matchedLocation == AppRoutes.onboarding;
+
+      if (!loggedIn && !goingToAuth) {
+        return AppRoutes.login;
+      }
+
+      if (loggedIn && goingToAuth) {
+        if (role == 'guest') return AppRoutes.guestHome;
+        if (role == 'cateraar') return AppRoutes.cateraarDashboard;
+      }
+
       return null;
     },
   );

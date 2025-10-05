@@ -326,7 +326,7 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
             items: _restaurants.map((restaurant) {
               return DropdownMenuItem(
                 value: restaurant,
-                child: Text((restaurant['name'] ?? restaurant['naam'] ?? '')
+                child: Text((restaurant['name'] ?? restaurant['name'] ?? '')
                     .toString()),
               );
             }).toList(),
@@ -352,7 +352,7 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
             items: _restaurants.map((restaurant) {
               return DropdownMenuItem(
                 value: restaurant,
-                child: Text((restaurant['name'] ?? restaurant['naam'] ?? '')
+                child: Text((restaurant['name'] ?? restaurant['name'] ?? '')
                     .toString()),
               );
             }).toList(),
@@ -381,7 +381,7 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
             items: _menus.map((menu) {
               return DropdownMenuItem(
                 value: menu,
-                child: Text((menu['name'] ?? menu['naam'] ?? '').toString()),
+                child: Text((menu['name'] ?? menu['name'] ?? '').toString()),
               );
             }).toList(),
             onChanged: (menu) {
@@ -920,12 +920,12 @@ class _QRGeneratorPageState extends ConsumerState<QRGeneratorPage>
           targetUrl =
               'https://menutri.nl/restaurant/${_selectedRestaurant!['id']}';
           description =
-              'QR code voor ${_selectedRestaurant!['name'] ?? _selectedRestaurant!['naam']}';
+              'QR code voor ${_selectedRestaurant!['name'] ?? _selectedRestaurant!['name']}';
           break;
         case 'menu':
           targetUrl = 'https://menutri.nl/menu/${_selectedMenu!['id']}';
           description =
-              'QR code voor menu ${_selectedMenu!['name'] ?? _selectedMenu!['naam']}';
+              'QR code voor menu ${_selectedMenu!['name'] ?? _selectedMenu!['name']}';
           break;
         case 'custom':
           targetUrl = _customUrl;
