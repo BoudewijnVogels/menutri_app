@@ -9,6 +9,7 @@ class MenuItem {
   final String? description;
   final double price;
   final String? category;
+  final int? categoryId; // ✅ Added support for category_id
   final bool available;
   final int order;
   final List<String> labels;
@@ -25,6 +26,7 @@ class MenuItem {
     this.description,
     required this.price,
     this.category,
+    this.categoryId,
     this.available = true,
     this.order = 0,
     this.labels = const [],
@@ -41,8 +43,11 @@ class MenuItem {
       recipeId: json['recipe_id'] as int?,
       name: json['name'] as String? ?? '',
       description: json['description'] as String?,
-      price: (json['price'] as num).toDouble(),
-      category: json['category'] as String?,
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
+      // ✅ Accept both category and category_id
+      category:
+          json['category'] as String? ?? (json['category_name'] as String?),
+      categoryId: json['category_id'] as int?,
       available: json['available'] as bool? ?? true,
       order: json['order'] as int? ?? 0,
       labels: (json['labels'] is List)
@@ -69,7 +74,9 @@ class MenuItem {
       'name': name,
       'description': description,
       'price': price,
+      // ✅ Include both for backend compatibility
       'category': category,
+      'category_id': categoryId,
       'available': available,
       'order': order,
       'labels': labels,
@@ -89,10 +96,8 @@ class MenuItem {
   bool get isDairyFree => labels.contains('dairy-free');
   bool get isNutFree => labels.contains('nut-free');
 
-  /// UI expects `double? calories`
   double? get calories => nutrition?.calories;
 
-  /// UI expects `List<String> allergens` (currently empty placeholder)
   List<String> get allergens => const [];
 
   bool get isVegetarian => isVegetarianLabel;
@@ -108,6 +113,7 @@ class MenuItem {
     String? description,
     double? price,
     String? category,
+    int? categoryId,
     bool? available,
     int? order,
     List<String>? labels,
@@ -124,6 +130,7 @@ class MenuItem {
       description: description ?? this.description,
       price: price ?? this.price,
       category: category ?? this.category,
+      categoryId: categoryId ?? this.categoryId,
       available: available ?? this.available,
       order: order ?? this.order,
       labels: labels ?? this.labels,
@@ -136,7 +143,7 @@ class MenuItem {
 
   @override
   String toString() =>
-      'MenuItem(id: $id, name: $name, price: $price, available: $available)';
+      'MenuItem(id: $id, name: $name, price: $price, categoryId: $categoryId, available: $available)';
 
   @override
   bool operator ==(Object other) =>
@@ -175,12 +182,18 @@ class NutritionInfo {
     return NutritionInfo(
       calories: (json['energy_kcal'] as num?)?.toDouble() ??
           (json['calories'] as num?)?.toDouble(),
-      protein: (json['protein'] as num?)?.toDouble(),
-      carbs: (json['carbs'] as num?)?.toDouble(),
-      fat: (json['fat'] as num?)?.toDouble(),
-      fiber: (json['fiber'] as num?)?.toDouble(),
-      sodium: (json['sodium'] as num?)?.toDouble(),
-      sugar: (json['sugar'] as num?)?.toDouble(),
+      protein: (json['protein_g'] as num?)?.toDouble() ??
+          (json['protein'] as num?)?.toDouble(),
+      carbs: (json['carbs_g'] as num?)?.toDouble() ??
+          (json['carbs'] as num?)?.toDouble(),
+      fat: (json['fat_g'] as num?)?.toDouble() ??
+          (json['fat'] as num?)?.toDouble(),
+      fiber: (json['fiber_g'] as num?)?.toDouble() ??
+          (json['fiber'] as num?)?.toDouble(),
+      sodium: (json['sodium_mg'] as num?)?.toDouble() ??
+          (json['sodium'] as num?)?.toDouble(),
+      sugar: (json['sugars_g'] as num?)?.toDouble() ??
+          (json['sugar'] as num?)?.toDouble(),
       calorieMargin: json['calorie_margin'] as String?,
       calorieNote: json['calorie_note'] as String?,
     );
