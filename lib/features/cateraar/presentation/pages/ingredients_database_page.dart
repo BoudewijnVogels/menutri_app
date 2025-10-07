@@ -40,8 +40,8 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
 
   final Map<String, String> _filterOptions = {
     'all': 'Alle ingrediënten',
-    'verified': 'Geverifieerd',
-    'unverified': 'Niet geverifieerd',
+    'verified': 'is_verified',
+    'unverified': 'is_not_verified',
     'custom': 'Aangepast',
   };
 
@@ -114,7 +114,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
           case 'verified':
             return ingredient['is_verified'] == true;
           case 'unverified':
-            return ingredient['is_verified'] != true;
+            return ingredient['is_not_verified'] != true;
           case 'custom':
             return ingredient['is_custom'] == true;
           default:
@@ -457,7 +457,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
                                   size: 14, color: Colors.green),
                               const SizedBox(width: 4),
                               Text(
-                                'Geverifieerd',
+                                'is_verified',
                                 style: Theme.of(context)
                                     .textTheme
                                     .labelSmall
@@ -1186,7 +1186,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Ingrediënt "${ingredient['name']}" geverifieerd'),
+            content: Text('Ingrediënt "${ingredient['name']}" is_verified'),
             backgroundColor: Colors.green,
           ),
         );
