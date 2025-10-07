@@ -939,8 +939,8 @@ class _CateraarProfileManagementPageState
                   leading: const Icon(Icons.verified),
                   title: const Text('Account Status'),
                   subtitle: Text(_profileData['is_verified'] == true
-                      ? 'Geverifieerd'
-                      : 'Niet geverifieerd'),
+                      ? 'is_verified'
+                      : 'is_not_verified'),
                   trailing: _profileData['is_verified'] == true
                       ? const Icon(Icons.check_circle, color: Colors.green)
                       : const Icon(Icons.warning, color: Colors.orange),
@@ -1102,8 +1102,8 @@ class _CateraarProfileManagementPageState
                       const SizedBox(width: 4),
                       Text(
                         _profileData['is_verified'] == true
-                            ? 'Geverifieerd'
-                            : 'Niet geverifieerd',
+                            ? 'is_verified'
+                            : 'is_not_verified',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: _profileData['is_verified'] == true
                                   ? Colors.green
