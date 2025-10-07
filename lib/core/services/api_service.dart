@@ -494,7 +494,7 @@ class ApiService {
   // ---------------------------------------------------------------------------
 
   Future<Map<String, dynamic>> getCategories({int? menuId}) async {
-    final response = await _dio.get('/categories', queryParameters: {
+    final response = await _dio.get('/categories/', queryParameters: {
       if (menuId != null) 'menu_id': menuId,
     });
     return response.data;
@@ -507,7 +507,7 @@ class ApiService {
 
   Future<Map<String, dynamic>> createCategory(
       Map<String, dynamic> categoryData) async {
-    final response = await _dio.post('/categories', data: categoryData);
+    final response = await _dio.post('/categories/', data: categoryData);
     return response.data;
   }
 
